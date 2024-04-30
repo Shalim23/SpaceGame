@@ -11,7 +11,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/Tools/CMake/FetchContent.cmake)
 
 set(SDL_LIBRARIES ${SDL_LIBRARIES} SDL2main SDL2 SDL2_image)
 
-set(SRC_DIR "${CMAKE_SOURCE_DIR}/${PROJECT_NAME}")
+set(SRC_DIR "${CMAKE_SOURCE_DIR}/Source")
 file(GLOB_RECURSE src "${SRC_DIR}/*.h" "${SRC_DIR}/*.cpp")
 
 add_executable(${PROJECT_NAME} ${src})
