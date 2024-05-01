@@ -20,8 +20,11 @@ target_link_libraries("${PROJECT_NAME}" PRIVATE ${SDL_LIBRARIES})
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "${CMAKE_CURRENT_SOURCE_DIR}/bin/_deps/sdl2-build/$<CONFIGURATION>/SDL2d.dll"
-    $<TARGET_FILE_DIR:${PROJECT_NAME}>)
+    $<$<CONFIG:Debug>:${CMAKE_BINARY_DIR}/_deps/sdl2-build/Debug/SDL2d.dll>
+    $<$<CONFIG:Debug>:${CMAKE_BINARY_DIR}/Debug>
+    $<$<CONFIG:MinSizeRel>:${CMAKE_BINARY_DIR}/_deps/sdl2-build/MinSizeRel/SDL2.dll>
+    $<$<CONFIG:MinSizeRel>:${CMAKE_BINARY_DIR}/MinSizeRel>
+    )
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/Tools/CMake/GroupSourcesByFolder.cmake)
 GroupSourcesByFolder(${PROJECT_NAME})
