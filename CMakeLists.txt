@@ -18,5 +18,10 @@ add_executable(${PROJECT_NAME} ${src})
 
 target_link_libraries("${PROJECT_NAME}" PRIVATE ${SDL_LIBRARIES})
 
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${CMAKE_CURRENT_SOURCE_DIR}/bin/_deps/sdl2-build/$<CONFIGURATION>/SDL2d.dll"
+    $<TARGET_FILE_DIR:${PROJECT_NAME}>)
+
 include(${CMAKE_CURRENT_SOURCE_DIR}/Tools/CMake/GroupSourcesByFolder.cmake)
 GroupSourcesByFolder(${PROJECT_NAME})

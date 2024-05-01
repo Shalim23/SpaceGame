@@ -1,4 +1,5 @@
 #pragma once
+#include "World.h"
 #include "Types/System.h"
 #include "Generated/SystemsRegistry.h"
 
