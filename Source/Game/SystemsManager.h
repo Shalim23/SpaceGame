@@ -14,9 +14,22 @@ public:
     SystemsManager& operator=(SystemsManager&& other) = delete;
 
 
-    void init()
+    void init(World& w)
     {
-        std::apply([](auto&&... system) {((system.init()), ...);}, m_systems);
+        std::apply([&w, this](auto&&... system)
+            {((system.init(w, *this)), ...);}, m_systems);
+    }
+
+    void update(World& w)
+    {
+        std::apply([&w](auto&&... system)
+            {((system.update(w)), ...); }, m_systems);
+    }
+
+    void shutdown()
+    {
+        std::apply([](auto&&... system)
+            {((system.shutdown()), ...); }, m_systems);
     }
 
     template<typename T>

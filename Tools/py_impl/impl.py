@@ -24,9 +24,15 @@ def _get_component_generation_contents(name: str) -> list[str]:
 
 
 def _get_system_generation_contents(name: str) -> list[str]:
-    return ["#pragma once\n\n",
-            f"class {name}",
-            "{",
+    return ["#pragma once\n",
+            "#include \"../World.h\"\n"
+            "#include \"../SystemsManager.h\"\n\n"
+            f"class {name}\n",
+            "{\n",
+            "public:\n",
+            "\tvoid init(World& w, SystemsManager& sm) {}\n"
+            "\tvoid update(World& w) {}\n"
+            "\tvoid shutdown() {}\n"
             "};\n"]
 
 
@@ -41,6 +47,8 @@ def generate(obj_type: str, name: str) -> bool:
         return False
     
     path = f"{_GAME_PATH}/{_OBJ_TYPE_TO_FOLDER[obj_type]}"
+    cpp_path = None
+    cpp_contents = None
     contents = []
 
     match obj_type:
@@ -48,6 +56,8 @@ def generate(obj_type: str, name: str) -> bool:
             system_fullname = f"{name.capitalize()}System"
             contents = _get_system_generation_contents(system_fullname)
             path += f"/{system_fullname}.h"
+            cpp_path = path.replace(".h", ".cpp")
+            cpp_contents = f"#include \"{system_fullname}.h\"\n"
         case "component":
             component_fullname = f"{name.capitalize()}Component"
             contents = _get_component_generation_contents(component_fullname)
@@ -59,7 +69,14 @@ def generate(obj_type: str, name: str) -> bool:
     with open(path, "w") as f:
         f.writelines(contents)
 
+    if cpp_path:
+       with open(cpp_path, "w") as f:
+            f.write(cpp_contents) 
+
     print(f"Created {path}")
+    if cpp_path:
+        print(f"Created {cpp_path}")
+
     return True
 
 
