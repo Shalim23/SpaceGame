@@ -2,13 +2,25 @@
 #include <cstdint>
 #include <vector>
 #include "../Generated/TextureType.h"
+#include "../Types/Entity.h"
 #include "SDL.h"
 
 class World;
 class SystemsManager;
+struct RenderComponent;
 
 class RenderSystem
 {
+
+using RenderData = std::vector<std::vector<RenderComponent*>>;
+
+public:
+    struct Texture
+    {
+        TextureType type;
+        SDL_Texture* texture;
+        SDL_Point size;
+    };
 
 private:
     struct TextureDescriptor
@@ -18,18 +30,9 @@ private:
         uint32_t size;
     };
 
-    struct Texture
-    {
-        explicit Texture(const TextureType t,
-            SDL_Texture* tex, const SDL_Point& s)
-            : type{ t }, texture{ tex }, size{ s }
-        {}
-        TextureType type;
-        SDL_Texture* texture;
-        SDL_Point size;
-    };
 
 public:
+	void preinit(World& w, SystemsManager& sm);
 	void init(World& w, SystemsManager& sm);
 	void update(World& w);
 	void shutdown();
@@ -39,10 +42,13 @@ public:
     const Texture& getTexture(const TextureType type);
     SDL_Texture* createTexture(const std::vector<char>& data) const;
     SDL_Point getTextureSize(SDL_Texture* texture) const;
+    SDL_Point getScreenSize() const;
 
 private:
     void initTexturesDescriptors();
     std::vector<char> getTextureData(const TextureType type) const;
+    RenderData gatherRenderData(World& w, const Entity camera_ent) const;
+    void generateBackground(World& w);
 
 private:
     SDL_Window* m_window{ nullptr };

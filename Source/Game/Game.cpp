@@ -15,6 +15,7 @@ Game::Game()
 
 void Game::run()
 {
+    m_systems_manager.preinit(m_world);
     m_systems_manager.init(m_world);
 
     while (m_is_running)

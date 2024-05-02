@@ -41,8 +41,8 @@ public:
         std::erase_if(m_component_remove_handlers, [e](const ComponentRemoveHandler& d){return d.e == e;});
     }
 
-    template<typename T, typename... ComponentArgs>
-    T& addComponent(const Entity e, ComponentArgs&&... args)
+    template<typename T>
+    T& addComponent(const Entity e)
     {
         auto& components{ getComponents<T>() };
         auto iter{std::ranges::find_if(components,
@@ -55,13 +55,12 @@ public:
 
         auto& component_destructors{ getComponentDestructors(e) };
         component_destructors.destructors.emplace_back(
-            ComponentRemoveHandler{ 
+            ComponentRemoveCallback{
                 [this, e] { removeComponentInternal<T>(e); },
                 ++m_next_component_destruction_callback_id });
 
         auto& new_component{ 
-        components.emplace_back(Component<T>{e, m_next_component_destruction_callback_id,
-            std::forward_as_tuple(std::forward<ComponentArgs>(args)...)})
+            components.emplace_back(Component<T>{e, m_next_component_destruction_callback_id})
         };
 
         return new_component.get();
@@ -110,7 +109,7 @@ private:
             return 0;
         }
 
-        const auto component_destruction_callback_id{iter->getDestructionCallbackId()};
+        const auto component_destruction_callback_id{iter->getRemoveCallbackId()};
         const auto index{ iter - components.begin() };
         std::swap(components[index], components.back());
         components.pop_back();

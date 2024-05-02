@@ -30,6 +30,7 @@ def _get_system_generation_contents(name: str) -> list[str]:
             f"class {name}\n",
             "{\n",
             "public:\n",
+            "\tvoid preinit(World& w, SystemsManager& sm) {}\n"
             "\tvoid init(World& w, SystemsManager& sm) {}\n"
             "\tvoid update(World& w) {}\n"
             "\tvoid shutdown() {}\n"
@@ -111,10 +112,10 @@ def update_registry(obj_type: str):
         f.write("\n\n")
         f.write(f"using Registered{folder} = TypesList\n<\n")
 
-        objs = [obj.split(".")[0] + "," for obj in objects if obj.endswith(".h")]
+        objs = [obj.split(".")[0] + ",\n" for obj in objects if obj.endswith(".h")]
         if objs:
             last_obj = objs.pop()
-            objs.append(last_obj.rstrip(",") + "\n")
+            objs.append(last_obj.replace(",", ""))
             f.writelines(objs)
 
         f.write(">;\n\n")

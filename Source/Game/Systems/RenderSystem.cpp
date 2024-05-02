@@ -6,7 +6,7 @@
 #include <fstream>
 #include <sstream>
 
-void RenderSystem::init(World& w, SystemsManager& sm)
+void RenderSystem::preinit(World& w, SystemsManager& sm)
 {
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
@@ -38,9 +38,29 @@ void RenderSystem::init(World& w, SystemsManager& sm)
     initTexturesDescriptors();
 }
 
+void RenderSystem::init(World& w, SystemsManager& sm)
+{
+    generateBackground(w);
+}
+
 void RenderSystem::update(World& w)
 {
+    w.forEach<CameraComponent>([this, &w](const Entity camera_ent, CameraComponent& camera_comp)
+        {
+            SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+            SDL_RenderClear(m_renderer);
 
+            RenderData render_data{gatherRenderData(w, camera_ent)};
+            for (const auto& layer : render_data)
+            {
+                for (const auto& data : layer)
+                {
+                    SDL_RenderCopy(m_renderer, data->texture, &data->src, &data->dst);
+                }
+            }
+
+            SDL_RenderPresent(m_renderer);
+        });
 }
 
 void RenderSystem::shutdown()
@@ -73,7 +93,8 @@ const RenderSystem::Texture& RenderSystem::getTexture(const TextureType type)
     const auto& texture_data{ getTextureData(type) };
     SDL_Texture* texture{ createTexture(texture_data) };
     const SDL_Point texture_size{ getTextureSize(texture) };
-    const auto& new_texture{ m_textures.emplace_back(Texture{type, texture, texture_size}) };
+    const auto& new_texture{ m_textures.emplace_back(
+        Texture{.type = type, .texture = texture, .size = texture_size}) };
 
     return new_texture;
 }
@@ -88,6 +109,13 @@ SDL_Point RenderSystem::getTextureSize(SDL_Texture* texture) const
     SDL_Point size;
     SDL_QueryTexture(texture, nullptr, nullptr, &size.x, &size.y);
     return size;
+}
+
+SDL_Point RenderSystem::getScreenSize() const
+{
+    SDL_Point s;
+    SDL_GetRendererOutputSize(m_renderer, &s.x, &s.y);
+    return s;
 }
 
 void RenderSystem::initTexturesDescriptors()
@@ -146,4 +174,105 @@ std::vector<char> RenderSystem::getTextureData(const TextureType type) const
 
     textures_file.close();
     return buffer;
+}
+
+RenderSystem::RenderData RenderSystem::gatherRenderData(World& w, const Entity camera_ent) const
+{
+    RenderData render_data{ static_cast<size_t>(RenderLayer::COUNT) };
+
+    const auto screen_size{ getScreenSize() };
+    const SDL_Point half_screen_size{ 
+        .x = screen_size.x / 2,
+        .y = screen_size.y / 2
+    };
+    const auto& player_transform{ *w.tryGetComponent<TransformComponent>(camera_ent) };
+
+    const SDL_Rect camera_rect{
+        .x = player_transform.location.x - half_screen_size.x,
+        .y = player_transform.location.y - half_screen_size.y,
+        .w = screen_size.x,
+        .h = screen_size.y
+    };
+
+    w.forEach<RenderComponent>(
+        [this, &render_data, &w, &player_transform, &half_screen_size, &camera_rect, camera_ent]
+            (const Entity render_ent, RenderComponent& render_comp)
+        {
+            if (render_ent == camera_ent)
+            {
+                auto& layer_data{ render_data[static_cast<size_t>(render_comp.layer)] };
+                layer_data.emplace_back(&render_comp);
+                render_comp.src = {
+                    .x = 0,
+                    .y = 0,
+                    .w = render_comp.texture_size.x,
+                    .h = render_comp.texture_size.y
+                };
+
+                render_comp.dst = {
+                    .x = half_screen_size.x - render_comp.texture_size.x / 2,
+                    .y = half_screen_size.y - render_comp.texture_size.y / 2,
+                    .w = render_comp.src.w,
+                    .h = render_comp.src.h
+                };
+
+                return;
+            }
+
+            const auto& render_obj_transform{ *w.tryGetComponent<TransformComponent>(render_ent) };
+            const auto& texture_size{ render_comp.texture_size };
+            const SDL_Rect render_obj_rect{
+                .x = render_obj_transform.location.x - texture_size.x / 2,
+                .y = render_obj_transform.location.y - texture_size.y / 2,
+                .w = texture_size.x,
+                .h = texture_size.y
+            };
+
+            SDL_Rect intersect_rect{};
+            if (!SDL_IntersectRect(&camera_rect, &render_obj_rect, &intersect_rect))
+            {
+                return;
+            }
+
+            auto& layer_data{ render_data[static_cast<size_t>(render_comp.layer)] };
+            layer_data.emplace_back(&render_comp);
+
+            render_comp.src = {
+                .x = std::abs(render_obj_rect.x - intersect_rect.x),
+                .y = std::abs(render_obj_rect.y - intersect_rect.y),
+                .w = intersect_rect.w,
+                .h = intersect_rect.h
+            };
+
+            render_comp.dst = {
+                .x = intersect_rect.x + half_screen_size.x - player_transform.location.x,
+                .y = intersect_rect.y + half_screen_size.y - player_transform.location.y,
+                .w = render_comp.src.w,
+                .h = render_comp.src.h
+            };
+
+        });
+
+    return render_data;
+}
+
+void RenderSystem::generateBackground(World& w)
+{
+    for (int i{ -5 }; i <= 5; ++i)
+    {
+        for (int k{ -5 }; k <= 5; ++k)
+        {
+            auto e{ w.createEntity() };
+
+            auto& render_comp{ w.addComponent<RenderComponent>(e)};
+            auto& texture{ getTexture(TextureType::Backgrounds_purple) };
+            render_comp.layer = RenderLayer::BACKGROUND;
+            render_comp.texture = texture.texture;
+            render_comp.texture_size = texture.size;
+
+            auto& transform{ w.addComponent<TransformComponent>(e) };
+            transform.location.x = render_comp.texture_size.x * i;
+            transform.location.y = render_comp.texture_size.y * k;
+        }
+    }
 }

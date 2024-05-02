@@ -3,14 +3,14 @@
 #include <tuple>
 #include <vector>
 
-template<typename T, typename... Args>
+template<typename T>
 class Component
 {
 public:
-    Component(const Entity entity, const size_t remove_callback_id, auto&& args)
+    Component(const Entity entity, const size_t remove_callback_id)
         : m_owner{ entity }
         , m_remove_callback_id{ remove_callback_id }
-        , m_instance{ std::make_from_tuple<T>(std::move(args)) }
+        , m_instance{}
     {}
 
     Entity getOwner() const { return m_owner; }
