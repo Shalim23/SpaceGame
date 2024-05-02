@@ -24,9 +24,9 @@ def _get_component_generation_contents(name: str) -> list[str]:
 
 
 def _get_system_generation_contents(name: str) -> list[str]:
-    return ["#pragma once\n",
-            "#include \"../World.h\"\n"
-            "#include \"../SystemsManager.h\"\n\n"
+    return ["#pragma once\n\n",
+            "class World;\n"
+            "class SystemsManager;\n\n"
             f"class {name}\n",
             "{\n",
             "public:\n",
@@ -57,7 +57,9 @@ def generate(obj_type: str, name: str) -> bool:
             contents = _get_system_generation_contents(system_fullname)
             path += f"/{system_fullname}.h"
             cpp_path = path.replace(".h", ".cpp")
-            cpp_contents = f"#include \"{system_fullname}.h\"\n"
+            cpp_contents = [f"#include \"{system_fullname}.h\"\n",
+                            "#include \"../World.h\"\n",
+                            "#include \"../SystemsManager.h\"\n"]
         case "component":
             component_fullname = f"{name.capitalize()}Component"
             contents = _get_component_generation_contents(component_fullname)
@@ -71,7 +73,7 @@ def generate(obj_type: str, name: str) -> bool:
 
     if cpp_path:
        with open(cpp_path, "w") as f:
-            f.write(cpp_contents) 
+            f.writelines(cpp_contents) 
 
     print(f"Created {path}")
     if cpp_path:
@@ -103,12 +105,13 @@ def update_registry(obj_type: str):
         f.write(obj_type_header)
 
         for obj in objects:
-            f.write(f"#include \"../{folder}/{obj}\"\n")
+            if obj.endswith(".h"):
+                f.write(f"#include \"../{folder}/{obj}\"\n")
 
         f.write("\n\n")
         f.write(f"using Registered{folder} = TypesList\n<\n")
 
-        objs = [obj.split(".")[0] + "," for obj in objects]
+        objs = [obj.split(".")[0] + "," for obj in objects if obj.endswith(".h")]
         if objs:
             last_obj = objs.pop()
             objs.append(last_obj.rstrip(",") + "\n")

@@ -37,8 +37,7 @@ void Game::run()
 
         m_systems_manager.update(m_world);
 
-        const Uint64 frame_time_end{ SDL_GetTicks64() };
-        const Uint64 frame_time{ frame_time_end - frame_time_begin };
+        const Uint64 frame_time{ SDL_GetTicks64() - frame_time_begin };
         if (frame_time < FRAME_MS)
         {
             SDL_Delay(FRAME_MS - frame_time);
