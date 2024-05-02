@@ -47,3 +47,15 @@ void RenderSystem::showMessageBox(const char* title, const char* message)
 {
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title, message, m_window);
 }
+
+SDL_Texture* RenderSystem::createTexture(const std::vector<char>& data) const
+{
+    return IMG_LoadTexture_RW(m_renderer, SDL_RWFromConstMem(data.data(), data.size()), 1);
+}
+
+SDL_Point RenderSystem::getTextureSize(SDL_Texture* texture) const
+{
+    SDL_Point size;
+    SDL_QueryTexture(texture, nullptr, nullptr, &size.x, &size.y);
+    return size;
+}
