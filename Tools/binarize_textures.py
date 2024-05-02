@@ -1,5 +1,14 @@
 from pathlib import Path
 import ctypes
+from dataclasses import dataclass, field
+import struct
+
+@dataclass
+class TextureDescriptor:
+    texture_id: ctypes.c_uint32 = field(default=ctypes.c_uint32)
+    start: ctypes.c_uint32 = field(default=ctypes.c_uint32)
+    size: ctypes.c_uint32 = field(default=ctypes.c_uint32)
+
 
 TEXTURES_PATH = "Data/Textures"
 TEXTURES_ENUM_PATH = "Source/Game/Generated/TextureType.h"
@@ -32,13 +41,10 @@ with open(TEXTURES_ENUM_PATH, "w") as t_enum, \
 
             assert write_size == t.lstat().st_size
 
-            typed_count: ctypes.c_uint32 = count
-            next_start += write_size
-            typed_size: ctypes.c_uint32 = write_size
+            desc = TextureDescriptor(count, next_start, write_size)
+            t_desc.write(struct.pack("iii", desc.texture_id, desc.start, desc.size))
 
-            t_desc.write(typed_count.to_bytes(8, "little"))
-            t_desc.write(next_start.to_bytes(8, "little"))
-            t_desc.write(typed_size.to_bytes(8, "little"))
+            next_start += write_size
 
             texture_name = t.as_posix().split(f"{TEXTURES_PATH}/")[-1].replace("/", "_").replace(".png", "")
             t_enum.write(f"\t{texture_name} = {count},\n")
