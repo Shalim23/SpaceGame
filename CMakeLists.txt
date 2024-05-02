@@ -26,5 +26,13 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     $<$<CONFIG:MinSizeRel>:${CMAKE_BINARY_DIR}/MinSizeRel>
     )
 
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    $<$<CONFIG:Debug>:${CMAKE_BINARY_DIR}/_deps/sdl2Image-build/Debug/SDL2_imaged.dll>
+    $<$<CONFIG:Debug>:${CMAKE_BINARY_DIR}/Debug>
+    $<$<CONFIG:MinSizeRel>:${CMAKE_BINARY_DIR}/_deps/sdl2Image-build/MinSizeRel/SDL2_image.dll>
+    $<$<CONFIG:MinSizeRel>:${CMAKE_BINARY_DIR}/MinSizeRel>
+    )
+
 include(${CMAKE_CURRENT_SOURCE_DIR}/Tools/CMake/GroupSourcesByFolder.cmake)
 GroupSourcesByFolder(${PROJECT_NAME})
