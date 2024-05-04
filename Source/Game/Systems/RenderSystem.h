@@ -33,7 +33,7 @@ private:
 
 public:
 	void preinit(World& w, SystemsManager& sm);
-	void init(World& w, SystemsManager& sm);
+	void init(World& w, SystemsManager& sm) {}
 	void update(World& w);
 	void shutdown();
 
@@ -48,7 +48,6 @@ private:
     void initTexturesDescriptors();
     std::vector<char> getTextureData(const TextureType type) const;
     RenderData gatherRenderData(World& w, const Entity camera_ent) const;
-    void generateBackground(World& w);
 
 private:
     SDL_Window* m_window{ nullptr };

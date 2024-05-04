@@ -1,11 +1,6 @@
 #include "Game.h"
 #include "SDL.h"
-
-
-namespace
-{
-    constexpr Uint64 FRAME_MS{ 1000 / 60 };
-}
+#include "Constants.h"
 
 
 Game::Game()
@@ -39,9 +34,9 @@ void Game::run()
         m_systems_manager.update(m_world);
 
         const Uint64 frame_time{ SDL_GetTicks64() - frame_time_begin };
-        if (frame_time < FRAME_MS)
+        if (frame_time < FrameTimeMs)
         {
-            SDL_Delay(FRAME_MS - frame_time);
+            SDL_Delay(FrameTimeMs - frame_time);
         }
     }
 }

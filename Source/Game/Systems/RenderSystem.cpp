@@ -38,11 +38,6 @@ void RenderSystem::preinit(World& w, SystemsManager& sm)
     initTexturesDescriptors();
 }
 
-void RenderSystem::init(World& w, SystemsManager& sm)
-{
-    generateBackground(w);
-}
-
 void RenderSystem::update(World& w)
 {
     w.forEach<CameraComponent>([this, &w](const Entity camera_ent, CameraComponent& camera_comp)
@@ -55,7 +50,8 @@ void RenderSystem::update(World& w)
             {
                 for (const auto& data : layer)
                 {
-                    SDL_RenderCopy(m_renderer, data->texture, &data->src, &data->dst);
+                    SDL_RenderCopyEx(m_renderer, data->texture,
+                        &data->src, &data->dst, data->rotation, nullptr, SDL_FLIP_NONE);
                 }
             }
 
@@ -198,6 +194,9 @@ RenderSystem::RenderData RenderSystem::gatherRenderData(World& w, const Entity c
         [this, &render_data, &w, &player_transform, &half_screen_size, &camera_rect, camera_ent]
             (const Entity render_ent, RenderComponent& render_comp)
         {
+            const auto& render_obj_transform{ *w.tryGetComponent<TransformComponent>(render_ent) };
+            render_comp.rotation = render_obj_transform.rotation;
+
             if (render_ent == camera_ent)
             {
                 auto& layer_data{ render_data[static_cast<size_t>(render_comp.layer)] };
@@ -219,7 +218,6 @@ RenderSystem::RenderData RenderSystem::gatherRenderData(World& w, const Entity c
                 return;
             }
 
-            const auto& render_obj_transform{ *w.tryGetComponent<TransformComponent>(render_ent) };
             const auto& texture_size{ render_comp.texture_size };
             const SDL_Rect render_obj_rect{
                 .x = render_obj_transform.location.x - texture_size.x / 2,
@@ -236,7 +234,7 @@ RenderSystem::RenderData RenderSystem::gatherRenderData(World& w, const Entity c
 
             auto& layer_data{ render_data[static_cast<size_t>(render_comp.layer)] };
             layer_data.emplace_back(&render_comp);
-
+            render_comp.rotation = render_obj_transform.rotation;
             render_comp.src = {
                 .x = std::abs(render_obj_rect.x - intersect_rect.x),
                 .y = std::abs(render_obj_rect.y - intersect_rect.y),
@@ -254,25 +252,4 @@ RenderSystem::RenderData RenderSystem::gatherRenderData(World& w, const Entity c
         });
 
     return render_data;
-}
-
-void RenderSystem::generateBackground(World& w)
-{
-    for (int i{ -5 }; i <= 5; ++i)
-    {
-        for (int k{ -5 }; k <= 5; ++k)
-        {
-            auto e{ w.createEntity() };
-
-            auto& render_comp{ w.addComponent<RenderComponent>(e)};
-            auto& texture{ getTexture(TextureType::Backgrounds_purple) };
-            render_comp.layer = RenderLayer::BACKGROUND;
-            render_comp.texture = texture.texture;
-            render_comp.texture_size = texture.size;
-
-            auto& transform{ w.addComponent<TransformComponent>(e) };
-            transform.location.x = render_comp.texture_size.x * i;
-            transform.location.y = render_comp.texture_size.y * k;
-        }
-    }
 }

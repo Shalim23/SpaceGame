@@ -15,4 +15,5 @@ struct RenderComponent
     SDL_Point texture_size;
     SDL_Rect src;
     SDL_Rect dst;
+    double rotation{};
 };
