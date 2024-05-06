@@ -1,4 +1,5 @@
 import os
+from jinja2 import Environment, FileSystemLoader
 
 
 _GAME_PATH = "Source/Game"
@@ -19,24 +20,6 @@ def _object_exists(obj_type: str, name: str) -> bool:
     return False
 
 
-def _get_component_generation_contents(name: str) -> list[str]:
-    return ["#pragma once\n\n", f"struct {name}\n", "{};\n"]
-
-
-def _get_system_generation_contents(name: str) -> list[str]:
-    return ["#pragma once\n\n",
-            "class World;\n"
-            "class SystemsManager;\n\n"
-            f"class {name}\n",
-            "{\n",
-            "public:\n",
-            "\tvoid preinit(World& w, SystemsManager& sm) {}\n"
-            "\tvoid init(World& w, SystemsManager& sm) {}\n"
-            "\tvoid update(World& w) {}\n"
-            "\tvoid shutdown() {}\n"
-            "};\n"]
-
-
 def _get_registry_main_headers() -> list[str]:
     return ["//GENERATED FILE! DO NOT MODIFY DIRECTLY!\n",
             "#pragma once\n",
@@ -48,37 +31,38 @@ def generate(obj_type: str, name: str) -> bool:
         return False
     
     path = f"{_GAME_PATH}/{_OBJ_TYPE_TO_FOLDER[obj_type]}"
-    cpp_path = None
-    cpp_contents = None
-    contents = []
+
+    environment = Environment(loader=FileSystemLoader("Tools/templates/"))
 
     match obj_type:
         case "system":
             system_fullname = f"{name.capitalize()}System"
-            contents = _get_system_generation_contents(system_fullname)
-            path += f"/{system_fullname}.h"
-            cpp_path = path.replace(".h", ".cpp")
-            cpp_contents = [f"#include \"{system_fullname}.h\"\n",
-                            "#include \"../World.h\"\n",
-                            "#include \"../SystemsManager.h\"\n"]
+
+            template_h = environment.get_template("SystemTemplate.h")
+            template_cpp = environment.get_template("SystemTemplate.cpp")
+
+            content_h = template_h.render(name=system_fullname)
+            content_cpp = template_cpp.render(name=system_fullname)
+
+            with open(path + f"/{system_fullname}.h", "w") as f:
+                f.write(content_h)
+            with open(path + f"/{system_fullname}.cpp", "w") as f:
+                f.write(content_cpp)
+
+            print(f"Created {system_fullname}")
+
         case "component":
             component_fullname = f"{name.capitalize()}Component"
-            contents = _get_component_generation_contents(component_fullname)
-            path += f"/{component_fullname}.h"
+
+            template_h = environment.get_template("ComponentTemplate.h")
+            content_h = template_h.render(name=component_fullname)
+            with open(path + f"/{component_fullname}.h", "w") as f:
+                f.write(content_h)
+            print(f"Created {component_fullname}")
+
         case _:
             print(f"Unknown type {obj_type}!")
             return False
-
-    with open(path, "w") as f:
-        f.writelines(contents)
-
-    if cpp_path:
-       with open(cpp_path, "w") as f:
-            f.writelines(cpp_contents) 
-
-    print(f"Created {path}")
-    if cpp_path:
-        print(f"Created {cpp_path}")
 
     return True
 
