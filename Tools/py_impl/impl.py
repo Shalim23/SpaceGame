@@ -20,12 +20,6 @@ def _object_exists(obj_type: str, name: str) -> bool:
     return False
 
 
-def _get_registry_main_headers() -> list[str]:
-    return ["//GENERATED FILE! DO NOT MODIFY DIRECTLY!\n",
-            "#pragma once\n",
-            "#include \"../Types/TypesList.h\"\n"]
-
-
 def generate(obj_type: str, name: str) -> bool:
     if _object_exists(obj_type, name):
         return False
@@ -68,41 +62,28 @@ def generate(obj_type: str, name: str) -> bool:
 
 
 def update_registry(obj_type: str):
-    main_headers = _get_registry_main_headers()
     folder = _OBJ_TYPE_TO_FOLDER[obj_type]
     objects_path = f"{_GAME_PATH}/{folder}"
     registry_path = f"{_GENERATED_PATH}/{folder}Registry.h"
-    obj_type_header = ""
+    environment = Environment(loader=FileSystemLoader("Tools/templates/"))
+    content = None
+
+    objects = os.listdir(objects_path)
+    objects = [obj.replace(".h", "") for obj in objects if obj.endswith(".h")]
 
     match obj_type:
         case "system":
-            obj_type_header = "#include \"../Types/System.h\"\n"
+            template = environment.get_template("SystemsRegistryTemplate.h")
+            content = template.render(systems=objects)
         case "component":
-            obj_type_header = "#include \"../Types/Component.h\"\n"
+            template = environment.get_template("ComponentsRegistryTemplate.h")
+            content = template.render(components=objects)
         case _:
             print(f"Unknown type {obj_type}!")
-            return False
+            return
         
-    objects = os.listdir(objects_path)
 
     with open(registry_path, "w") as f:
-        f.writelines(main_headers)
-        f.write(obj_type_header)
+        f.write(content)
 
-        for obj in objects:
-            if obj.endswith(".h"):
-                f.write(f"#include \"../{folder}/{obj}\"\n")
-
-        f.write("\n\n")
-        f.write(f"using Registered{folder} = TypesList\n<\n")
-
-        objs = [obj.split(".")[0] + ",\n" for obj in objects if obj.endswith(".h")]
-        if objs:
-            last_obj = objs.pop()
-            objs.append(last_obj.replace(",", ""))
-            f.writelines(objs)
-
-        f.write(">;\n\n")
-        f.write(f"using {folder} = {folder}List<Registered{folder}>::type;\n")
-
-        print(f"Updated {registry_path}")
+    print(f"Updated {registry_path}")

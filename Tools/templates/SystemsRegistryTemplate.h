@@ -1,0 +1,17 @@
+//GENERATED FILE! DO NOT MODIFY DIRECTLY!
+#pragma once
+#include "../Types/TypesList.h"
+#include "../Types/System.h"
+{% for s in systems %}
+#include "../Systems/{{ s }}.h"
+{%- endfor %}
+
+
+using RegisteredSystems = TypesList
+<
+{%- for s in systems %}
+{{ s }}{{ "," if not loop.last }}
+{%- endfor %}
+>;
+
+using Systems = SystemsList<RegisteredSystems>::type;
