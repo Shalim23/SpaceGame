@@ -28,7 +28,7 @@ def _generate(obj_type: str, name: str) -> bool:
 
     match obj_type:
         case "system":
-            system_fullname = f"{name.capitalize()}System"
+            system_fullname = f"{name}System"
 
             template_h = environment.get_template("SystemTemplate.h")
             template_cpp = environment.get_template("SystemTemplate.cpp")
@@ -44,7 +44,7 @@ def _generate(obj_type: str, name: str) -> bool:
             print(f"Created {system_fullname}")
 
         case "component":
-            component_fullname = f"{name.capitalize()}Component"
+            component_fullname = f"{name}Component"
 
             template_h = environment.get_template("ComponentTemplate.h")
             content_h = template_h.render(name=component_fullname)

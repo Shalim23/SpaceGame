@@ -10,7 +10,4 @@ public:
 	void init(World& w, SystemsManager& sm);
 	void update(World& w) {}
 	void shutdown() {}
-
-private:
-	void generateBackground(World& w, SystemsManager& sm);
 };

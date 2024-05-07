@@ -44,9 +44,9 @@ void RenderSystem::update(World& w)
     SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(m_renderer);
 
-    w.forEach<CameraComponent>([this, &w](const Entity camera_ent, CameraComponent& camera_comp)
+    w.forEach<PlayerComponent>([this, &w](const Entity ent, PlayerComponent& comp)
         {
-            RenderData render_data{gatherRenderData(w, camera_ent)};
+            RenderData render_data{gatherRenderData(w, ent)};
             for (const auto& layer : render_data)
             {
                 for (const auto& data : layer)
@@ -173,7 +173,7 @@ std::vector<char> RenderSystem::getTextureData(const TextureType type) const
     return buffer;
 }
 
-RenderSystem::RenderData RenderSystem::gatherRenderData(World& w, const Entity camera_ent) const
+RenderSystem::RenderData RenderSystem::gatherRenderData(World& w, const Entity player_ent) const
 {
     RenderData render_data{ static_cast<size_t>(RenderLayer::COUNT) };
 
@@ -187,7 +187,7 @@ RenderSystem::RenderData RenderSystem::gatherRenderData(World& w, const Entity c
         .x = screen_size_f.x / 2.0f,
         .y = screen_size_f.y / 2.0f
     };
-    const auto& player_transform{ *w.tryGetComponent<TransformComponent>(camera_ent) };
+    const auto& player_transform{ *w.tryGetComponent<TransformComponent>(player_ent) };
 
     const SDL_FRect camera_rect{
         .x = player_transform.location.x - half_screen_size.x,
@@ -196,31 +196,14 @@ RenderSystem::RenderData RenderSystem::gatherRenderData(World& w, const Entity c
         .h = screen_size_f.y
     };
 
+    processPlayerData(w, render_data, half_screen_size, player_ent, player_transform);
+
     w.forEach<RenderComponent>(
-        [this, &render_data, &w, &player_transform, &half_screen_size, &camera_rect, camera_ent]
+        [this, &render_data, &w, &player_transform, &half_screen_size, &camera_rect, player_ent]
             (const Entity render_ent, RenderComponent& render_comp)
         {
-            const auto& render_obj_transform{ *w.tryGetComponent<TransformComponent>(render_ent) };
-            render_comp.rotation = render_obj_transform.rotation;
-
-            if (render_ent == camera_ent)
+            if (render_ent == player_ent)
             {
-                auto& layer_data{ render_data[static_cast<size_t>(render_comp.layer)] };
-                layer_data.emplace_back(&render_comp);
-                render_comp.src = {
-                    .x = 0,
-                    .y = 0,
-                    .w = render_comp.texture_size.x,
-                    .h = render_comp.texture_size.y
-                };
-
-                render_comp.dst = {
-                    .x = half_screen_size.x - render_comp.texture_size.x / 2,
-                    .y = half_screen_size.y - render_comp.texture_size.y / 2,
-                    .w = static_cast<float>(render_comp.src.w),
-                    .h = static_cast<float>(render_comp.src.h)
-                };
-
                 return;
             }
 
@@ -229,6 +212,7 @@ RenderSystem::RenderData RenderSystem::gatherRenderData(World& w, const Entity c
                 .y = static_cast<float>(render_comp.texture_size.y)
                 };
 
+            const auto& render_obj_transform{ *w.tryGetComponent<TransformComponent>(render_ent) };
             const SDL_FRect render_obj_rect{
                 .x = render_obj_transform.location.x - texture_size.x / 2.0f,
                 .y = render_obj_transform.location.y - texture_size.y / 2.0f,
@@ -261,4 +245,28 @@ RenderSystem::RenderData RenderSystem::gatherRenderData(World& w, const Entity c
         });
 
     return render_data;
+}
+
+void RenderSystem::processPlayerData(World& w, RenderData& render_data,
+    const SDL_FPoint& half_screen_size, const Entity player_ent, const TransformComponent& player_transform) const
+{
+    auto& render_comp{ *w.tryGetComponent<RenderComponent>(player_ent) };
+    render_comp.rotation = player_transform.rotation;
+    
+    auto& layer_data{ render_data[static_cast<size_t>(render_comp.layer)] };
+    layer_data.emplace_back(&render_comp);
+
+    render_comp.src = {
+        .x = 0,
+        .y = 0,
+        .w = render_comp.texture_size.x,
+        .h = render_comp.texture_size.y
+    };
+
+    render_comp.dst = {
+        .x = half_screen_size.x - render_comp.texture_size.x / 2,
+        .y = half_screen_size.y - render_comp.texture_size.y / 2,
+        .w = static_cast<float>(render_comp.src.w),
+        .h = static_cast<float>(render_comp.src.h)
+    };
 }

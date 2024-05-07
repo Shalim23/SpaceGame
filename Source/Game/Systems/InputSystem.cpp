@@ -9,8 +9,8 @@ void InputSystem::update(World& w)
     int len;
     const Uint8* keyboardState{SDL_GetKeyboardState(&len)};
 
-    w.forEach<InputComponent>([this, &w, &keyboardState]
-        (const Entity ent, InputComponent& comp)
+    w.forEach<PlayerComponent>([this, &w, &keyboardState]
+        (const Entity ent, PlayerComponent& comp)
         {
             auto& transform{ *w.tryGetComponent<TransformComponent>(ent) };
             auto& movement{ *w.tryGetComponent<MovementComponent>(ent) };

@@ -19,4 +19,5 @@ enum class TextureType
 	PlayerShip_playerShip3_green = 13,
 	PlayerShip_playerShip3_orange = 14,
 	PlayerShip_playerShip3_red = 15,
+	white_pixel = 16,
 };

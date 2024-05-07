@@ -6,13 +6,15 @@
 #include "../Systems/GameplaySystem.h"
 #include "../Systems/InputSystem.h"
 #include "../Systems/RenderSystem.h"
+#include "../Systems/WorldBoundsSystem.h"
 
 
 using RegisteredSystems = TypesList
 <
 GameplaySystem,
 InputSystem,
-RenderSystem
+RenderSystem,
+WorldBoundsSystem
 >;
 
 using Systems = SystemsList<RegisteredSystems>::type;

@@ -8,6 +8,7 @@
 class World;
 class SystemsManager;
 struct RenderComponent;
+struct TransformComponent;
 
 class RenderSystem
 {
@@ -47,7 +48,10 @@ public:
 private:
     void initTexturesDescriptors();
     std::vector<char> getTextureData(const TextureType type) const;
-    RenderData gatherRenderData(World& w, const Entity camera_ent) const;
+    RenderData gatherRenderData(World& w, const Entity player_ent) const;
+
+    void processPlayerData(World& w, RenderData& render_data, const SDL_FPoint& half_screen_size,
+        const Entity player_ent, const TransformComponent& player_transform) const;
 
 private:
     SDL_Window* m_window{ nullptr };
