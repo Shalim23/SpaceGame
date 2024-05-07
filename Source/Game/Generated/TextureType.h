@@ -3,10 +3,10 @@
 
 enum class TextureType
 {
-	Backgrounds_black = 0,
-	Backgrounds_blue = 1,
-	Backgrounds_darkPurple = 2,
-	Backgrounds_purple = 3,
+	Backgrounds_big_black = 0,
+	Backgrounds_big_blue = 1,
+	Backgrounds_big_darkPurple = 2,
+	Backgrounds_big_purple = 3,
 	PlayerShip_playerShip1_blue = 4,
 	PlayerShip_playerShip1_green = 5,
 	PlayerShip_playerShip1_orange = 6,

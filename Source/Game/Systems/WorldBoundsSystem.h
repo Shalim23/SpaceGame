@@ -21,7 +21,7 @@ private:
 
 private:
 	const float m_bounds_pixel_size{3500.0f};
-	const int m_grid_size{20};
+	const int m_grid_size{3};
 
 	const Uint64 m_fade_in_time_ms{7000};
 	const float m_fade_in_timef_ms{static_cast<float>(m_fade_in_time_ms)};

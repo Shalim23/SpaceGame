@@ -12,7 +12,7 @@ void WorldBoundsSystem::init(World& w, SystemsManager& sm)
             auto e{ w.createEntity() };
 
             auto& render_comp{ w.addComponent<RenderComponent>(e) };
-            auto& texture{ m_render_system->getTexture(TextureType::Backgrounds_purple) };
+            auto& texture{ m_render_system->getTexture(TextureType::Backgrounds_big_purple) };
             render_comp.layer = RenderLayer::BACKGROUND;
             render_comp.texture = texture.texture;
             render_comp.texture_size = texture.size;
