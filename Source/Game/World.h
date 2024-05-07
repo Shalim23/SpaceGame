@@ -76,6 +76,21 @@ public:
     }
 
     template<typename T>
+    std::vector<Entity> getEntities()
+    {
+        std::vector<Entity> ents;
+        const auto& comps{ getComponents<T>() };
+        ents.reserve(comps.size());
+
+        for (const auto& comp : comps)
+        {
+            ents.push_back(comp.getOwner());
+        }
+
+        return ents;
+    }
+
+    template<typename T>
     void forEach(std::function<void(const Entity, T&)> f)
     {
         for (auto& component : getComponents<T>())

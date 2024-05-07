@@ -20,8 +20,11 @@ void RenderSystem::preinit(World& w, SystemsManager& sm)
         throw SystemInitException{};
     }
 
+    constexpr Uint32 fullscreen_flag{0};
+    //constexpr Uint32 fullscreen_flag{ SDL_WINDOW_FULLSCREEN_DESKTOP };
+
     m_window = SDL_CreateWindow("Space Game", SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED, 800, 600, 0/*SDL_WINDOW_FULLSCREEN_DESKTOP*/);
+        SDL_WINDOWPOS_CENTERED, 800, 600, fullscreen_flag);
     if (!m_window)
     {
         showMessageBox(__FUNCTION__, "Failed to create window!");
@@ -47,7 +50,17 @@ void RenderSystem::update(World& w)
     w.forEach<PlayerComponent>([this, &w](const Entity ent, PlayerComponent& comp)
         {
             RenderData render_data{gatherRenderData(w, ent)};
+            UIRenderData ui_render_data{gatherUIRenderData(w)};
             for (const auto& layer : render_data)
+            {
+                for (const auto& data : layer)
+                {
+                    SDL_RenderCopyExF(m_renderer, data->texture,
+                        &data->src, &data->dst, data->rotation, nullptr, SDL_FLIP_NONE);
+                }
+            }
+
+            for (const auto& layer : ui_render_data)
             {
                 for (const auto& data : layer)
                 {
@@ -175,7 +188,7 @@ std::vector<char> RenderSystem::getTextureData(const TextureType type) const
 
 RenderSystem::RenderData RenderSystem::gatherRenderData(World& w, const Entity player_ent) const
 {
-    RenderData render_data{ static_cast<size_t>(RenderLayer::COUNT) };
+    RenderData render_data;
 
     const SDL_Point screen_size{ getScreenSize() };
     const SDL_FPoint screen_size_f{ 
@@ -229,6 +242,7 @@ RenderSystem::RenderData RenderSystem::gatherRenderData(World& w, const Entity p
             auto& layer_data{ render_data[static_cast<size_t>(render_comp.layer)] };
             layer_data.emplace_back(&render_comp);
             render_comp.rotation = render_obj_transform.rotation;
+
             render_comp.src = {
                 .x = static_cast<int>(std::abs(render_obj_rect.x - intersect_rect.x)),
                 .y = static_cast<int>(std::abs(render_obj_rect.y - intersect_rect.y)),
@@ -237,11 +251,23 @@ RenderSystem::RenderData RenderSystem::gatherRenderData(World& w, const Entity p
             };
 
             render_comp.dst = {
-                .x = intersect_rect.x + half_screen_size.x - player_transform.location.x,
-                .y = intersect_rect.y + half_screen_size.y - player_transform.location.y,
-                .w = static_cast<float>(render_comp.src.w),
-                .h = static_cast<float>(render_comp.src.h)
+                .x = roundf(intersect_rect.x + half_screen_size.x - player_transform.location.x),
+                .y = ceilf(intersect_rect.y + half_screen_size.y - player_transform.location.y),
+                .w = ceilf(intersect_rect.w),
+                .h = ceilf(intersect_rect.h)
             };
+        });
+
+    return render_data;
+}
+
+RenderSystem::UIRenderData RenderSystem::gatherUIRenderData(World& w) const
+{
+    UIRenderData render_data;
+    w.forEach<UIRenderComponent>([&render_data](const Entity render_ent, UIRenderComponent& render_comp)
+        {
+            auto& layer_data{ render_data[static_cast<size_t>(render_comp.layer)] };
+            layer_data.emplace_back(&render_comp);
         });
 
     return render_data;

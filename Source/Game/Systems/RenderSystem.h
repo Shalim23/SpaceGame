@@ -1,19 +1,22 @@
 #pragma once
 #include <cstdint>
 #include <vector>
+#include <array>
 #include "../Generated/TextureType.h"
 #include "../Types/Entity.h"
+#include "../Components/RenderComponent.h"
+#include "../Components/UIRenderComponent.h"
 #include "SDL.h"
 
 class World;
 class SystemsManager;
-struct RenderComponent;
 struct TransformComponent;
 
 class RenderSystem
 {
 
-using RenderData = std::vector<std::vector<RenderComponent*>>;
+using RenderData = std::array<std::vector<RenderComponent*>, static_cast<size_t>(RenderLayer::COUNT)>;
+using UIRenderData = std::array<std::vector<UIRenderComponent*>, static_cast<size_t>(UIRenderLayer::COUNT)>;
 
 public:
     struct Texture
@@ -49,6 +52,7 @@ private:
     void initTexturesDescriptors();
     std::vector<char> getTextureData(const TextureType type) const;
     RenderData gatherRenderData(World& w, const Entity player_ent) const;
+    UIRenderData gatherUIRenderData(World& w) const;
 
     void processPlayerData(World& w, RenderData& render_data, const SDL_FPoint& half_screen_size,
         const Entity player_ent, const TransformComponent& player_transform) const;
