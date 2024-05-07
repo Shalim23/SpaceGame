@@ -28,7 +28,7 @@ void RenderSystem::preinit(World& w, SystemsManager& sm)
         throw SystemInitException{};
     }
 
-    m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED);
+    m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!m_renderer)
     {
         showMessageBox(__FUNCTION__, "Failed to create renderer!");
@@ -40,23 +40,24 @@ void RenderSystem::preinit(World& w, SystemsManager& sm)
 
 void RenderSystem::update(World& w)
 {
+
+    SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+    SDL_RenderClear(m_renderer);
+
     w.forEach<CameraComponent>([this, &w](const Entity camera_ent, CameraComponent& camera_comp)
         {
-            SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-            SDL_RenderClear(m_renderer);
-
             RenderData render_data{gatherRenderData(w, camera_ent)};
             for (const auto& layer : render_data)
             {
                 for (const auto& data : layer)
                 {
-                    SDL_RenderCopyEx(m_renderer, data->texture,
+                    SDL_RenderCopyExF(m_renderer, data->texture,
                         &data->src, &data->dst, data->rotation, nullptr, SDL_FLIP_NONE);
                 }
             }
-
-            SDL_RenderPresent(m_renderer);
         });
+
+    SDL_RenderPresent(m_renderer);
 }
 
 void RenderSystem::shutdown()
@@ -176,18 +177,23 @@ RenderSystem::RenderData RenderSystem::gatherRenderData(World& w, const Entity c
 {
     RenderData render_data{ static_cast<size_t>(RenderLayer::COUNT) };
 
-    const auto screen_size{ getScreenSize() };
-    const SDL_Point half_screen_size{ 
-        .x = screen_size.x / 2,
-        .y = screen_size.y / 2
+    const SDL_Point screen_size{ getScreenSize() };
+    const SDL_FPoint screen_size_f{ 
+        .x = static_cast<float>(screen_size.x),
+        .y = static_cast<float>(screen_size.y)
+        };
+
+    const SDL_FPoint half_screen_size{ 
+        .x = screen_size_f.x / 2.0f,
+        .y = screen_size_f.y / 2.0f
     };
     const auto& player_transform{ *w.tryGetComponent<TransformComponent>(camera_ent) };
 
-    const SDL_Rect camera_rect{
+    const SDL_FRect camera_rect{
         .x = player_transform.location.x - half_screen_size.x,
         .y = player_transform.location.y - half_screen_size.y,
-        .w = screen_size.x,
-        .h = screen_size.y
+        .w = screen_size_f.x,
+        .h = screen_size_f.y
     };
 
     w.forEach<RenderComponent>(
@@ -211,23 +217,27 @@ RenderSystem::RenderData RenderSystem::gatherRenderData(World& w, const Entity c
                 render_comp.dst = {
                     .x = half_screen_size.x - render_comp.texture_size.x / 2,
                     .y = half_screen_size.y - render_comp.texture_size.y / 2,
-                    .w = render_comp.src.w,
-                    .h = render_comp.src.h
+                    .w = static_cast<float>(render_comp.src.w),
+                    .h = static_cast<float>(render_comp.src.h)
                 };
 
                 return;
             }
 
-            const auto& texture_size{ render_comp.texture_size };
-            const SDL_Rect render_obj_rect{
-                .x = render_obj_transform.location.x - texture_size.x / 2,
-                .y = render_obj_transform.location.y - texture_size.y / 2,
-                .w = texture_size.x,
-                .h = texture_size.y
+            const SDL_FPoint texture_size{ 
+                .x = static_cast<float>(render_comp.texture_size.x),
+                .y = static_cast<float>(render_comp.texture_size.y)
+                };
+
+            const SDL_FRect render_obj_rect{
+                .x = render_obj_transform.location.x - texture_size.x / 2.0f,
+                .y = render_obj_transform.location.y - texture_size.y / 2.0f,
+                .w = texture_size.x + 1.0f,
+                .h = texture_size.y + 1.0f
             };
 
-            SDL_Rect intersect_rect{};
-            if (!SDL_IntersectRect(&camera_rect, &render_obj_rect, &intersect_rect))
+            SDL_FRect intersect_rect{};
+            if (!SDL_IntersectFRect(&camera_rect, &render_obj_rect, &intersect_rect))
             {
                 return;
             }
@@ -236,19 +246,18 @@ RenderSystem::RenderData RenderSystem::gatherRenderData(World& w, const Entity c
             layer_data.emplace_back(&render_comp);
             render_comp.rotation = render_obj_transform.rotation;
             render_comp.src = {
-                .x = std::abs(render_obj_rect.x - intersect_rect.x),
-                .y = std::abs(render_obj_rect.y - intersect_rect.y),
-                .w = intersect_rect.w,
-                .h = intersect_rect.h
+                .x = static_cast<int>(std::abs(render_obj_rect.x - intersect_rect.x)),
+                .y = static_cast<int>(std::abs(render_obj_rect.y - intersect_rect.y)),
+                .w = static_cast<int>(intersect_rect.w),
+                .h = static_cast<int>(intersect_rect.h)
             };
 
             render_comp.dst = {
                 .x = intersect_rect.x + half_screen_size.x - player_transform.location.x,
                 .y = intersect_rect.y + half_screen_size.y - player_transform.location.y,
-                .w = render_comp.src.w,
-                .h = render_comp.src.h
+                .w = static_cast<float>(render_comp.src.w),
+                .h = static_cast<float>(render_comp.src.h)
             };
-
         });
 
     return render_data;

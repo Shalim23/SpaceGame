@@ -11,6 +11,7 @@ void GameplaySystem::init(World& w, SystemsManager& sm)
     auto e{ w.createEntity() };
     w.addComponent<CameraComponent>(e);
     w.addComponent<InputComponent>(e);
+    w.addComponent<MovementComponent>(e);
     w.addComponent<TransformComponent>(e);
 
     auto& render_comp{w.addComponent<RenderComponent>(e)};

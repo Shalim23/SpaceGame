@@ -2,7 +2,7 @@
 #include "../World.h"
 #include "../SystemsManager.h"
 #include "../Constants.h"
-#include <iostream>
+#include <numbers>
 
 void InputSystem::update(World& w)
 {
@@ -13,7 +13,16 @@ void InputSystem::update(World& w)
         (const Entity ent, InputComponent& comp)
         {
             auto& transform{ *w.tryGetComponent<TransformComponent>(ent) };
+            auto& movement{ *w.tryGetComponent<MovementComponent>(ent) };
             processRotation(keyboardState, transform);
+            movement.forward_vector = calculateForwardVector(transform.rotation);
+
+            if (keyboardState[SDL_SCANCODE_W])
+            {
+                const float movementDelta{ MovementPerSecond / FrameTimeMsF };
+                transform.location.x += movement.forward_vector.x * movementDelta;
+                transform.location.y += movement.forward_vector.y * movementDelta;
+            }
         });
 }
 
@@ -38,4 +47,10 @@ void InputSystem::processRotation(const Uint8* keyboardState, TransformComponent
     {
         t.rotation -= FullCircleDegreesD;
     }
+}
+
+SDL_FPoint InputSystem::calculateForwardVector(const double rotation) const
+{
+    const float radians{static_cast<float>(rotation * std::numbers::pi / 180.0)};
+    return SDL_FPoint{.x = sin(radians), .y = cos(radians) * -1.0f };
 }

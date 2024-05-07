@@ -2,6 +2,6 @@
 
 struct TransformComponent
 {
-    SDL_Point location{};
+    SDL_FPoint location{};
     double rotation{};
 };
