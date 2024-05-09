@@ -23,3 +23,5 @@ struct ComponentRemoveHandler
     Entity e;
     std::vector<ComponentRemoveCallback> destructors;
 };
+
+using ComponentRemoveHandlers = std::vector<ComponentRemoveHandler>;

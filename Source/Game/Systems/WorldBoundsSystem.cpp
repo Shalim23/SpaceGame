@@ -29,17 +29,17 @@ void WorldBoundsSystem::update(World& w)
     w.forEach<PlayerComponent>([this, &w](const Entity ent, PlayerComponent& comp)
         {
             const auto& player_transform{ *w.tryGetComponent<TransformComponent>(ent) };
-            const std::vector<Entity> out_of_bounds_ents{w.getEntities<OutOfWorldBoundsComponent>()};
+            const std::optional<Entity> out_of_bounds_ent{getOutOfWorldBoundsComponentEntity(w)};
             if (isPlayerInRange(player_transform))
             {
-                if (out_of_bounds_ents.size() != 0)
+                if (out_of_bounds_ent.has_value())
                 {
-                    w.destroyEntity(*out_of_bounds_ents.begin());
+                    w.destroyEntity(out_of_bounds_ent.value());
                 }
             }
             else
             {
-                if (out_of_bounds_ents.size() == 0)
+                if (!out_of_bounds_ent.has_value())
                 {
                     createOutOfBoundsEntity(w, player_transform);
                     m_fade_in_start = SDL_GetTicks64();
@@ -50,7 +50,7 @@ void WorldBoundsSystem::update(World& w)
                     const Uint64 diff{ current_time_ms - m_fade_in_start };
                     if (diff < m_fade_in_time_ms)
                     {
-                        auto& render_comp{*w.tryGetComponent<UIRenderComponent>(*out_of_bounds_ents.begin())};
+                        auto& render_comp{*w.tryGetComponent<UIRenderComponent>(out_of_bounds_ent.value())};
                         const float delta{static_cast<float>(diff) / m_fade_in_timef_ms };
                         constexpr float max_opacity{255.0f};
                         SDL_SetTextureAlphaMod(render_comp.texture, static_cast<Uint8>(max_opacity * delta));
@@ -86,4 +86,15 @@ void WorldBoundsSystem::createOutOfBoundsEntity(World& w, const TransformCompone
     render_comp.src.h = render_comp.dst.h = screen_size.y;
     SDL_SetTextureColorMod(render_comp.texture, 0, 0, 0);
     SDL_SetTextureAlphaMod(render_comp.texture, 0);
+}
+
+std::optional<Entity> WorldBoundsSystem::getOutOfWorldBoundsComponentEntity(World& w) const
+{
+    std::optional<Entity> ent_opt;
+    w.forEach<OutOfWorldBoundsComponent>([&ent_opt](const Entity ent, OutOfWorldBoundsComponent& comp)
+    {
+        ent_opt.emplace(ent);
+    });
+
+    return ent_opt;
 }

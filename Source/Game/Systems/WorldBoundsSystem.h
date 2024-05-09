@@ -1,5 +1,7 @@
 #pragma once
 #include "SDL.h"
+#include "../Types/Entity.h"
+#include <optional>
 
 class World;
 class SystemsManager;
@@ -18,6 +20,7 @@ private:
 	bool isPlayerInRange(const TransformComponent& player_transform) const;
 	bool inRange(const float value, const float min_value, const float max_value) const;
 	void createOutOfBoundsEntity(World& w, const TransformComponent& player_transform);
+	std::optional<Entity> getOutOfWorldBoundsComponentEntity(World& w) const;
 
 private:
 	const float m_bounds_pixel_size{3500.0f};
