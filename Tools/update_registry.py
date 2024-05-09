@@ -16,8 +16,7 @@ def update_registry(obj_type: str):
 
     match obj_type:
         case "system":
-            template = environment.get_template("SystemsRegistryTemplate.h")
-            content = template.render(systems=objects)
+            print("Systems Registry must be updated manually!")
         case "component":
             template = environment.get_template("ComponentsRegistryTemplate.h")
             content = template.render(components=objects)

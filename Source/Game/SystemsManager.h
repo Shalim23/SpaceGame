@@ -1,6 +1,6 @@
 #pragma once
 #include "World.h"
-#include "Generated/SystemsRegistry.h"
+#include "SystemsRegistry.h"
 
 class SystemsManager
 {
