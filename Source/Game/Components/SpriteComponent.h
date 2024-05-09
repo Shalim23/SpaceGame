@@ -1,5 +1,5 @@
 #pragma once
-#include "SDL.h"
+#include "../Types/RenderData.h"
 
 enum class SpriteLayer
 {
@@ -10,10 +10,6 @@ enum class SpriteLayer
 
 struct SpriteComponent
 {
-    SpriteLayer layer;
-    SDL_Texture* texture{nullptr};
-    SDL_Point texture_size;
-    SDL_Rect src;
-    SDL_FRect dst;
-    double rotation{};
+    SpriteLayer layer{SpriteLayer::COUNT};
+    RenderData render_data{};
 };

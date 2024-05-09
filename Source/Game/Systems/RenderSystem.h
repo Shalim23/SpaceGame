@@ -14,7 +14,7 @@ struct TransformComponent;
 class RenderSystem
 {
 
-using RenderData = std::array<std::vector<SpriteComponent*>, static_cast<size_t>(SpriteLayer::COUNT)>;
+using SpritesToRender = std::array<std::vector<SpriteComponent*>, static_cast<size_t>(SpriteLayer::COUNT)>;
 
 public:
     struct Texture
@@ -44,19 +44,27 @@ public:
     const Texture& getTexture(const TextureType type);
     SDL_Texture* createTexture(const std::vector<char>& data) const;
     SDL_Point getTextureSize(SDL_Texture* texture) const;
+    SDL_FPoint getTextureSizeF(const SDL_Point& texture_size) const;
     SDL_Point getScreenSize() const;
+    SDL_FPoint getScreenSizeF() const;
 
 private:
     void initTexturesDescriptors();
     std::vector<char> getTextureData(const TextureType type) const;
-    RenderData gatherRenderData(World& w, const Entity player_ent) const;
+    void processRenderData(World& w, const Entity player_ent);
 
-    void processPlayerData(World& w, RenderData& render_data, const SDL_FPoint& half_screen_size,
-        const Entity player_ent, const TransformComponent& player_transform) const;
+    void processPlayerData(World& w, const SDL_FPoint& half_screen_size,
+        const Entity player_ent, const TransformComponent& player_transform);
+
+    SDL_Rect createSourceRect(const int x, const int y,
+        const int w, const int h);
+    SDL_FRect createDestinationRect(const float x, const float y,
+        const float w, const float h);
 
 private:
     SDL_Window* m_window{ nullptr };
     SDL_Renderer* m_renderer{ nullptr };
     std::vector<TextureDescriptor> m_texture_descriptors;
     std::vector<Texture> m_textures;
+    SpritesToRender m_sprites_to_render;
 };

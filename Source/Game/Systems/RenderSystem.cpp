@@ -49,14 +49,18 @@ void RenderSystem::update(World& w)
 
     w.forEach<PlayerComponent>([this, &w](const Entity ent, PlayerComponent& comp)
         {
-            RenderData render_data{gatherRenderData(w, ent)};
+            processRenderData(w, ent);
 
-            for (const auto& layer : render_data)
+            for (const auto& layer : m_sprites_to_render)
             {
-                for (const auto& data : layer)
+                for (const auto& sprite : layer)
                 {
-                    SDL_RenderCopyExF(m_renderer, data->texture,
-                        &data->src, &data->dst, data->rotation, nullptr, SDL_FLIP_NONE);
+                    SDL_RenderCopyExF(m_renderer,
+                        sprite->render_data.texture,
+                        &sprite->render_data.src,
+                        &sprite->render_data.dst,
+                        sprite->render_data.rotation,
+                        nullptr, SDL_FLIP_NONE);
                 }
             }
         });
@@ -112,11 +116,24 @@ SDL_Point RenderSystem::getTextureSize(SDL_Texture* texture) const
     return size;
 }
 
+SDL_FPoint RenderSystem::getTextureSizeF(const SDL_Point& texture_size) const
+{
+    return SDL_FPoint{ static_cast<float>(texture_size.x),
+            static_cast<float>(texture_size.y) };
+}
+
 SDL_Point RenderSystem::getScreenSize() const
 {
     SDL_Point s;
     SDL_GetRendererOutputSize(m_renderer, &s.x, &s.y);
     return s;
+}
+
+SDL_FPoint RenderSystem::getScreenSizeF() const
+{
+    const SDL_Point s{getScreenSize()};
+    return SDL_FPoint{static_cast<float>(s.x),
+        static_cast<float>(s.y)};
 }
 
 void RenderSystem::initTexturesDescriptors()
@@ -177,34 +194,33 @@ std::vector<char> RenderSystem::getTextureData(const TextureType type) const
     return buffer;
 }
 
-RenderSystem::RenderData RenderSystem::gatherRenderData(World& w, const Entity player_ent) const
+void RenderSystem::processRenderData(World& w, const Entity player_ent)
 {
-    RenderData render_data;
+    for (auto& layer : m_sprites_to_render)
+    {
+        layer.clear();
+    }
 
-    const SDL_Point screen_size{ getScreenSize() };
-    const SDL_FPoint screen_size_f{ 
-        .x = static_cast<float>(screen_size.x),
-        .y = static_cast<float>(screen_size.y)
-        };
+    const SDL_FPoint screen_size{getScreenSizeF()};
 
     const SDL_FPoint half_screen_size{ 
-        .x = screen_size_f.x / 2.0f,
-        .y = screen_size_f.y / 2.0f
+        .x = screen_size.x / 2.0f,
+        .y = screen_size.y / 2.0f
     };
     const auto& player_transform{ *w.tryGetComponent<TransformComponent>(player_ent) };
 
     const SDL_FRect camera_rect{
         .x = player_transform.location.x - half_screen_size.x,
         .y = player_transform.location.y - half_screen_size.y,
-        .w = screen_size_f.x,
-        .h = screen_size_f.y
+        .w = screen_size.x,
+        .h = screen_size.y
     };
 
-    processPlayerData(w, render_data, half_screen_size, player_ent, player_transform);
+    processPlayerData(w, half_screen_size, player_ent, player_transform);
 
     w.forEach<SpriteComponent>(
-        [this, &render_data, &w, &player_transform, &half_screen_size, &camera_rect, player_ent]
-            (const Entity render_ent, SpriteComponent& render_comp)
+        [this, &w, &player_transform, &half_screen_size, &camera_rect, player_ent]
+            (const Entity render_ent, SpriteComponent& sprite)
         {
             if (render_ent == player_ent)
             {
@@ -212,16 +228,15 @@ RenderSystem::RenderData RenderSystem::gatherRenderData(World& w, const Entity p
             }
 
             const SDL_FPoint texture_size{ 
-                .x = static_cast<float>(render_comp.texture_size.x),
-                .y = static_cast<float>(render_comp.texture_size.y)
+                getTextureSizeF(sprite.render_data.texture_size)
                 };
 
             const auto& render_obj_transform{ *w.tryGetComponent<TransformComponent>(render_ent) };
             const SDL_FRect render_obj_rect{
                 .x = render_obj_transform.location.x - texture_size.x / 2.0f,
                 .y = render_obj_transform.location.y - texture_size.y / 2.0f,
-                .w = texture_size.x + 1.0f,
-                .h = texture_size.y + 1.0f
+                .w = texture_size.x,
+                .h = texture_size.y
             };
 
             SDL_FRect intersect_rect{};
@@ -230,48 +245,54 @@ RenderSystem::RenderData RenderSystem::gatherRenderData(World& w, const Entity p
                 return;
             }
 
-            auto& layer_data{ render_data[static_cast<size_t>(render_comp.layer)] };
-            layer_data.emplace_back(&render_comp);
-            render_comp.rotation = render_obj_transform.rotation;
+            auto& layer_data{ m_sprites_to_render[static_cast<size_t>(sprite.layer)] };
+            layer_data.emplace_back(&sprite);
+            sprite.render_data.rotation = render_obj_transform.rotation;
 
-            render_comp.src = {
-                .x = static_cast<int>(std::abs(render_obj_rect.x - intersect_rect.x)),
-                .y = static_cast<int>(std::abs(render_obj_rect.y - intersect_rect.y)),
-                .w = static_cast<int>(intersect_rect.w),
-                .h = static_cast<int>(intersect_rect.h)
-            };
+            sprite.render_data.src = createSourceRect(
+                std::abs(render_obj_rect.x - intersect_rect.x),
+                std::abs(render_obj_rect.y - intersect_rect.y),
+                intersect_rect.w, intersect_rect.h
+            );
 
-            render_comp.dst = {
-                .x = roundf(intersect_rect.x + half_screen_size.x - player_transform.location.x),
-                .y = ceilf(intersect_rect.y + half_screen_size.y - player_transform.location.y),
-                .w = ceilf(intersect_rect.w),
-                .h = ceilf(intersect_rect.h)
-            };
+            sprite.render_data.dst = createDestinationRect(
+                intersect_rect.x + half_screen_size.x - player_transform.location.x,
+                intersect_rect.y + half_screen_size.y - player_transform.location.y,
+                intersect_rect.w, intersect_rect.h
+            );
         });
-
-    return render_data;
 }
 
-void RenderSystem::processPlayerData(World& w, RenderData& render_data,
-    const SDL_FPoint& half_screen_size, const Entity player_ent, const TransformComponent& player_transform) const
+void RenderSystem::processPlayerData(World& w, const SDL_FPoint& half_screen_size,
+    const Entity player_ent, const TransformComponent& player_transform)
 {
-    auto& render_comp{ *w.tryGetComponent<SpriteComponent>(player_ent) };
-    render_comp.rotation = player_transform.rotation;
+    auto& sprite{ *w.tryGetComponent<SpriteComponent>(player_ent) };
+    sprite.render_data.rotation = player_transform.rotation;
     
-    auto& layer_data{ render_data[static_cast<size_t>(render_comp.layer)] };
-    layer_data.emplace_back(&render_comp);
+    auto& layer_data{ m_sprites_to_render[static_cast<size_t>(sprite.layer)] };
+    layer_data.emplace_back(&sprite);
 
-    render_comp.src = {
-        .x = 0,
-        .y = 0,
-        .w = render_comp.texture_size.x,
-        .h = render_comp.texture_size.y
-    };
+    sprite.render_data.src = createSourceRect(
+        0, 0,
+        sprite.render_data.texture_size.x,
+        sprite.render_data.texture_size.y
+        );
 
-    render_comp.dst = {
-        .x = half_screen_size.x - render_comp.texture_size.x / 2,
-        .y = half_screen_size.y - render_comp.texture_size.y / 2,
-        .w = static_cast<float>(render_comp.src.w),
-        .h = static_cast<float>(render_comp.src.h)
-    };
+    sprite.render_data.dst = createDestinationRect(
+        half_screen_size.x - sprite.render_data.texture_size.x / 2,
+        half_screen_size.y - sprite.render_data.texture_size.y / 2,
+        sprite.render_data.src.w,
+        sprite.render_data.src.h
+        );
+}
+
+SDL_Rect RenderSystem::createSourceRect(const int x, const int y, const int w, const int h)
+{
+    return SDL_Rect{ .x = x, .y = y, .w = w, .h = h };
+}
+
+SDL_FRect RenderSystem::createDestinationRect(const float x, const float y, const float w, const float h)
+{
+    return SDL_FRect{ .x = roundf(x), .y = ceilf(y),
+        .w = ceilf(w), .h = ceilf(h) };
 }

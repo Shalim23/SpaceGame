@@ -11,15 +11,15 @@ void WorldBoundsSystem::init(World& w, SystemsManager& sm)
         {
             auto e{ w.createEntity() };
 
-            auto& render_comp{ w.addComponent<SpriteComponent>(e) };
+            auto& sprite{ w.addComponent<SpriteComponent>(e) };
             auto& texture{ m_render_system->getTexture(TextureType::Backgrounds_big_purple) };
-            render_comp.layer = SpriteLayer::BACKGROUND;
-            render_comp.texture = texture.texture;
-            render_comp.texture_size = texture.size;
+            sprite.layer = SpriteLayer::BACKGROUND;
+            sprite.render_data.texture = texture.texture;
+            sprite.render_data.texture_size = texture.size;
 
             auto& transform{ w.addComponent<TransformComponent>(e) };
-            transform.location.x = render_comp.texture_size.x * i;
-            transform.location.y = render_comp.texture_size.y * k;
+            transform.location.x = sprite.render_data.texture_size.x * i;
+            transform.location.y = sprite.render_data.texture_size.y * k;
         }
     }
 }
@@ -50,10 +50,10 @@ void WorldBoundsSystem::update(World& w)
                     const Uint64 diff{ current_time_ms - m_fade_in_start };
                     if (diff < m_fade_in_time_ms)
                     {
-                        auto& render_comp{*w.tryGetComponent<UISpriteComponent>(out_of_bounds_ent.value())};
+                        auto& render_data{*w.tryGetComponent<UISpriteComponent>(out_of_bounds_ent.value())};
                         const float delta{static_cast<float>(diff) / m_fade_in_timef_ms };
                         constexpr float max_opacity{255.0f};
-                        SDL_SetTextureAlphaMod(render_comp.texture, static_cast<Uint8>(max_opacity * delta));
+                        SDL_SetTextureAlphaMod(render_data.texture, static_cast<Uint8>(max_opacity * delta));
                     }
                 }*/
             }
@@ -76,16 +76,16 @@ void WorldBoundsSystem::createOutOfBoundsEntity(World& w, const TransformCompone
     auto e{w.createEntity()};
     w.addComponent<OutOfWorldBoundsComponent>(e);
 
-    /*auto& render_comp{w.addComponent<UISpriteComponent>(e)};
-    render_comp.layer = UISpriteLayer::OUT_OF_WORLD_BOUNDS_EFFECT;
-    render_comp.texture = m_render_system->getTexture(TextureType::white_pixel).texture;
+    /*auto& render_data{w.addComponent<UISpriteComponent>(e)};
+    render_data.layer = UISpriteLayer::OUT_OF_WORLD_BOUNDS_EFFECT;
+    render_data.texture = m_render_system->getTexture(TextureType::white_pixel).texture;
     
     const SDL_Point screen_size{m_render_system->getScreenSize()};
-    render_comp.src.x = render_comp.src.y = render_comp.dst.x = render_comp.dst.y = 0;
-    render_comp.src.w = render_comp.dst.w = screen_size.x;
-    render_comp.src.h = render_comp.dst.h = screen_size.y;
-    SDL_SetTextureColorMod(render_comp.texture, 0, 0, 0);
-    SDL_SetTextureAlphaMod(render_comp.texture, 0);*/
+    render_data.src.x = render_data.src.y = render_data.dst.x = render_data.dst.y = 0;
+    render_data.src.w = render_data.dst.w = screen_size.x;
+    render_data.src.h = render_data.dst.h = screen_size.y;
+    SDL_SetTextureColorMod(render_data.texture, 0, 0, 0);
+    SDL_SetTextureAlphaMod(render_data.texture, 0);*/
 }
 
 std::optional<Entity> WorldBoundsSystem::getOutOfWorldBoundsComponentEntity(World& w) const
