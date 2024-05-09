@@ -1,16 +1,16 @@
 #pragma once
 #include "SDL.h"
 
-enum class RenderLayer
+enum class SpriteLayer
 {
     BACKGROUND,
     PLAYER,
     COUNT,
 };
 
-struct RenderComponent
+struct SpriteComponent
 {
-    RenderLayer layer;
+    SpriteLayer layer;
     SDL_Texture* texture{nullptr};
     SDL_Point texture_size;
     SDL_Rect src;

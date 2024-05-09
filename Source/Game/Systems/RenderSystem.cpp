@@ -50,17 +50,8 @@ void RenderSystem::update(World& w)
     w.forEach<PlayerComponent>([this, &w](const Entity ent, PlayerComponent& comp)
         {
             RenderData render_data{gatherRenderData(w, ent)};
-            UIRenderData ui_render_data{gatherUIRenderData(w)};
-            for (const auto& layer : render_data)
-            {
-                for (const auto& data : layer)
-                {
-                    SDL_RenderCopyExF(m_renderer, data->texture,
-                        &data->src, &data->dst, data->rotation, nullptr, SDL_FLIP_NONE);
-                }
-            }
 
-            for (const auto& layer : ui_render_data)
+            for (const auto& layer : render_data)
             {
                 for (const auto& data : layer)
                 {
@@ -211,9 +202,9 @@ RenderSystem::RenderData RenderSystem::gatherRenderData(World& w, const Entity p
 
     processPlayerData(w, render_data, half_screen_size, player_ent, player_transform);
 
-    w.forEach<RenderComponent>(
+    w.forEach<SpriteComponent>(
         [this, &render_data, &w, &player_transform, &half_screen_size, &camera_rect, player_ent]
-            (const Entity render_ent, RenderComponent& render_comp)
+            (const Entity render_ent, SpriteComponent& render_comp)
         {
             if (render_ent == player_ent)
             {
@@ -261,22 +252,10 @@ RenderSystem::RenderData RenderSystem::gatherRenderData(World& w, const Entity p
     return render_data;
 }
 
-RenderSystem::UIRenderData RenderSystem::gatherUIRenderData(World& w) const
-{
-    UIRenderData render_data;
-    w.forEach<UIRenderComponent>([&render_data](const Entity render_ent, UIRenderComponent& render_comp)
-        {
-            auto& layer_data{ render_data[static_cast<size_t>(render_comp.layer)] };
-            layer_data.emplace_back(&render_comp);
-        });
-
-    return render_data;
-}
-
 void RenderSystem::processPlayerData(World& w, RenderData& render_data,
     const SDL_FPoint& half_screen_size, const Entity player_ent, const TransformComponent& player_transform) const
 {
-    auto& render_comp{ *w.tryGetComponent<RenderComponent>(player_ent) };
+    auto& render_comp{ *w.tryGetComponent<SpriteComponent>(player_ent) };
     render_comp.rotation = player_transform.rotation;
     
     auto& layer_data{ render_data[static_cast<size_t>(render_comp.layer)] };

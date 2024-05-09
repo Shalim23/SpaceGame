@@ -6,9 +6,9 @@
 #include "../Components/MovementComponent.h"
 #include "../Components/OutOfWorldBoundsComponent.h"
 #include "../Components/PlayerComponent.h"
-#include "../Components/RenderComponent.h"
+#include "../Components/SpriteComponent.h"
 #include "../Components/TransformComponent.h"
-#include "../Components/UIRenderComponent.h"
+#include "../Components/WidgetComponent.h"
 
 
 using RegisteredComponents = TypesList
@@ -16,9 +16,9 @@ using RegisteredComponents = TypesList
 MovementComponent,
 OutOfWorldBoundsComponent,
 PlayerComponent,
-RenderComponent,
+SpriteComponent,
 TransformComponent,
-UIRenderComponent
+WidgetComponent
 >;
 
 using Components = ComponentsList<RegisteredComponents>::type;

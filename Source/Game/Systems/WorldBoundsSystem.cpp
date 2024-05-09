@@ -11,9 +11,9 @@ void WorldBoundsSystem::init(World& w, SystemsManager& sm)
         {
             auto e{ w.createEntity() };
 
-            auto& render_comp{ w.addComponent<RenderComponent>(e) };
+            auto& render_comp{ w.addComponent<SpriteComponent>(e) };
             auto& texture{ m_render_system->getTexture(TextureType::Backgrounds_big_purple) };
-            render_comp.layer = RenderLayer::BACKGROUND;
+            render_comp.layer = SpriteLayer::BACKGROUND;
             render_comp.texture = texture.texture;
             render_comp.texture_size = texture.size;
 
@@ -39,7 +39,7 @@ void WorldBoundsSystem::update(World& w)
             }
             else
             {
-                if (!out_of_bounds_ent.has_value())
+                /*if (!out_of_bounds_ent.has_value())
                 {
                     createOutOfBoundsEntity(w, player_transform);
                     m_fade_in_start = SDL_GetTicks64();
@@ -50,12 +50,12 @@ void WorldBoundsSystem::update(World& w)
                     const Uint64 diff{ current_time_ms - m_fade_in_start };
                     if (diff < m_fade_in_time_ms)
                     {
-                        auto& render_comp{*w.tryGetComponent<UIRenderComponent>(out_of_bounds_ent.value())};
+                        auto& render_comp{*w.tryGetComponent<UISpriteComponent>(out_of_bounds_ent.value())};
                         const float delta{static_cast<float>(diff) / m_fade_in_timef_ms };
                         constexpr float max_opacity{255.0f};
                         SDL_SetTextureAlphaMod(render_comp.texture, static_cast<Uint8>(max_opacity * delta));
                     }
-                }
+                }*/
             }
         });
 }
@@ -76,8 +76,8 @@ void WorldBoundsSystem::createOutOfBoundsEntity(World& w, const TransformCompone
     auto e{w.createEntity()};
     w.addComponent<OutOfWorldBoundsComponent>(e);
 
-    auto& render_comp{w.addComponent<UIRenderComponent>(e)};
-    render_comp.layer = UIRenderLayer::OUT_OF_WORLD_BOUNDS_EFFECT;
+    /*auto& render_comp{w.addComponent<UISpriteComponent>(e)};
+    render_comp.layer = UISpriteLayer::OUT_OF_WORLD_BOUNDS_EFFECT;
     render_comp.texture = m_render_system->getTexture(TextureType::white_pixel).texture;
     
     const SDL_Point screen_size{m_render_system->getScreenSize()};
@@ -85,7 +85,7 @@ void WorldBoundsSystem::createOutOfBoundsEntity(World& w, const TransformCompone
     render_comp.src.w = render_comp.dst.w = screen_size.x;
     render_comp.src.h = render_comp.dst.h = screen_size.y;
     SDL_SetTextureColorMod(render_comp.texture, 0, 0, 0);
-    SDL_SetTextureAlphaMod(render_comp.texture, 0);
+    SDL_SetTextureAlphaMod(render_comp.texture, 0);*/
 }
 
 std::optional<Entity> WorldBoundsSystem::getOutOfWorldBoundsComponentEntity(World& w) const
