@@ -1,25 +1,26 @@
 #include "WorldBoundsSystem.h"
 #include "../World.h"
 #include "../SystemsManager.h"
+#include "../FunctionsLibrary.h"
 
-void WorldBoundsSystem::init(World& w, SystemsManager& sm)
+void WorldBoundsSystem::init(World& world, SystemsManager& systemsManager)
 {
-    m_render_system = &sm.getSystem<RenderSystem>();
-    for (int i{ -m_grid_size }; i <= m_grid_size; ++i)
+    renderSystem_ = &systemsManager.getSystem<RenderSystem>();
+    for (int i{ -gridSize_ }; i <= gridSize_; ++i)
     {
-        for (int k{ -m_grid_size }; k <= m_grid_size; ++k)
+        for (int k{ -gridSize_ }; k <= gridSize_; ++k)
         {
-            auto e{ w.createEntity() };
+            auto e{ world.createEntity() };
 
-            auto& sprite{ w.addComponent<SpriteComponent>(e) };
-            auto& texture{ m_render_system->getTexture(TextureType::Backgrounds_big_purple) };
+            auto& sprite{ world.addComponent<SpriteComponent>(e) };
+            auto& texture{ renderSystem_->getTexture(TextureType::Backgrounds_big_purple) };
             sprite.layer = SpriteLayer::BACKGROUND;
             sprite.render_data.texture = texture.texture;
-            sprite.render_data.texture_size = texture.size;
+            sprite.render_data.textureSize = texture.size;
 
-            auto& transform{ w.addComponent<TransformComponent>(e) };
-            transform.location.x = sprite.render_data.texture_size.x * i;
-            transform.location.y = sprite.render_data.texture_size.y * k;
+            auto& transform{ world.addComponent<TransformComponent>(e) };
+            transform.location.x = sprite.render_data.textureSize.x * i;
+            transform.location.y = sprite.render_data.textureSize.y * k;
         }
     }
 }
@@ -62,13 +63,8 @@ void WorldBoundsSystem::update(World& w)
 
 bool WorldBoundsSystem::isPlayerInRange(const TransformComponent& player_transform) const
 {
-    return inRange(player_transform.location.x, -m_bounds_pixel_size, m_bounds_pixel_size) &&
-        inRange(player_transform.location.y, -m_bounds_pixel_size, m_bounds_pixel_size);
-}
-
-bool WorldBoundsSystem::inRange(const float value, const float min_value, const float max_value) const
-{
-    return (value >= min_value) && (value <= max_value);
+    return fl::inRange(player_transform.location.x, -boundsPixelSize_, boundsPixelSize_) &&
+        fl::inRange(player_transform.location.y, -boundsPixelSize_, boundsPixelSize_);
 }
 
 void WorldBoundsSystem::createOutOfBoundsEntity(World& w, const TransformComponent& player_transform)

@@ -11,24 +11,24 @@ struct TransformComponent;
 class WorldBoundsSystem
 {
 public:
-	void preInit(World& w, SystemsManager& sm) {}
-	void init(World& w, SystemsManager& sm);
-	void update(World& w);
+	void preInit(World&, SystemsManager&) {}
+	void init(World&, SystemsManager&);
+	void update(World&);
 	void shutdown() {}
 
 private:
-	bool isPlayerInRange(const TransformComponent& player_transform) const;
-	bool inRange(const float value, const float min_value, const float max_value) const;
+	bool isPlayerInRange(const TransformComponent& playerTransform) const;
 	void createOutOfBoundsEntity(World& w, const TransformComponent& player_transform);
 	std::optional<Entity> getOutOfWorldBoundsComponentEntity(World& w) const;
 
 private:
-	const float m_bounds_pixel_size{3500.0f};
-	const int m_grid_size{3};
+	const float boundsPixelSize_{3500.0f};
+	const int gridSize_{3};
 
+	//#TODO move to widget
 	const Uint64 m_fade_in_time_ms{7000};
 	const float m_fade_in_timef_ms{static_cast<float>(m_fade_in_time_ms)};
 	Uint64 m_fade_in_start{};
 
-	RenderSystem* m_render_system{nullptr};
+	RenderSystem* renderSystem_{nullptr};
 };

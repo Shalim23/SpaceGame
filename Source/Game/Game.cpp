@@ -4,39 +4,39 @@
 
 
 Game::Game()
-    : m_is_running{true}
+    : is_running_{true}
 {
 }
 
 void Game::run()
 {
-    m_systems_manager.preInit(m_world);
-    m_systems_manager.init(m_world);
+    systems_manager_.preInit(world_);
+    systems_manager_.init(world_);
 
-    while (m_is_running)
+    while (is_running_)
     {
-        const Uint64 frame_time_begin{ SDL_GetTicks64() };
+        const Uint64 frameTimeBegin{ SDL_GetTicks64() };
 
-        SDL_Event current_event{};
-        while (SDL_PollEvent(&current_event))
+        SDL_Event currentEvent;
+        while (SDL_PollEvent(&currentEvent))
         {
-            switch (current_event.type)
+            switch (currentEvent.type)
             {
             case SDL_QUIT:
             {
-                m_is_running = false;
-                m_systems_manager.shutdown();
+                is_running_ = ~is_running_;
+                systems_manager_.shutdown();
                 return;
             }
             }
         }
 
-        m_systems_manager.update(m_world);
+        systems_manager_.update(world_);
 
-        const Uint64 frame_time{ SDL_GetTicks64() - frame_time_begin };
-        if (frame_time < FrameTimeMs)
+        const Uint64 frameTime{ SDL_GetTicks64() - frameTimeBegin };
+        if (frameTime < constants::frameTimeMs)
         {
-            SDL_Delay(FrameTimeMs - frame_time);
+            SDL_Delay(constants::frameTimeMs - frameTime);
         }
     }
 }

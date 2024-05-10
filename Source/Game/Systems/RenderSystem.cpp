@@ -6,7 +6,7 @@
 #include <fstream>
 #include <sstream>
 
-void RenderSystem::preInit(World& w, SystemsManager& sm)
+void RenderSystem::preInit(World& world, SystemsManager& systemsManager)
 {
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
@@ -41,15 +41,15 @@ void RenderSystem::preInit(World& w, SystemsManager& sm)
     initTexturesDescriptors();
 }
 
-void RenderSystem::update(World& w)
+void RenderSystem::update(World& world)
 {
 
     SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(m_renderer);
 
-    w.forEach<PlayerComponent>([this, &w](const Entity ent, PlayerComponent& comp)
+    world.forEach<PlayerComponent>([this, &world](const Entity entity, PlayerComponent&)
         {
-            processRenderData(w, ent);
+            processRenderData(world, entity);
 
             for (const auto& layer : m_sprites_to_render)
             {
@@ -57,8 +57,8 @@ void RenderSystem::update(World& w)
                 {
                     SDL_RenderCopyExF(m_renderer,
                         sprite->render_data.texture,
-                        &sprite->render_data.src,
-                        &sprite->render_data.dst,
+                        &sprite->render_data.sourceRect,
+                        &sprite->render_data.destinationRect,
                         sprite->render_data.rotation,
                         nullptr, SDL_FLIP_NONE);
                 }
@@ -227,16 +227,16 @@ void RenderSystem::processRenderData(World& w, const Entity player_ent)
                 return;
             }
 
-            const SDL_FPoint texture_size{ 
-                getTextureSizeF(sprite.render_data.texture_size)
+            const SDL_FPoint textureSize{ 
+                getTextureSizeF(sprite.render_data.textureSize)
                 };
 
             const auto& render_obj_transform{ *w.tryGetComponent<TransformComponent>(render_ent) };
             const SDL_FRect render_obj_rect{
-                .x = render_obj_transform.location.x - texture_size.x / 2.0f,
-                .y = render_obj_transform.location.y - texture_size.y / 2.0f,
-                .w = texture_size.x,
-                .h = texture_size.y
+                .x = render_obj_transform.location.x - textureSize.x / 2.0f,
+                .y = render_obj_transform.location.y - textureSize.y / 2.0f,
+                .w = textureSize.x,
+                .h = textureSize.y
             };
 
             SDL_FRect intersect_rect{};
@@ -249,13 +249,13 @@ void RenderSystem::processRenderData(World& w, const Entity player_ent)
             layer_data.emplace_back(&sprite);
             sprite.render_data.rotation = render_obj_transform.rotation;
 
-            sprite.render_data.src = createSourceRect(
+            sprite.render_data.sourceRect = createSourceRect(
                 std::abs(render_obj_rect.x - intersect_rect.x),
                 std::abs(render_obj_rect.y - intersect_rect.y),
                 intersect_rect.w, intersect_rect.h
             );
 
-            sprite.render_data.dst = createDestinationRect(
+            sprite.render_data.destinationRect = createDestinationRect(
                 intersect_rect.x + half_screen_size.x - player_transform.location.x,
                 intersect_rect.y + half_screen_size.y - player_transform.location.y,
                 intersect_rect.w, intersect_rect.h
@@ -272,17 +272,17 @@ void RenderSystem::processPlayerData(World& w, const SDL_FPoint& half_screen_siz
     auto& layer_data{ m_sprites_to_render[static_cast<size_t>(sprite.layer)] };
     layer_data.emplace_back(&sprite);
 
-    sprite.render_data.src = createSourceRect(
+    sprite.render_data.sourceRect = createSourceRect(
         0, 0,
-        sprite.render_data.texture_size.x,
-        sprite.render_data.texture_size.y
+        sprite.render_data.textureSize.x,
+        sprite.render_data.textureSize.y
         );
 
-    sprite.render_data.dst = createDestinationRect(
-        half_screen_size.x - sprite.render_data.texture_size.x / 2,
-        half_screen_size.y - sprite.render_data.texture_size.y / 2,
-        sprite.render_data.src.w,
-        sprite.render_data.src.h
+    sprite.render_data.destinationRect = createDestinationRect(
+        half_screen_size.x - sprite.render_data.textureSize.x / 2,
+        half_screen_size.y - sprite.render_data.textureSize.y / 2,
+        sprite.render_data.sourceRect.w,
+        sprite.render_data.sourceRect.h
         );
 }
 

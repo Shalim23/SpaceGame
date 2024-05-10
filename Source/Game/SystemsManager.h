@@ -13,22 +13,22 @@ public:
     SystemsManager& operator=(const SystemsManager& other) = delete;
     SystemsManager& operator=(SystemsManager&& other) = delete;
 
-    void preInit(World& w)
+    void preInit(World& world)
     {
-        std::apply([&w, this](auto&&... system)
-            {((system.preInit(w, *this)), ...); }, systems_);
+        std::apply([&world, this](auto&&... system)
+            {((system.preInit(world, *this)), ...); }, systems_);
     }
 
-    void init(World& w)
+    void init(World& world)
     {
-        std::apply([&w, this](auto&&... system)
-            {((system.init(w, *this)), ...);}, systems_);
+        std::apply([&world, this](auto&&... system)
+            {((system.init(world, *this)), ...);}, systems_);
     }
 
-    void update(World& w)
+    void update(World& world)
     {
-        std::apply([&w](auto&&... system)
-            {((system.update(w)), ...); }, systems_);
+        std::apply([&world](auto&&... system)
+            {((system.update(world)), ...); }, systems_);
     }
 
     void shutdown()

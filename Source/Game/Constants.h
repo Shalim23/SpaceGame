@@ -1,9 +1,12 @@
 #pragma once
 #include "SDL.h"
 
-static constexpr Uint64 SecondMs{ 1000 };
-static constexpr Uint64 Frames{ 60 };
-static constexpr Uint64 FrameTimeMs{ SecondMs / Frames };
-static constexpr float FrameTimeMsF{ static_cast<float>(FrameTimeMs) };
-static constexpr double FrameTimeMsD{ static_cast<double>(FrameTimeMs) };
-static constexpr double FullCircleDegreesD{ 360.0 };
+namespace constants
+{
+    static constexpr Uint64 secondMs{ 1000 };
+    static constexpr Uint64 frames{ 60 };
+    static constexpr Uint64 frameTimeMs{ secondMs / frames };
+    static constexpr float frameTimeMsF{ static_cast<float>(frameTimeMs) };
+    static constexpr double frameTimeMsD{ static_cast<double>(frameTimeMs) };
+    static constexpr double fullCircleDegreesD{ 360.0 };
+}

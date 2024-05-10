@@ -9,7 +9,7 @@ public:
     void run();
 
 private:
-    World m_world{};
-    SystemsManager m_systems_manager{};
-    uint8_t m_is_running : 1;
+    World world_;
+    SystemsManager systems_manager_;
+    uint8_t is_running_ : 1;
 };
