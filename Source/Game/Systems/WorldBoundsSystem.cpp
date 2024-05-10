@@ -3,7 +3,7 @@
 #include "../SystemsManager.h"
 #include "../FunctionsLibrary.h"
 
-void WorldBoundsSystem::init(World& world, SystemsManager& systemsManager)
+void WorldBoundsSystem::postInit(World& world, SystemsManager& systemsManager)
 {
     renderSystem_ = &systemsManager.getSystem<RenderSystem>();
     for (int i{ -gridSize_ }; i <= gridSize_; ++i)
@@ -15,27 +15,27 @@ void WorldBoundsSystem::init(World& world, SystemsManager& systemsManager)
             auto& sprite{ world.addComponent<SpriteComponent>(e) };
             auto& texture{ renderSystem_->getTexture(TextureType::Backgrounds_big_purple) };
             sprite.layer = SpriteLayer::BACKGROUND;
-            sprite.render_data.texture = texture.texture;
-            sprite.render_data.textureSize = texture.size;
+            sprite.renderData.texture = texture.texture;
+            sprite.renderData.textureSize = texture.size;
 
             auto& transform{ world.addComponent<TransformComponent>(e) };
-            transform.location.x = sprite.render_data.textureSize.x * i;
-            transform.location.y = sprite.render_data.textureSize.y * k;
+            transform.location.x = sprite.renderData.textureSize.x * i;
+            transform.location.y = sprite.renderData.textureSize.y * k;
         }
     }
 }
 
-void WorldBoundsSystem::update(World& w)
+void WorldBoundsSystem::update(World& world)
 {
-    w.forEach<PlayerComponent>([this, &w](const Entity ent, PlayerComponent& comp)
+    world.forEach<PlayerComponent>([this, &world](const Entity entity, PlayerComponent&)
         {
-            const auto& player_transform{ *w.tryGetComponent<TransformComponent>(ent) };
-            const std::optional<Entity> out_of_bounds_ent{getOutOfWorldBoundsComponentEntity(w)};
-            if (isPlayerInRange(player_transform))
+            const auto& playerTransform{ *world.tryGetComponent<TransformComponent>(entity) };
+            const std::optional<Entity> outOfBoundsEntity{getOutOfWorldBoundsComponentEntity(world)};
+            if (isPlayerInRange(playerTransform))
             {
-                if (out_of_bounds_ent.has_value())
+                if (outOfBoundsEntity.has_value())
                 {
-                    w.destroyEntity(out_of_bounds_ent.value());
+                    world.destroyEntity(outOfBoundsEntity.value());
                 }
             }
             else
@@ -61,16 +61,16 @@ void WorldBoundsSystem::update(World& w)
         });
 }
 
-bool WorldBoundsSystem::isPlayerInRange(const TransformComponent& player_transform) const
+bool WorldBoundsSystem::isPlayerInRange(const TransformComponent& playerTransform) const
 {
-    return fl::inRange(player_transform.location.x, -boundsPixelSize_, boundsPixelSize_) &&
-        fl::inRange(player_transform.location.y, -boundsPixelSize_, boundsPixelSize_);
+    return fl::inRange(playerTransform.location.x, -boundsPixelSize_, boundsPixelSize_) &&
+        fl::inRange(playerTransform.location.y, -boundsPixelSize_, boundsPixelSize_);
 }
 
-void WorldBoundsSystem::createOutOfBoundsEntity(World& w, const TransformComponent& player_transform)
+void WorldBoundsSystem::createOutOfBoundsEntity(World& world, const TransformComponent& playerTransform)
 {
-    auto e{w.createEntity()};
-    w.addComponent<OutOfWorldBoundsComponent>(e);
+    auto e{world.createEntity()};
+    world.addComponent<OutOfWorldBoundsComponent>(e);
 
     /*auto& render_data{w.addComponent<UISpriteComponent>(e)};
     render_data.layer = UISpriteLayer::OUT_OF_WORLD_BOUNDS_EFFECT;
@@ -84,13 +84,13 @@ void WorldBoundsSystem::createOutOfBoundsEntity(World& w, const TransformCompone
     SDL_SetTextureAlphaMod(render_data.texture, 0);*/
 }
 
-std::optional<Entity> WorldBoundsSystem::getOutOfWorldBoundsComponentEntity(World& w) const
+std::optional<Entity> WorldBoundsSystem::getOutOfWorldBoundsComponentEntity(World& world) const
 {
-    std::optional<Entity> ent_opt;
-    w.forEach<OutOfWorldBoundsComponent>([&ent_opt](const Entity ent, OutOfWorldBoundsComponent& comp)
+    std::optional<Entity> outOfBoundsEntity;
+    world.forEach<OutOfWorldBoundsComponent>([&outOfBoundsEntity](const Entity entity, OutOfWorldBoundsComponent&)
     {
-        ent_opt.emplace(ent);
+        outOfBoundsEntity.emplace(entity);
     });
 
-    return ent_opt;
+    return outOfBoundsEntity;
 }

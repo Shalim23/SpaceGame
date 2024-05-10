@@ -11,5 +11,5 @@ enum class SpriteLayer
 struct SpriteComponent
 {
     SpriteLayer layer{SpriteLayer::COUNT};
-    RenderData render_data{};
+    RenderData renderData{};
 };

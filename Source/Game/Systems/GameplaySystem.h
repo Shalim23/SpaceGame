@@ -6,11 +6,11 @@ class SystemsManager;
 class GameplaySystem
 {
 public:
-	void preInit(World& w, SystemsManager& sm){}
-	void init(World& w, SystemsManager& sm);
-	void update(World& w) {}
+	void init(World& world, SystemsManager& systemsManager){}
+	void postInit(World& world, SystemsManager& systemsManager);
+	void update(World& world) {}
 	void shutdown() {}
 
 private:
-	void createPlayer(World& w, SystemsManager& sm) const;
+	void createPlayer(World& world, SystemsManager& systemsManager) const;
 };

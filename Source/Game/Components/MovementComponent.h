@@ -3,5 +3,5 @@
 
 struct MovementComponent
 {
-    SDL_FPoint forward_vector{};
+    SDL_FPoint forwardVector{};
 };

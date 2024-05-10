@@ -8,16 +8,16 @@ struct TransformComponent;
 class InputSystem
 {
 public:
-	void preInit(World& w, SystemsManager& sm) {}
-	void init(World& w, SystemsManager& sm) {}
-	void update(World& w);
+	void postInit(World& world, SystemsManager& systemsManager) {}
+	void init(World& world, SystemsManager& systemsManager) {}
+	void update(World& world);
 	void shutdown() {}
 
 private:
-	void processRotation(const Uint8* keyboardState, TransformComponent& t);
+	void processRotation(const Uint8* const keyboardState, TransformComponent& transform);
 	SDL_FPoint calculateForwardVector(const double rotation) const;
 
 private:
-	const double RotationPerSecond{20.0};
-	const float MovementPerSecond{50.0};
+	const double rotationPerSecond_{20.0};
+	const float movementPerSecond_{50.0};
 };

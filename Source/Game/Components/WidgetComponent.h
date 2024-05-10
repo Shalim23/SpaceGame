@@ -12,7 +12,8 @@ enum class WidgetLayer
 
 struct WidgetElement
 {
-    RenderData render_data{};
+    RenderData renderData{};
+    std::vector<WidgetElement> children;
 };
 
 struct WidgetComponent

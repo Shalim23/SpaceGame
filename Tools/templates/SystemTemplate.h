@@ -6,8 +6,8 @@ class SystemsManager;
 class {{ name }}
 {
 public:
-	void preInit(World&, SystemsManager&) {}
-	void init(World&, SystemsManager&) {}
-	void update(World&) {}
+	void init(World& world, SystemsManager& systemsManager) {}
+	void postInit(World& world, SystemsManager& systemsManager) {}
+	void update(World& world) {}
 	void shutdown() {}
 };

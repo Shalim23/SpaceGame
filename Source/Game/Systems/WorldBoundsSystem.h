@@ -11,15 +11,15 @@ struct TransformComponent;
 class WorldBoundsSystem
 {
 public:
-	void preInit(World&, SystemsManager&) {}
-	void init(World&, SystemsManager&);
-	void update(World&);
+	void init(World& world, SystemsManager& systemsManager){}
+	void postInit(World& world, SystemsManager& systemsManager);
+	void update(World& world);
 	void shutdown() {}
 
 private:
 	bool isPlayerInRange(const TransformComponent& playerTransform) const;
-	void createOutOfBoundsEntity(World& w, const TransformComponent& player_transform);
-	std::optional<Entity> getOutOfWorldBoundsComponentEntity(World& w) const;
+	void createOutOfBoundsEntity(World& world, const TransformComponent& playerTransform);
+	std::optional<Entity> getOutOfWorldBoundsComponentEntity(World& world) const;
 
 private:
 	const float boundsPixelSize_{3500.0f};

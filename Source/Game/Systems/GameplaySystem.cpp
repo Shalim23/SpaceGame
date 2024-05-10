@@ -2,23 +2,23 @@
 #include "../World.h"
 #include "../SystemsManager.h"
 
-void GameplaySystem::init(World& w, SystemsManager& sm)
+void GameplaySystem::postInit(World& world, SystemsManager& systemsManager)
 {
-    createPlayer(w, sm);
+    createPlayer(world, systemsManager);
 }
 
-void GameplaySystem::createPlayer(World& w, SystemsManager& sm) const
+void GameplaySystem::createPlayer(World& world, SystemsManager& systemsManager) const
 {
-    auto& render_system{ sm.getSystem<RenderSystem>() };
+    auto& renderSystem{ systemsManager.getSystem<RenderSystem>() };
 
-    auto e{ w.createEntity() };
-    w.addComponent<PlayerComponent>(e);
-    w.addComponent<MovementComponent>(e);
-    w.addComponent<TransformComponent>(e);
+    const auto entity{ world.createEntity() };
+    world.addComponent<PlayerComponent>(entity);
+    world.addComponent<MovementComponent>(entity);
+    world.addComponent<TransformComponent>(entity);
 
-    auto& sprite{ w.addComponent<SpriteComponent>(e) };
-    auto& texture{ render_system.getTexture(TextureType::PlayerShip_playerShip2_orange) };
+    auto& sprite{ world.addComponent<SpriteComponent>(entity) };
+    const auto& texture{ renderSystem.getTexture(TextureType::PlayerShip_playerShip2_orange) };
     sprite.layer = SpriteLayer::PLAYER;
-    sprite.render_data.texture = texture.texture;
-    sprite.render_data.textureSize = texture.size;
+    sprite.renderData.texture = texture.texture;
+    sprite.renderData.textureSize = texture.size;
 }

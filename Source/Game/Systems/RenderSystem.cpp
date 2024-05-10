@@ -6,7 +6,7 @@
 #include <fstream>
 #include <sstream>
 
-void RenderSystem::preInit(World& world, SystemsManager& systemsManager)
+void RenderSystem::init(World& world, SystemsManager& systemsManager)
 {
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
@@ -20,19 +20,19 @@ void RenderSystem::preInit(World& world, SystemsManager& systemsManager)
         throw SystemInitException{};
     }
 
-    constexpr Uint32 fullscreen_flag{0};
-    //constexpr Uint32 fullscreen_flag{ SDL_WINDOW_FULLSCREEN_DESKTOP };
+    constexpr Uint32 fullscreenFlag{0};
+    //constexpr Uint32 fullscreenFlag{ SDL_WINDOW_FULLSCREEN_DESKTOP };
 
-    m_window = SDL_CreateWindow("Space Game", SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED, 800, 600, fullscreen_flag);
-    if (!m_window)
+    window_ = SDL_CreateWindow("Space Game", SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED, 800, 600, fullscreenFlag);
+    if (!window_)
     {
         showMessageBox(__FUNCTION__, "Failed to create window!");
         throw SystemInitException{};
     }
 
-    m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (!m_renderer)
+    renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (!renderer_)
     {
         showMessageBox(__FUNCTION__, "Failed to create renderer!");
         throw SystemInitException{};
@@ -43,70 +43,69 @@ void RenderSystem::preInit(World& world, SystemsManager& systemsManager)
 
 void RenderSystem::update(World& world)
 {
-
-    SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-    SDL_RenderClear(m_renderer);
+    SDL_SetRenderDrawColor(renderer_, 0, 0, 0, SDL_ALPHA_OPAQUE);
+    SDL_RenderClear(renderer_);
 
     world.forEach<PlayerComponent>([this, &world](const Entity entity, PlayerComponent&)
         {
             processRenderData(world, entity);
 
-            for (const auto& layer : m_sprites_to_render)
+            for (const auto& layer : spritesToRender_)
             {
                 for (const auto& sprite : layer)
                 {
-                    SDL_RenderCopyExF(m_renderer,
-                        sprite->render_data.texture,
-                        &sprite->render_data.sourceRect,
-                        &sprite->render_data.destinationRect,
-                        sprite->render_data.rotation,
+                    SDL_RenderCopyExF(renderer_,
+                        sprite->renderData.texture,
+                        &sprite->renderData.sourceRect,
+                        &sprite->renderData.destinationRect,
+                        sprite->renderData.rotation,
                         nullptr, SDL_FLIP_NONE);
                 }
             }
         });
 
-    SDL_RenderPresent(m_renderer);
+    SDL_RenderPresent(renderer_);
 }
 
 void RenderSystem::shutdown()
 {
-    for (const auto& t : m_textures)
+    for (const auto& texture : textures_)
     {
-        SDL_DestroyTexture(t.texture);
+        SDL_DestroyTexture(texture.texture);
     }
     
-    SDL_DestroyRenderer(m_renderer);
-    SDL_DestroyWindow(m_window);
+    SDL_DestroyRenderer(renderer_);
+    SDL_DestroyWindow(window_);
     IMG_Quit();
     SDL_Quit();
 }
 
 void RenderSystem::showMessageBox(const char* title, const char* message) const
 {
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title, message, m_window);
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title, message, window_);
 }
 
-const RenderSystem::Texture& RenderSystem::getTexture(const TextureType type)
+const Texture& RenderSystem::getTexture(const TextureType type)
 {
-    const auto iter{ std::ranges::find_if(m_textures,
-        [type](const Texture& t) { return t.type == type; }) };
-    if (iter != m_textures.end())
+    const auto iter{ std::ranges::find_if(textures_,
+        [type](const Texture& texture) { return texture.type == type; }) };
+    if (iter != textures_.end())
     {
         return *iter;
     }
 
-    const auto& texture_data{ getTextureData(type) };
-    SDL_Texture* texture{ createTexture(texture_data) };
-    const SDL_Point texture_size{ getTextureSize(texture) };
-    const auto& new_texture{ m_textures.emplace_back(
-        Texture{.type = type, .texture = texture, .size = texture_size}) };
+    const auto& textureRawData{ getTextureData(type) };
+    SDL_Texture* texture{ createTexture(textureRawData) };
+    const SDL_Point textureSize{ getTextureSize(texture) };
+    const auto& newTexture{ textures_.emplace_back(
+        Texture{.type = type, .texture = texture, .size = textureSize}) };
 
-    return new_texture;
+    return newTexture;
 }
 
-SDL_Texture* RenderSystem::createTexture(const std::vector<char>& data) const
+SDL_Texture* RenderSystem::createTexture(const std::vector<char>& rawData) const
 {
-    return IMG_LoadTexture_RW(m_renderer, SDL_RWFromConstMem(data.data(), data.size()), 1);
+    return IMG_LoadTexture_RW(renderer_, SDL_RWFromConstMem(rawData.data(), rawData.size()), 1);
 }
 
 SDL_Point RenderSystem::getTextureSize(SDL_Texture* texture) const
@@ -116,16 +115,16 @@ SDL_Point RenderSystem::getTextureSize(SDL_Texture* texture) const
     return size;
 }
 
-SDL_FPoint RenderSystem::getTextureSizeF(const SDL_Point& texture_size) const
+SDL_FPoint RenderSystem::getTextureSizeF(const SDL_Point& textureSize) const
 {
-    return SDL_FPoint{ static_cast<float>(texture_size.x),
-            static_cast<float>(texture_size.y) };
+    return SDL_FPoint{ static_cast<float>(textureSize.x),
+            static_cast<float>(textureSize.y) };
 }
 
 SDL_Point RenderSystem::getScreenSize() const
 {
     SDL_Point s;
-    SDL_GetRendererOutputSize(m_renderer, &s.x, &s.y);
+    SDL_GetRendererOutputSize(renderer_, &s.x, &s.y);
     return s;
 }
 
@@ -138,151 +137,151 @@ SDL_FPoint RenderSystem::getScreenSizeF() const
 
 void RenderSystem::initTexturesDescriptors()
 {
-    std::ifstream metas_file("textures_descriptors.bin", std::ios::binary);
-    if (!metas_file.is_open())
+    std::ifstream descriptorsFile("textures_descriptors.bin", std::ios::binary);
+    if (!descriptorsFile.is_open())
     {
         showMessageBox(__FUNCTION__, "textures_descriptors.bin is missing!");
         throw std::exception{};
     }
 
     TextureDescriptor desc{};
-    while (metas_file.read(reinterpret_cast<char*>(&desc), sizeof(TextureDescriptor)))
+    while (descriptorsFile.read(reinterpret_cast<char*>(&desc), sizeof(TextureDescriptor)))
     {
-        m_texture_descriptors.push_back(desc);
+        textureDescriptors_.push_back(desc);
     }
 
-    metas_file.close();
-    m_textures.reserve(m_texture_descriptors.size());
+    descriptorsFile.close();
+    textures_.reserve(textureDescriptors_.size());
 }
 
 std::vector<char> RenderSystem::getTextureData(const TextureType type) const
 {
-    const auto texture_type_int{ static_cast<uint32_t>(type) };
-    const auto iter{ std::ranges::find_if(m_texture_descriptors,
-        [texture_type_int](const TextureDescriptor& meta) { return meta.id == texture_type_int; }) };
-    if (iter == m_texture_descriptors.end())
+    const auto textureTypeTnt{ static_cast<uint32_t>(type) };
+    const auto iter{ std::ranges::find_if(textureDescriptors_,
+        [textureTypeTnt](const TextureDescriptor& desc) { return desc.id == textureTypeTnt; }) };
+    if (iter == textureDescriptors_.end())
     {
         std::stringstream ss;
-        ss << "Unknown TextureType " << texture_type_int << "!";
+        ss << "Unknown TextureType " << textureTypeTnt << "!";
         showMessageBox(__FUNCTION__, ss.str().c_str());
         throw std::exception{};
     }
 
-    std::ifstream textures_file("textures.bin", std::ios::binary);
-    if (!textures_file.is_open())
+    std::ifstream texturesFile("textures.bin", std::ios::binary);
+    if (!texturesFile.is_open())
     {
         showMessageBox(__FUNCTION__, "textures.bin is missing!");
         throw std::exception{};
     }
 
-    textures_file.seekg(iter->position, std::ios::beg);
-    if (!textures_file)
+    texturesFile.seekg(iter->position, std::ios::beg);
+    if (!texturesFile)
     {
         showMessageBox(__FUNCTION__, "textures.bin data is corrupted!");
         throw std::exception{};
     }
 
     std::vector<char> buffer(iter->size);
-    textures_file.read(buffer.data(), iter->size);
-    if (!textures_file)
+    texturesFile.read(buffer.data(), iter->size);
+    if (!texturesFile)
     {
         showMessageBox(__FUNCTION__, "textures.bin data is corrupted!");
         throw std::exception{};
     }
 
-    textures_file.close();
+    texturesFile.close();
     return buffer;
 }
 
-void RenderSystem::processRenderData(World& w, const Entity player_ent)
+void RenderSystem::processRenderData(World& world, const Entity playerEntity)
 {
-    for (auto& layer : m_sprites_to_render)
+    for (auto& layer : spritesToRender_)
     {
         layer.clear();
     }
 
-    const SDL_FPoint screen_size{getScreenSizeF()};
+    const SDL_FPoint screenSize{getScreenSizeF()};
 
-    const SDL_FPoint half_screen_size{ 
-        .x = screen_size.x / 2.0f,
-        .y = screen_size.y / 2.0f
+    const SDL_FPoint halfScreenSize{ 
+        .x = screenSize.x / 2.0f,
+        .y = screenSize.y / 2.0f
     };
-    const auto& player_transform{ *w.tryGetComponent<TransformComponent>(player_ent) };
+    const auto& playerTransform{ *world.tryGetComponent<TransformComponent>(playerEntity) };
 
-    const SDL_FRect camera_rect{
-        .x = player_transform.location.x - half_screen_size.x,
-        .y = player_transform.location.y - half_screen_size.y,
-        .w = screen_size.x,
-        .h = screen_size.y
+    const SDL_FRect cameraRect{
+        .x = playerTransform.location.x - halfScreenSize.x,
+        .y = playerTransform.location.y - halfScreenSize.y,
+        .w = screenSize.x,
+        .h = screenSize.y
     };
 
-    processPlayerData(w, half_screen_size, player_ent, player_transform);
+    processPlayerData(world, halfScreenSize, playerEntity, playerTransform);
 
-    w.forEach<SpriteComponent>(
-        [this, &w, &player_transform, &half_screen_size, &camera_rect, player_ent]
-            (const Entity render_ent, SpriteComponent& sprite)
+    world.forEach<SpriteComponent>(
+        [this, &world, &playerTransform, &halfScreenSize, &cameraRect, playerEntity]
+            (const Entity renderEntity, SpriteComponent& sprite)
         {
-            if (render_ent == player_ent)
+            if (renderEntity == playerEntity)
             {
                 return;
             }
 
             const SDL_FPoint textureSize{ 
-                getTextureSizeF(sprite.render_data.textureSize)
+                getTextureSizeF(sprite.renderData.textureSize)
                 };
 
-            const auto& render_obj_transform{ *w.tryGetComponent<TransformComponent>(render_ent) };
-            const SDL_FRect render_obj_rect{
-                .x = render_obj_transform.location.x - textureSize.x / 2.0f,
-                .y = render_obj_transform.location.y - textureSize.y / 2.0f,
+            const auto& renderTransform{ *world.tryGetComponent<TransformComponent>(renderEntity) };
+            const SDL_FRect renderRect{
+                .x = renderTransform.location.x - textureSize.x / 2.0f,
+                .y = renderTransform.location.y - textureSize.y / 2.0f,
                 .w = textureSize.x,
                 .h = textureSize.y
             };
 
-            SDL_FRect intersect_rect{};
-            if (!SDL_IntersectFRect(&camera_rect, &render_obj_rect, &intersect_rect))
+            SDL_FRect intersectRect{};
+            if (!SDL_IntersectFRect(&cameraRect, &renderRect, &intersectRect))
             {
                 return;
             }
 
-            auto& layer_data{ m_sprites_to_render[static_cast<size_t>(sprite.layer)] };
-            layer_data.emplace_back(&sprite);
-            sprite.render_data.rotation = render_obj_transform.rotation;
+            auto& layerData{ spritesToRender_[static_cast<size_t>(sprite.layer)] };
+            layerData.emplace_back(&sprite);
+            sprite.renderData.rotation = renderTransform.rotation;
 
-            sprite.render_data.sourceRect = createSourceRect(
-                std::abs(render_obj_rect.x - intersect_rect.x),
-                std::abs(render_obj_rect.y - intersect_rect.y),
-                intersect_rect.w, intersect_rect.h
+            sprite.renderData.sourceRect = createSourceRect(
+                std::abs(renderRect.x - intersectRect.x),
+                std::abs(renderRect.y - intersectRect.y),
+                intersectRect.w, intersectRect.h
             );
-
-            sprite.render_data.destinationRect = createDestinationRect(
-                intersect_rect.x + half_screen_size.x - player_transform.location.x,
-                intersect_rect.y + half_screen_size.y - player_transform.location.y,
-                intersect_rect.w, intersect_rect.h
+            
+            sprite.renderData.destinationRect = createDestinationRect(
+                intersectRect.x + halfScreenSize.x - playerTransform.location.x,
+                intersectRect.y + halfScreenSize.y - playerTransform.location.y,
+                intersectRect.w, intersectRect.h
             );
         });
 }
 
 void RenderSystem::processPlayerData(World& w, const SDL_FPoint& half_screen_size,
-    const Entity player_ent, const TransformComponent& player_transform)
+    const Entity playerEntity, const TransformComponent& playerTransform)
 {
-    auto& sprite{ *w.tryGetComponent<SpriteComponent>(player_ent) };
-    sprite.render_data.rotation = player_transform.rotation;
+    auto& sprite{ *w.tryGetComponent<SpriteComponent>(playerEntity) };
+    sprite.renderData.rotation = playerTransform.rotation;
     
-    auto& layer_data{ m_sprites_to_render[static_cast<size_t>(sprite.layer)] };
-    layer_data.emplace_back(&sprite);
+    auto& layerData{ spritesToRender_[static_cast<size_t>(sprite.layer)] };
+    layerData.emplace_back(&sprite);
 
-    sprite.render_data.sourceRect = createSourceRect(
+    sprite.renderData.sourceRect = createSourceRect(
         0, 0,
-        sprite.render_data.textureSize.x,
-        sprite.render_data.textureSize.y
+        sprite.renderData.textureSize.x,
+        sprite.renderData.textureSize.y
         );
 
-    sprite.render_data.destinationRect = createDestinationRect(
-        half_screen_size.x - sprite.render_data.textureSize.x / 2,
-        half_screen_size.y - sprite.render_data.textureSize.y / 2,
-        sprite.render_data.sourceRect.w,
-        sprite.render_data.sourceRect.h
+    sprite.renderData.destinationRect = createDestinationRect(
+        half_screen_size.x - sprite.renderData.textureSize.x / 2,
+        half_screen_size.y - sprite.renderData.textureSize.y / 2,
+        sprite.renderData.sourceRect.w,
+        sprite.renderData.sourceRect.h
         );
 }
 
