@@ -62,6 +62,22 @@ void RenderSystem::update(World& world)
                         nullptr, SDL_FLIP_NONE);
                 }
             }
+
+            for (const auto& layer : widgetsToRender_)
+            {
+                for (const auto& widget : layer)
+                {
+                    for (const auto& renderData : widget->gatherRenderData())
+                    {
+                        SDL_RenderCopyExF(renderer_,
+                            renderData->texture,
+                            &renderData->sourceRect,
+                            &renderData->destinationRect,
+                            renderData->rotation,
+                            nullptr, SDL_FLIP_NONE);
+                    }
+                }
+            }
         });
 
     SDL_RenderPresent(renderer_);
@@ -260,6 +276,18 @@ void RenderSystem::processRenderData(World& world, const Entity playerEntity)
                 intersectRect.w, intersectRect.h
             );
         });
+
+    for (auto& layer : widgetsToRender_)
+    {
+        layer.clear();
+    }
+
+    world.forEach<WidgetComponent>([this](const Entity entity, WidgetComponent& widgetComponent)
+        {
+            auto& layerData{ widgetsToRender_[static_cast<size_t>(widgetComponent.getLayer())] };
+            layerData.emplace_back(&widgetComponent);
+        }
+    );
 }
 
 void RenderSystem::processPlayerData(World& w, const SDL_FPoint& half_screen_size,

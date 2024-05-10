@@ -6,6 +6,7 @@
 #include "../Types/Entity.h"
 #include "../Types/Texture.h"
 #include "../Components/SpriteComponent.h"
+#include "../Components/WidgetComponent.h"
 #include "SDL.h"
 
 class World;
@@ -18,6 +19,10 @@ class RenderSystem
 using SpritesToRender =
     std::array<std::vector<SpriteComponent*>,
         static_cast<size_t>(SpriteLayer::COUNT)>;
+
+using WidgetsToRender =
+    std::array<std::vector<WidgetComponent*>,
+        static_cast<size_t>(WidgetLayer::COUNT)>;
 
 private:
     struct TextureDescriptor
@@ -62,4 +67,5 @@ private:
     std::vector<TextureDescriptor> textureDescriptors_;
     std::vector<Texture> textures_;
     SpritesToRender spritesToRender_;
+    WidgetsToRender widgetsToRender_;
 };
