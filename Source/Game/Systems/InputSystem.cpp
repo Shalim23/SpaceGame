@@ -13,23 +13,19 @@ void InputSystem::update(World& world)
         (const Entity entity, PlayerComponent&)
         {
             auto& transform{ *world.tryGetComponent<TransformComponent>(entity) };
-            auto& movement{ *world.tryGetComponent<MovementComponent>(entity) };
             processRotation(keyboardState, transform);
-            //#TODO movement system
-            movement.forwardVector = calculateForwardVector(transform.rotation);
 
-            if (keyboardState[SDL_SCANCODE_W])
-            {
-                const float movementDelta{ movementPerSecond_ / constants::frameTimeMsF };
-                transform.location.x += movement.forwardVector.x * movementDelta;
-                transform.location.y += movement.forwardVector.y * movementDelta;
-            }
+            auto& movement{ *world.tryGetComponent<MovementComponent>(entity) };
+            movement.forwardVector = calculateForwardVector(transform.rotation);
+            movement.speedPerSecond =
+                keyboardState[SDL_SCANCODE_W] ?
+                movementSpeedPerSecond_ : 0.0f;
         });
 }
 
 void InputSystem::processRotation(const Uint8* const keyboardState, TransformComponent& transform)
 {
-    const double rotationDelta{ rotationPerSecond_ / constants::frameTimeMsD };
+    const double rotationDelta{ rotationRatePerSecond_ / constants::frameTimeMsD };
     if (keyboardState[SDL_SCANCODE_A])
     {
         transform.rotation -= rotationDelta;

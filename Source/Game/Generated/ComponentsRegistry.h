@@ -2,13 +2,7 @@
 #pragma once
 #include "../Types/TypesList.h"
 #include "../Types/Component.h"
-
-#include "../Components/MovementComponent.h"
-#include "../Components/OutOfWorldBoundsComponent.h"
-#include "../Components/PlayerComponent.h"
-#include "../Components/SpriteComponent.h"
-#include "../Components/TransformComponent.h"
-#include "../Components/WidgetComponent.h"
+#include "AllComponents.h"
 
 
 using RegisteredComponents = TypesList

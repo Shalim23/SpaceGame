@@ -2,9 +2,7 @@
 #pragma once
 #include "../Types/TypesList.h"
 #include "../Types/Component.h"
-{% for c in components %}
-#include "../Components/{{ c }}.h"
-{%- endfor %}
+#include "AllComponents.h"
 
 
 using RegisteredComponents = TypesList

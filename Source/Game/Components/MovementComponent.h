@@ -4,4 +4,5 @@
 struct MovementComponent
 {
     SDL_FPoint forwardVector{};
+    float speedPerSecond{};
 };

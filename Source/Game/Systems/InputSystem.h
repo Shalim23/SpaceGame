@@ -18,6 +18,6 @@ private:
 	SDL_FPoint calculateForwardVector(const double rotation) const;
 
 private:
-	const double rotationPerSecond_{20.0};
-	const float movementPerSecond_{50.0};
+	const double rotationRatePerSecond_{20.0};
+	const float movementSpeedPerSecond_{50.0};
 };
