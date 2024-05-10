@@ -6,7 +6,7 @@
 #include <fstream>
 #include <sstream>
 
-void RenderSystem::preinit(World& w, SystemsManager& sm)
+void RenderSystem::preInit(World& w, SystemsManager& sm)
 {
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {

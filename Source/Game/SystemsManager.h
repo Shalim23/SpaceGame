@@ -13,36 +13,36 @@ public:
     SystemsManager& operator=(const SystemsManager& other) = delete;
     SystemsManager& operator=(SystemsManager&& other) = delete;
 
-    void preinit(World& w)
+    void preInit(World& w)
     {
         std::apply([&w, this](auto&&... system)
-            {((system.preinit(w, *this)), ...); }, m_systems);
+            {((system.preInit(w, *this)), ...); }, systems_);
     }
 
     void init(World& w)
     {
         std::apply([&w, this](auto&&... system)
-            {((system.init(w, *this)), ...);}, m_systems);
+            {((system.init(w, *this)), ...);}, systems_);
     }
 
     void update(World& w)
     {
         std::apply([&w](auto&&... system)
-            {((system.update(w)), ...); }, m_systems);
+            {((system.update(w)), ...); }, systems_);
     }
 
     void shutdown()
     {
         std::apply([](auto&&... system)
-            {((system.shutdown()), ...); }, m_systems);
+            {((system.shutdown()), ...); }, systems_);
     }
 
     template<typename T>
     T& getSystem()
     {
-        return std::get<T>(m_systems);
+        return std::get<T>(systems_);
     }
 
 private:
-    Systems m_systems;
+    Systems systems_;
 };
