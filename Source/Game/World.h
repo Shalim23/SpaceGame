@@ -1,7 +1,7 @@
 #pragma once
 #include "Generated/ComponentsRegistry.h"
 #include "Types/Entity.h"
-#include "Types/ComponentRemoveHandler.h"
+#include "Types/ComponentRemoveCallback.h"
 #include <cassert>
 #include <vector>
 
@@ -16,125 +16,129 @@ public:
     World& operator=(const World& other) = delete;
     World& operator=(World&& other) = delete;
 
-    size_t getEntitiesAmount() const
-    {
-        return m_entities.size();
-    }
-
     Entity createEntity()
     {
-        const Entity e{ ++m_next_entity };
-        m_entities.emplace_back(e);
-        m_component_remove_handlers.emplace_back(ComponentRemoveHandler{e});
-        return e;
+        const Entity entity{ ++entityId_ };
+        entities_.emplace_back(entity);
+
+        componentRemoveCallbacks_.emplace_back(
+            EntityComponentRemoveCallbacks{entity});
+
+        return entity;
     }
 
-    void destroyEntity(const Entity e)
+    void destroyEntity(const Entity entity)
     {
-        auto& component_destructors{ getComponentDestructors(e) };
-        for (auto& d : component_destructors.destructors)
+        auto& componentRemoveCallbacks{ getComponentRemoveCallbacks(entity) };
+        for (auto& callback : componentRemoveCallbacks.callbacks)
         {
-            d.cb();
+            callback();
         }
 
-        std::erase(m_entities, e);
-        std::erase_if(m_component_remove_handlers, [e](const ComponentRemoveHandler& d){return d.e == e;});
+        std::erase(entities_, entity);
+        std::erase_if(componentRemoveCallbacks_,
+            [entity](const EntityComponentRemoveCallbacks& callbacks)
+                {return callbacks.entity == entity;});
     }
 
     template<typename T>
-    T& addComponent(const Entity e)
+    T& addComponent(const Entity entity)
     {
         auto& components{ getComponents<T>() };
         auto iter{std::ranges::find_if(components,
-            [e](const Component<T> component){ return e == component.getOwner(); })};
+            [entity](const Component<T>& component)
+                { return entity == component.getOwningEntity(); })};
         if (iter != components.end())
         {
-            assert(false && "Entity can have only one instance of any component!");
-            return iter->get();
+            assert(!"Entity can have only one instance of any component!");
+            return *(*iter);
         }
 
-        auto& component_destructors{ getComponentDestructors(e) };
-        component_destructors.destructors.emplace_back(
+        auto& componentRemoveCallbacks{ getComponentRemoveCallbacks(entity) };
+        componentRemoveCallbacks.callbacks.emplace_back(
             ComponentRemoveCallback{
-                [this, e] { removeComponentInternal<T>(e); },
-                ++m_next_component_destruction_callback_id });
+                [this, entity] { removeComponentInternal<T>(entity); },
+                ++componentRemoveCallbackId_ });
 
         auto& new_component{ 
-            components.emplace_back(Component<T>{e, m_next_component_destruction_callback_id})
+            components.emplace_back(Component<T>{entity, componentRemoveCallbackId_})
         };
 
-        return new_component.get();
+        return *new_component;
     }
 
     template<typename T>
-    T* tryGetComponent(const Entity e)
+    T* tryGetComponent(const Entity entity)
     {
         auto& components{ getComponents<T>() };
         auto iter{ std::ranges::find_if(components,
-            [e](const Component<T> component) { return e == component.getOwner(); }) };
-        return iter != components.end() ? &iter->get() : nullptr;
+            [entity](const Component<T>& component)
+                { return entity == component.getOwningEntity(); }) };
+        return iter != components.end() ? &(*(*iter)) : nullptr;
     }
 
     template<typename T>
-    void forEach(std::function<void(const Entity, T&)> f)
+    void forEach(std::function<void(const Entity, T&)> callback)
     {
         for (auto& component : getComponents<T>())
         {
-            f(component.getOwner(), component.get());
+            callback(component.getOwningEntity(), *component);
         }
     }
 
     template<typename T>
-    void removeComponent(const Entity e)
+    void removeComponent(const Entity entity)
     {
-        const auto component_destruction_callback_id{removeComponentInternal<T>(e)};
+        const auto removeCallbackId{removeComponentInternal<T>(entity)};
 
-        auto& component_destructors{ getComponentDestructors(e) };
-        auto pred{ [component_destruction_callback_id](const ComponentRemoveCallback& cdc)
-                { return cdc.id == component_destruction_callback_id; } };
-        const auto result{std::erase_if(component_destructors.destructors, pred)};
+        auto& componentRemoveCallbacks{ getComponentRemoveCallbacks(entity) };
+        const auto pred{ [removeCallbackId](const ComponentRemoveCallback& callback)
+                { return callback.id == removeCallbackId; } };
+        const auto result{std::erase_if(componentRemoveCallbacks.callbacks, pred)};
         assert(result == 1 && "No destruction callback was erased!");
     }
 
 private:
     template<typename T>
-    size_t removeComponentInternal(const Entity e)
+    size_t removeComponentInternal(const Entity entity)
     {
         auto& components{ getComponents<T>() };
-        auto iter{ std::ranges::find_if(components,
-            [e](const Component<T> component) { return e == component.getOwner(); }) };
+        const auto iter{ std::ranges::find_if(components,
+            [entity](const Component<T> component)
+                { return entity == component.getOwningEntity(); }) };
         if (iter == components.end())
         {
-            assert(false && "Trying to remove non-existent component!");
+            assert(!"Trying to remove non-existent component!");
             return 0;
         }
 
-        const auto component_destruction_callback_id{iter->getRemoveCallbackId()};
+        const auto removeCallbackId{iter->getRemoveCallbackId()};
         const auto index{ iter - components.begin() };
         std::swap(components[index], components.back());
         components.pop_back();
 
-        return component_destruction_callback_id;
+        return removeCallbackId;
     }
 
-    ComponentRemoveHandler& getComponentDestructors(const Entity e)
+    EntityComponentRemoveCallbacks& getComponentRemoveCallbacks(const Entity entity)
     {
-        auto iter{ std::ranges::find_if(m_component_remove_handlers,
-                    [e](const ComponentRemoveHandler& cd) {return cd.e == e; }) };
-        assert(iter != m_component_remove_handlers.end() && "No component remove handler found for entity!");
+        auto iter{ std::ranges::find_if(componentRemoveCallbacks_,
+                    [entity](const EntityComponentRemoveCallbacks& callback)
+                        {return callback.entity == entity; }) };
+        assert(iter != componentRemoveCallbacks_.end() && "No component remove callbacks found for entity!");
         return *iter;
     }
 
     template<typename T>
     std::vector<Component<T>>& getComponents()
     {
-        return std::get<std::vector<Component<T>>>(m_components);
+        return std::get<std::vector<Component<T>>>(components_);
     }
 
 private:
-    ComponentRemoveHandlers m_component_remove_handlers;
-    Components m_components;
-    std::vector<Entity> m_entities;
-    size_t m_next_entity{0};
-    size_t m_next_component_destruction_callback_id{0};
+    ComponentRemoveCallbacks componentRemoveCallbacks_;
+    Components components_;
+    std::vector<Entity> entities_;
+    size_t entityId_{0};
+    size_t componentRemoveCallbackId_{0};
 };

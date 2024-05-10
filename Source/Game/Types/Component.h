@@ -7,20 +7,20 @@ template<typename T>
 class Component
 {
 public:
-    Component(const Entity entity, const size_t remove_callback_id)
-        : m_owner{ entity }
-        , m_remove_callback_id{ remove_callback_id }
-        , m_instance{}
+    Component(const Entity entity, const size_t removeCallbackId)
+        : owner_{ entity }
+        , removeCallbackId_{ removeCallbackId }
+        , component_{}
     {}
 
-    Entity getOwner() const { return m_owner; }
-    T& get() { return m_instance; }
-    size_t getRemoveCallbackId() const { return m_remove_callback_id; }
+    Entity getOwningEntity() const { return owner_; }
+    T& operator*() { return component_; }
+    size_t getRemoveCallbackId() const { return removeCallbackId_; }
 
 private:
-    Entity m_owner;
-    size_t m_remove_callback_id;
-    T m_instance;
+    Entity owner_;
+    size_t removeCallbackId_;
+    T component_;
 };
 
 template<typename> struct ComponentsList;
