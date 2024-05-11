@@ -16,5 +16,13 @@ FetchContent_Declare(
     GIT_PROGRESS    TRUE
 )
 
+FetchContent_Declare(
+    SDL2ttf
+    GIT_REPOSITORY  https://github.com/libsdl-org/SDL_ttf
+    GIT_TAG         4a318f8dfaa1bb6f10e0c5e54052e25d3c7f3440
+    GIT_PROGRESS    TRUE
+)
+
 FetchContent_MakeAvailable(SDL2)
 FetchContent_MakeAvailable(SDL2Image)
+FetchContent_MakeAvailable(SDL2ttf)
