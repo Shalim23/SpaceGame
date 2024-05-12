@@ -62,29 +62,31 @@ void WorldBoundsSystem::createOutOfBoundsEntity(World& world) const
     auto& widget{world.addComponent<WidgetComponent>(e)};
     widget.setLayer(WidgetLayer::EFFECTS);
 
-    auto& background{widget.addElement()};
-    background.renderData.texture = renderSystem_->getTexture(TextureType::white_pixel).texture;
+    auto& background{widget.addWidget()};
+
+    RenderData& background_renderData{background.updateRenderData()};
+    background_renderData.texture = renderSystem_->getTexture(TextureType::white_pixel).texture;
     
     const SDL_Point screenSize{renderSystem_->getScreenSize()};
-    background.renderData.sourceRect.x = 0;
-    background.renderData.sourceRect.y = 0;
-    background.renderData.destinationRect.x = 0;
-    background.renderData.destinationRect.y = 0;
-    background.renderData.sourceRect.w = screenSize.x;
-    background.renderData.destinationRect.w = screenSize.x;
-    background.renderData.sourceRect.h = screenSize.y;
-    background.renderData.destinationRect.h = screenSize.y;
-    SDL_SetTextureColorMod(background.renderData.texture, 0, 0, 0);
+    background_renderData.sourceRect.x = 0;
+    background_renderData.sourceRect.y = 0;
+    background_renderData.destinationRect.x = 0;
+    background_renderData.destinationRect.y = 0;
+    background_renderData.sourceRect.w = screenSize.x;
+    background_renderData.destinationRect.w = screenSize.x;
+    background_renderData.sourceRect.h = screenSize.y;
+    background_renderData.destinationRect.h = screenSize.y;
+    SDL_SetTextureColorMod(background_renderData.texture, 0, 0, 0);
 
     constexpr Uint64 backgroundAnimationTime{7000};
-    background.animation.emplace(WidgetElementAnimation{backgroundAnimationTime,
-    [&background](const float delta)
+    background.addAnimation(backgroundAnimationTime,
+    [&background_renderData](const float delta)
     {
         constexpr float minOpacity{0.0f};
         constexpr float maxOpacity{255.0f};
         const float currentOpacity{fl::lerp(minOpacity, maxOpacity, delta)};
-        SDL_SetTextureAlphaMod(background.renderData.texture, static_cast<Uint8>(currentOpacity));
-    }});
+        SDL_SetTextureAlphaMod(background_renderData.texture, static_cast<Uint8>(currentOpacity));
+    });
 }
 
 std::optional<Entity> WorldBoundsSystem::getOutOfWorldBoundsComponentEntity(World& world) const

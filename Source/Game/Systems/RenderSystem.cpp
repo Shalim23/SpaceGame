@@ -24,7 +24,7 @@ void RenderSystem::init(World& world, SystemsManager& systemsManager)
     //constexpr Uint32 fullscreenFlag{ SDL_WINDOW_FULLSCREEN_DESKTOP };
 
     window_ = SDL_CreateWindow("Space Game", SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED, 800, 600, fullscreenFlag);
+        SDL_WINDOWPOS_CENTERED, 1920, 1080, fullscreenFlag);
     if (!window_)
     {
         showMessageBox(__FUNCTION__, "Failed to create window!");

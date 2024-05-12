@@ -36,9 +36,9 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    $<$<CONFIG:Debug>:${CMAKE_BINARY_DIR}/_deps/sdl2Image-build/Debug/SDL2_ttfd.dll>
+    $<$<CONFIG:Debug>:${CMAKE_BINARY_DIR}/_deps/sdl2ttf-build/Debug/SDL2_ttfd.dll>
     $<$<CONFIG:Debug>:${CMAKE_BINARY_DIR}/Debug>
-    $<$<CONFIG:MinSizeRel>:${CMAKE_BINARY_DIR}/_deps/sdl2Image-build/MinSizeRel/SDL2_ttf.dll>
+    $<$<CONFIG:MinSizeRel>:${CMAKE_BINARY_DIR}/_deps/sdl2ttf-build/MinSizeRel/SDL2_ttf.dll>
     $<$<CONFIG:MinSizeRel>:${CMAKE_BINARY_DIR}/MinSizeRel>
     )
 
