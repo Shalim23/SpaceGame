@@ -5,24 +5,15 @@
 #include "../Generated/TextureType.h"
 #include "../Types/Entity.h"
 #include "../Types/Texture.h"
-#include "../Components/SpriteComponent.h"
-#include "../Components/WidgetComponent.h"
 #include "SDL.h"
 
 class World;
 class SystemsManager;
 struct TransformComponent;
+struct SpriteComponent;
 
 class RenderSystem
 {
-
-using SpritesToRender =
-    std::array<std::vector<SpriteComponent*>,
-        static_cast<size_t>(SpriteLayer::COUNT)>;
-
-using WidgetsToRender =
-    std::array<std::vector<WidgetComponent*>,
-        static_cast<size_t>(WidgetLayer::COUNT)>;
 
 private:
     struct TextureDescriptor
@@ -43,6 +34,8 @@ public:
 
     const Texture& getTexture(const TextureType type);
     SDL_Texture* createTexture(const std::vector<char>& rawData) const;
+    SDL_Texture* createTextureFromSurface(SDL_Surface* surface) const;
+
     SDL_Point getTextureSize(SDL_Texture* texture) const;
     SDL_FPoint getTextureSizeF(const SDL_Point& textureSize) const;
     SDL_Point getScreenSize() const;
@@ -51,10 +44,12 @@ public:
 private:
     void initTexturesDescriptors();
     std::vector<char> getTextureData(const TextureType type) const;
-    void processRenderData(World& world, const Entity playerEntity);
+    void processSpriteData(World& world);
 
-    void processPlayerData(World& world, const SDL_FPoint& halfScreenSize,
+    SpriteComponent* processPlayerData(World& world, const SDL_FPoint& halfScreenSize,
         const Entity playerEntity, const TransformComponent& playerTransform);
+
+    void processWidgetData(World& world);
 
     SDL_Rect createSourceRect(const int x, const int y,
         const int w, const int h);
@@ -66,6 +61,4 @@ private:
     SDL_Renderer* renderer_{ nullptr };
     std::vector<TextureDescriptor> textureDescriptors_;
     std::vector<Texture> textures_;
-    SpritesToRender spritesToRender_;
-    WidgetsToRender widgetsToRender_;
 };

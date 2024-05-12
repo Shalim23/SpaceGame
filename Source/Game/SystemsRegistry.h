@@ -11,6 +11,7 @@ InputSystem,
 MovementSystem,
 GameplaySystem,
 WorldBoundsSystem,
+TextSystem,
 
 RenderSystem
 >;

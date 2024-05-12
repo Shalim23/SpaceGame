@@ -12,6 +12,7 @@ class TextureDescriptor:
 
 TEXTURES_PATH = "Data/Textures"
 TEXTURES_ENUM_PATH = "Source/Game/Generated/TextureType.h"
+BIN_DATA_PATH = "bin/Data"
 
 textures = []
 
@@ -26,8 +27,8 @@ gather_textures(Path(TEXTURES_PATH))
 
 next_start: ctypes.c_uint32 = 0
 with open(TEXTURES_ENUM_PATH, "w") as t_enum, \
-     open("bin/textures.bin", "wb") as t_bin, \
-     open ("bin/textures_descriptors.bin", "wb") as t_desc:
+     open(f"{BIN_DATA_PATH}/textures.bin", "wb") as t_bin, \
+     open (f"{BIN_DATA_PATH}/texturesDescriptors.bin", "wb") as t_desc:
     
     t_enum.write("//GENERATED FILE! DO NOT MODIFY DIRECTLY!\n")
     t_enum.write("#pragma once\n\n")
