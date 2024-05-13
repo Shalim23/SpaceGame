@@ -2,6 +2,7 @@
 #include "../World.h"
 #include "../SystemsManager.h"
 #include "../FunctionsLibrary.h"
+#include "../Constants.h"
 
 void WorldBoundsSystem::init(World& world, SystemsManager& systemsManager)
 {
@@ -83,15 +84,8 @@ void WorldBoundsSystem::createBackgroundWidget(WidgetComponent& widgetComponent)
     RenderData& backgroundRenderData{ background.updateRenderData() };
     backgroundRenderData.texture = renderSystem_->getTexture(TextureType::white_pixel).texture;
 
-    const SDL_Point screenSize{ renderSystem_->getScreenSize() };
-    backgroundRenderData.sourceRect.x = 0;
-    backgroundRenderData.sourceRect.y = 0;
-    backgroundRenderData.destinationRect.x = 0;
-    backgroundRenderData.destinationRect.y = 0;
-    backgroundRenderData.sourceRect.w = screenSize.x;
-    backgroundRenderData.destinationRect.w = screenSize.x;
-    backgroundRenderData.sourceRect.h = screenSize.y;
-    backgroundRenderData.destinationRect.h = screenSize.y;
+    backgroundRenderData.sourceRect = fl::makeRect(constants::sdlZeroPoint, renderSystem_->getScreenSize());
+    backgroundRenderData.destinationRect = fl::makeRect(constants::sdlZeroPointF, renderSystem_->getScreenSizeF());
 
     constexpr SDL_Color blackColor{ .r = 0, .g = 0, .b = 0 };
     SDL_SetTextureColorMod(backgroundRenderData.texture,
@@ -111,40 +105,52 @@ void WorldBoundsSystem::createBackgroundWidget(WidgetComponent& widgetComponent)
 void WorldBoundsSystem::createTextWidget(const Entity entity, WidgetComponent& widgetComponent) const
 {
     const SDL_FPoint screenSize{ renderSystem_->getScreenSizeF() };
-    constexpr float textStartPosition{780.0f};
+    const SDL_FPoint screenSizeModifier{renderSystem_->getScreenSizeF() / constants::baseScreenSize};
 
-    Widget& warningText{ widgetComponent.addWidget() };
+    float nextTextPosition{780.0f};
 
-    RenderData& warningTextRenderData{ warningText.updateRenderData() };
-    warningTextRenderData = textSystem_->getText(TextType::Warning);
+    {
+        Widget& warningText{ widgetComponent.addWidget() };
 
-    warningTextRenderData.sourceRect.x = 0;
-    warningTextRenderData.sourceRect.y = 0;
-    warningTextRenderData.sourceRect.w = warningTextRenderData.textureSize.x;
-    warningTextRenderData.sourceRect.h = warningTextRenderData.textureSize.y;
+        RenderData& warningTextRenderData{ warningText.updateRenderData() };
+        warningTextRenderData = textSystem_->getText(TextType::Warning);
 
-    warningTextRenderData.destinationRect.x = screenSize.x / 2.0f - warningTextRenderData.textureSize.x / 2.0f;
-    warningTextRenderData.destinationRect.y = textStartPosition;
-    warningTextRenderData.destinationRect.w = warningTextRenderData.textureSize.x;
-    warningTextRenderData.destinationRect.h = warningTextRenderData.textureSize.y;
+        warningTextRenderData.sourceRect = fl::makeRect(constants::sdlZeroPoint,
+            warningTextRenderData.textureSize);
 
-    const float nextTextPosition{ warningTextRenderData.destinationRect.y  + warningTextRenderData.textureSize.y };
+        warningTextRenderData.destinationRect = fl::makeRect(
+            SDL_FPoint
+            {
+                .x = screenSize.x / 2.0f -
+                    (warningTextRenderData.textureSize.x / 2.0f * screenSizeModifier.x),
+                .y = nextTextPosition * screenSizeModifier.y
+            },
+            screenSizeModifier * warningTextRenderData.textureSize
+            );
 
+        nextTextPosition =
+            warningTextRenderData.destinationRect.y  + warningTextRenderData.textureSize.y;
+    }
 
-    Widget& radiationText{ widgetComponent.addWidget() };
+    {
+        Widget& radiationText{ widgetComponent.addWidget() };
 
-    RenderData& radiationTextRenderData{ radiationText.updateRenderData() };
-    radiationTextRenderData = textSystem_->getText(TextType::Highradiationlevel);
+        RenderData& radiationTextRenderData{ radiationText.updateRenderData() };
+        radiationTextRenderData = textSystem_->getText(TextType::Highradiationlevel);
 
-    radiationTextRenderData.sourceRect.x = 0;
-    radiationTextRenderData.sourceRect.y = 0;
-    radiationTextRenderData.sourceRect.w = radiationTextRenderData.textureSize.x;
-    radiationTextRenderData.sourceRect.h = radiationTextRenderData.textureSize.y;
+        radiationTextRenderData.sourceRect = fl::makeRect(constants::sdlZeroPoint,
+            radiationTextRenderData.textureSize);
 
-    radiationTextRenderData.destinationRect.x = screenSize.x / 2.0f - radiationTextRenderData.textureSize.x / 2.0f;
-    radiationTextRenderData.destinationRect.y = nextTextPosition + 10.0f;
-    radiationTextRenderData.destinationRect.w = radiationTextRenderData.textureSize.x;
-    radiationTextRenderData.destinationRect.h = radiationTextRenderData.textureSize.y;
+        radiationTextRenderData.destinationRect = fl::makeRect(
+            SDL_FPoint
+            {
+                .x = screenSize.x / 2.0f -
+                    (radiationTextRenderData.textureSize.x / 2.0f * screenSizeModifier.x),
+                .y = nextTextPosition + (10.0f * screenSizeModifier.y)
+            },
+            screenSizeModifier * radiationTextRenderData.textureSize
+        );
+    }
 }
 
 std::optional<Entity> WorldBoundsSystem::getOutOfWorldBoundsComponentEntity(World& world) const

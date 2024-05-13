@@ -2,6 +2,8 @@
 #include "../World.h"
 #include "../SystemsManager.h"
 #include "../Types/Exceptions.h"
+#include "../FunctionsLibrary.h"
+#include "../Constants.h"
 #include "SDL_image.h"
 #include <fstream>
 #include <sstream>
@@ -239,10 +241,15 @@ void RenderSystem::processSpriteData(World& world)
                     layerData.emplace_back(&sprite);
                     sprite.renderData.rotation = renderTransform.rotation;
 
-                    sprite.renderData.sourceRect = createSourceRect(
-                        std::abs(renderRect.x - intersectRect.x),
-                        std::abs(renderRect.y - intersectRect.y),
-                        intersectRect.w, intersectRect.h
+                    sprite.renderData.sourceRect = fl::makeRect(
+                    SDL_Point{
+                        .x = std::abs(static_cast<int>(renderRect.x - intersectRect.x)),
+                        .y = std::abs(static_cast<int>(renderRect.y - intersectRect.y))
+                        },
+                        SDL_Point{
+                            .x = static_cast<int>(intersectRect.w),
+                            .y = static_cast<int>(intersectRect.h)
+                        }
                     );
 
                     sprite.renderData.destinationRect = createDestinationRect(
@@ -273,11 +280,7 @@ SpriteComponent* RenderSystem::processPlayerData(World& w, const SDL_FPoint& hal
     auto& sprite{ *w.tryGetComponent<SpriteComponent>(playerEntity) };
     sprite.renderData.rotation = playerTransform.rotation;
 
-    sprite.renderData.sourceRect = createSourceRect(
-        0, 0,
-        sprite.renderData.textureSize.x,
-        sprite.renderData.textureSize.y
-        );
+    sprite.renderData.sourceRect = fl::makeRect(constants::sdlZeroPoint, sprite.renderData.textureSize);
 
     sprite.renderData.destinationRect = createDestinationRect(
         half_screen_size.x - sprite.renderData.textureSize.x / 2,
@@ -317,11 +320,6 @@ void RenderSystem::processWidgetData(World& world)
             }
         }
     }
-}
-
-SDL_Rect RenderSystem::createSourceRect(const int x, const int y, const int w, const int h)
-{
-    return SDL_Rect{ .x = x, .y = y, .w = w, .h = h };
 }
 
 SDL_FRect RenderSystem::createDestinationRect(const float x, const float y, const float w, const float h)

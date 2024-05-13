@@ -52,8 +52,6 @@ private:
 
     void processWidgetData(World& world);
 
-    SDL_Rect createSourceRect(const int x, const int y,
-        const int w, const int h);
     SDL_FRect createDestinationRect(const float x, const float y,
         const float w, const float h);
 
