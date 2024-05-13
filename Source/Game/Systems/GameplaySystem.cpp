@@ -4,9 +4,10 @@
 
 void GameplaySystem::postInit(World& world, SystemsManager& systemsManager)
 {
-    //const auto entity{ world.createEntity() };
-    //world.addComponent<GameStateComponent>(entity);
-    createPlayer(world, systemsManager);
+    const auto entity{ world.createEntity() };
+    auto& gameStateComppnent{world.addComponent<GameStateComponent>(entity)};
+    gameStateComppnent.gameState = GameStateType::MAIN_MENU;
+    //createPlayer(world, systemsManager);
 }
 
 void GameplaySystem::createPlayer(World& world, SystemsManager& systemsManager) const

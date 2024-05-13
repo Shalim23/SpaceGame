@@ -23,6 +23,18 @@ namespace fl
     {
         return SDL_FRect{ .x = xy.x, .y = xy.y, .w = wh.x, .h = wh.y };
     }
+
+    static GameStateType getCurrentGameState(World& world)
+    {
+        GameStateType type{GameStateType::NONE};
+        world.forEach<GameStateComponent>([&type](const Entity entity, GameStateComponent component)
+            {
+                type = component.gameState;
+            }
+        );
+        assert(type != GameStateType::NONE);
+        return type;
+    }
 }
 
 static SDL_FPoint operator*(const SDL_FPoint& lhs, const SDL_Point& rhs)
