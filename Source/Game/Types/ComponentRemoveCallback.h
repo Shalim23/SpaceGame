@@ -3,21 +3,25 @@
 #include <cassert>
 #include "Entity.h"
 
-struct ComponentRemoveCallback
+class ComponentRemoveCallback
 {
-    explicit ComponentRemoveCallback(std::function<void()> callback_, const size_t callback_id)
-        : callback{callback_}, id{callback_id}
+public:
+    explicit ComponentRemoveCallback(std::function<void()> callback, const size_t callback_id)
+        : callback_{callback_}, id_{callback_id}
     {
         assert(callback != nullptr);
     }
 
     void operator()()
     {
-        callback();
+        callback_();
     }
 
-    size_t id;
-    std::function<void()> callback;
+    size_t getId() const { return id_; }
+
+private:
+    size_t id_;
+    std::function<void()> callback_;
 };
 
 struct EntityComponentRemoveCallbacks

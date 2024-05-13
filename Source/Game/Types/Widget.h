@@ -4,21 +4,22 @@
 #include <functional>
 #include <optional>
 
-class WidgetAnimation
-{
-public:
-    explicit WidgetAnimation(const Uint64 animationTimeMs,
-        std::function<void(const float)> animationFunction);
-    void run();
-
-private:
-    Uint64 animationTimeMs_{};
-    Uint64 animationStartTimeMs_{};
-    std::function<void(const float)> animationFunction_{};
-};
 
 class Widget
 {
+    class Animation
+    {
+    public:
+        explicit Animation(const Uint64 animationTimeMs,
+            std::function<void(const float)> animationFunction);
+        void run();
+
+    private:
+        Uint64 animationTimeMs_{};
+        Uint64 animationStartTimeMs_{};
+        std::function<void(const float)> animationFunction_{};
+    };
+
 public:
     RenderData& updateRenderData();
     void addAnimation(const Uint64 animationTimeMs,
@@ -28,6 +29,5 @@ public:
 
 private:
     RenderData renderData_{};
-    std::vector<Widget> children_;
-    std::optional<WidgetAnimation> animation_;
+    std::optional<Animation> animation_;
 };

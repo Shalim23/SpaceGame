@@ -93,7 +93,7 @@ public:
 
         auto& componentRemoveCallbacks{ getComponentRemoveCallbacks(entity) };
         const auto pred{ [removeCallbackId](const ComponentRemoveCallback& callback)
-                { return callback.id == removeCallbackId; } };
+                { return callback.getId() == removeCallbackId; }};
         const auto result{std::erase_if(componentRemoveCallbacks.callbacks, pred)};
         assert(result == 1 && "No destruction callback was erased!");
     }
