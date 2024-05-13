@@ -7,9 +7,9 @@ class ComponentRemoveCallback
 {
 public:
     explicit ComponentRemoveCallback(std::function<void()> callback, const size_t callback_id)
-        : callback_{callback_}, id_{callback_id}
+        : callback_{callback}, id_{callback_id}
     {
-        assert(callback != nullptr);
+        assert(callback_ != nullptr);
     }
 
     void operator()()
