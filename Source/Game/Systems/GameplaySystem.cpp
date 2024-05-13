@@ -4,6 +4,8 @@
 
 void GameplaySystem::postInit(World& world, SystemsManager& systemsManager)
 {
+    //const auto entity{ world.createEntity() };
+    //world.addComponent<GameStateComponent>(entity);
     createPlayer(world, systemsManager);
 }
 

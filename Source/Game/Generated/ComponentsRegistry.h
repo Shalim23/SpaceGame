@@ -7,6 +7,7 @@
 
 using RegisteredComponents = TypesList
 <
+GameStateComponent,
 MovementComponent,
 OutOfWorldBoundsComponent,
 PlayerComponent,
