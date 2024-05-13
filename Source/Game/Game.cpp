@@ -10,6 +10,7 @@ Game::Game()
 
 void Game::run()
 {
+    systems_manager_.preInit(world_);
     systems_manager_.init(world_);
     systems_manager_.postInit(world_);
 

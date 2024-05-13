@@ -17,7 +17,7 @@ void TextSystem::init(World& world, SystemsManager& systemsManager)
     const std::vector<char> fontRawData{ getFontRawData() };
     font_ = loadFontFromRawData(fontRawData, 40);
 
-    //#TODO cache static text
+    initStaticText();
 }
 
 void TextSystem::update(World& world)
@@ -40,6 +40,11 @@ void TextSystem::update(World& world)
 
     for (const auto* textsToRemove : dynamicTextsToRemove)
     {
+        for (SDL_Texture* texture : textsToRemove->textures)
+        {
+            SDL_DestroyTexture(texture);
+        }
+
         std::erase_if(dynamicTexts_, [textsToRemove](const DynamicTextsToEntity& texts)
             {
                 return textsToRemove->entity == texts.entity;
@@ -49,14 +54,34 @@ void TextSystem::update(World& world)
 
 void TextSystem::shutdown()
 {
+    for (const auto& staticText : staticTexts_)
+    {
+        SDL_DestroyTexture(staticText.data.texture);
+    }
+    
     TTF_CloseFont(font_);
 
     TTF_Quit();
 }
 
-RenderData TextSystem::createText(const Entity entity, std::string_view text, const SDL_Color& color)
+RenderData TextSystem::getText(const TextType type) const
 {
-    SDL_Surface* textSurface{TTF_RenderText_Solid(font_, text.data(), color)};
+    auto iter{std::ranges::find_if(staticTexts_,
+        [type](const StaticText& text){ return text.id == type; })};
+    return iter->data;
+}
+
+RenderData TextSystem::createDynamicText(const Entity entity, std::string_view text)
+{
+    RenderData data{createText(text)};
+    addDynanicText(entity, data.texture);
+    return data;
+}
+
+RenderData TextSystem::createText(std::string_view text)
+{
+    SDL_Surface* textSurface{ TTF_RenderText_Solid(font_, text.data(),
+        SDL_Color{.r = 255, .g = 255, .b = 255, .a = 255})};
     if (!textSurface)
     {
         auto a = SDL_GetError();
@@ -64,7 +89,7 @@ RenderData TextSystem::createText(const Entity entity, std::string_view text, co
         throw std::exception{};
     }
 
-    SDL_Texture* texture{renderSystem_->createTextureFromSurface(textSurface)};
+    SDL_Texture* texture{ renderSystem_->createTextureFromSurface(textSurface) };
     if (!texture)
     {
         renderSystem_->showMessageBox(__FUNCTION__, "Failed to create texture from text surface!");
@@ -77,8 +102,6 @@ RenderData TextSystem::createText(const Entity entity, std::string_view text, co
     renderData.textureSize.y = textSurface->h;
 
     SDL_FreeSurface(textSurface);
-
-    addDynanicText(entity, texture);
 
     return renderData;
 }
@@ -97,6 +120,37 @@ std::vector<char> TextSystem::getFontRawData() const
     fontFile.close();
 
     return fontRawData;
+}
+
+std::vector<TextSystem::TextDescriptor> TextSystem::getTextDescriptors() const
+{
+    std::ifstream textDescriptorsFile("Data/textDescriptors.bin", std::ios::binary);
+    if (!textDescriptorsFile.is_open())
+    {
+        renderSystem_->showMessageBox(__FUNCTION__, "textDescriptors.bin is missing!");
+        throw SystemInitException{};
+    }
+
+    std::vector<TextDescriptor> textDescriptors;
+
+    while (!textDescriptorsFile.eof())
+    {
+        TextDescriptor desc{};
+        if (textDescriptorsFile.read(reinterpret_cast<char*>(&desc.id), sizeof(desc.id)) &&
+            textDescriptorsFile.read(reinterpret_cast<char*>(&desc.len), sizeof(desc.len)))
+        {
+            std::vector<char> buffer(desc.len);
+            if (textDescriptorsFile.read(buffer.data(), desc.len))
+            {
+                desc.text.assign(buffer.begin(), buffer.end());
+                textDescriptors.push_back(desc);
+            }
+        }
+    }
+
+    textDescriptorsFile.close();
+
+    return textDescriptors;
 }
 
 TTF_Font* TextSystem::loadFontFromRawData(const std::vector<char>& rawData, const int fontSize) const
@@ -127,5 +181,18 @@ void TextSystem::addDynanicText(const Entity entity, SDL_Texture* texture)
         &dynamicTexts_.emplace_back(DynamicTextsToEntity{ .entity = entity }) :
         &(*iter)};
 
-    texts->textTextures.push_back(texture);
+    texts->textures.push_back(texture);
+}
+
+void TextSystem::initStaticText()
+{
+    const std::vector<TextDescriptor> textDescriptors{getTextDescriptors()};
+
+    staticTexts_.reserve(textDescriptors.size());
+
+    for (const auto& desc : textDescriptors)
+    {
+        staticTexts_.emplace_back(StaticText{.id = static_cast<TextType>(desc.id),
+            .data = createText(desc.text)});
+    }
 }

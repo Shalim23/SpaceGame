@@ -111,13 +111,12 @@ void WorldBoundsSystem::createBackgroundWidget(WidgetComponent& widgetComponent)
 void WorldBoundsSystem::createTextWidget(const Entity entity, WidgetComponent& widgetComponent) const
 {
     const SDL_FPoint screenSize{ renderSystem_->getScreenSizeF() };
-    constexpr SDL_Color whiteColor{ .r = 255, .g = 255, .b = 255, .a = 255 };
     constexpr float textStartPosition{780.0f};
 
     Widget& warningText{ widgetComponent.addWidget() };
 
     RenderData& warningTextRenderData{ warningText.updateRenderData() };
-    warningTextRenderData = textSystem_->createText(entity, "Warning!", whiteColor);
+    warningTextRenderData = textSystem_->getText(TextType::Warning);
 
     warningTextRenderData.sourceRect.x = 0;
     warningTextRenderData.sourceRect.y = 0;
@@ -135,7 +134,7 @@ void WorldBoundsSystem::createTextWidget(const Entity entity, WidgetComponent& w
     Widget& radiationText{ widgetComponent.addWidget() };
 
     RenderData& radiationTextRenderData{ radiationText.updateRenderData() };
-    radiationTextRenderData = textSystem_->createText(entity, "High radiation level!", whiteColor);
+    radiationTextRenderData = textSystem_->getText(TextType::Highradiationlevel);
 
     radiationTextRenderData.sourceRect.x = 0;
     radiationTextRenderData.sourceRect.y = 0;

@@ -2,6 +2,9 @@ from pathlib import Path
 import ctypes
 from dataclasses import dataclass, field
 import struct
+from jinja2 import Environment, FileSystemLoader
+from data import BIN_DATA_PATH, GENERATED_PATH
+
 
 @dataclass
 class TextureDescriptor:
@@ -9,10 +12,8 @@ class TextureDescriptor:
     start: ctypes.c_uint32 = field(default=ctypes.c_uint32)
     size: ctypes.c_uint32 = field(default=ctypes.c_uint32)
 
-
+ENUM_NAME = "TextureType"
 TEXTURES_PATH = "Data/Textures"
-TEXTURES_ENUM_PATH = "Source/Game/Generated/TextureType.h"
-BIN_DATA_PATH = "bin/Data"
 
 textures = []
 
@@ -25,15 +26,11 @@ def gather_textures(path: Path):
 
 gather_textures(Path(TEXTURES_PATH))
 
+enum_entries = []
+
 next_start: ctypes.c_uint32 = 0
-with open(TEXTURES_ENUM_PATH, "w") as t_enum, \
-     open(f"{BIN_DATA_PATH}/textures.bin", "wb") as t_bin, \
+with open(f"{BIN_DATA_PATH}/textures.bin", "wb") as t_bin, \
      open (f"{BIN_DATA_PATH}/texturesDescriptors.bin", "wb") as t_desc:
-    
-    t_enum.write("//GENERATED FILE! DO NOT MODIFY DIRECTLY!\n")
-    t_enum.write("#pragma once\n\n")
-    t_enum.write("enum class TextureType\n")
-    t_enum.write("{\n")
 
     for count, t in enumerate(textures):
         with open(t.as_posix(), "rb") as t_file:
@@ -48,9 +45,12 @@ with open(TEXTURES_ENUM_PATH, "w") as t_enum, \
             next_start += write_size
 
             texture_name = t.as_posix().split(f"{TEXTURES_PATH}/")[-1].replace("/", "_").replace(".png", "")
-            t_enum.write(f"\t{texture_name} = {count},\n")
+            enum_entries.append(f"\t{texture_name} = {count}")
 
             print(f"Processed {t.as_posix()}")
 
-    t_enum.write("};\n")
-    
+environment = Environment(loader=FileSystemLoader("Tools/templates/"))
+template = environment.get_template("EnumTemplate.h")
+content = template.render(name=ENUM_NAME, entries=enum_entries)
+with open(f"{GENERATED_PATH}/{ENUM_NAME}.h", "w") as f:
+    f.write(content)

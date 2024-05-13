@@ -6,7 +6,7 @@
 #include <fstream>
 #include <sstream>
 
-void RenderSystem::init(World& world, SystemsManager& systemsManager)
+void RenderSystem::preInit(World& world, SystemsManager& systemsManager)
 {
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
@@ -20,7 +20,7 @@ void RenderSystem::init(World& world, SystemsManager& systemsManager)
         throw SystemInitException{};
     }
 
-    constexpr Uint32 fullscreenFlag{0};
+    constexpr Uint32 fullscreenFlag{ 0 };
     //constexpr Uint32 fullscreenFlag{ SDL_WINDOW_FULLSCREEN_DESKTOP };
 
     window_ = SDL_CreateWindow("Space Game", SDL_WINDOWPOS_CENTERED,
