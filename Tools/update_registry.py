@@ -10,7 +10,6 @@ def update_registry(obj_type: str):
     registry_path = f"{GENERATED_PATH}/{folder}Registry.h"
     blob_path = f"{GENERATED_PATH}/All{folder}.h"
     environment = Environment(loader=FileSystemLoader("Tools/templates/"))
-    content = None
 
     objects = os.listdir(objects_path)
     objects = [obj.replace(".h", "") for obj in objects if obj.endswith(".h")]
@@ -24,17 +23,27 @@ def update_registry(obj_type: str):
         case "system":
             print("Systems Registry must be updated manually!")
             return
+        
         case "component":
+            enum_name = "ComponentType"
+            enum_template = environment.get_template("EnumTemplate.h")
+            components = [comp.replace("Component", "") for comp in objects]
+            enum_content = enum_template.render(name=enum_name, entries=components)
+            with open(f"{GENERATED_PATH}/{enum_name}.h", "w") as f:
+                f.write(enum_content)
+            
+            comps_dict = {}
+            for i in range(0, len(objects)):
+                comps_dict[f"{enum_name}::{components[i]}"] = objects[i]
             template = environment.get_template("ComponentsRegistryTemplate.h")
-            content = template.render(components=objects)
+            content = template.render(components=comps_dict)
+            with open(registry_path, "w") as f:
+                f.write(content)
+            print(f"Updated {registry_path}")
+
         case _:
             print(f"Unknown type {obj_type}!")
             return
-        
-    with open(registry_path, "w") as f:
-        f.write(content)
-
-    print(f"Updated {registry_path}")
 
 
 def _main():

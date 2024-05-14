@@ -1,7 +1,7 @@
 #pragma once
 #include "Generated/ComponentsRegistry.h"
 #include "Types/Entity.h"
-#include "Types/ComponentRemoveCallback.h"
+#include "FunctionsLibrary.h"
 #include <cassert>
 #include <vector>
 
@@ -18,127 +18,85 @@ public:
 
     Entity createEntity()
     {
-        const Entity entity{ ++entityId_ };
-        entities_.emplace_back(entity);
-
-        componentRemoveCallbacks_.emplace_back(
-            EntityComponentRemoveCallbacks{entity});
-
-        return entity;
+        return entities_.emplace_back(EntityInfo{ .entity = ++entityId_ }).entity;
     }
 
     void destroyEntity(const Entity entity)
     {
-        auto& componentRemoveCallbacks{ getComponentRemoveCallbacks(entity) };
-        for (auto& callback : componentRemoveCallbacks.callbacks)
+        const auto& entityInfo{ findEntity(entity) };
+        for (const auto& callback : entityInfo.componentRemoveCallbacks)
         {
-            callback();
+            callback(entity);
         }
 
-        std::erase(entities_, entity);
-        std::erase_if(componentRemoveCallbacks_,
-            [entity](const EntityComponentRemoveCallbacks& callbacks)
-                {return callbacks.entity == entity;});
+        std::erase_if(entities_,
+            [entity](const EntityInfo& info){ return info.entity == entity; });
     }
 
-    template<typename T>
-    T& addComponent(const Entity entity)
+    template<ComponentType type>
+    auto& addComponent(const Entity entity)
     {
-        auto& components{ getComponents<T>() };
-        auto iter{std::ranges::find_if(components,
-            [entity](const Component<T>& component)
-                { return entity == component.getOwningEntity(); })};
-        if (iter != components.end())
+        auto& entityInfo{findEntity(entity)};
+        if (functionsLibrary::contains(entityInfo.components, type))
         {
             assert(!"Entity can have only one instance of any component!");
-            return *(*iter);
+            return *tryGetComponent<type>(entity);
         }
+        
+        auto& new_component{ getComponents<type>().emplace_back()};
+        new_component.entity = entity;
+        entityInfo.components.emplace_back(type);
+        entityInfo.componentRemoveCallbacks.emplace_back(
+            [this](const Entity entity){ removeComponent<type>(entity); });
 
-        auto& componentRemoveCallbacks{ getComponentRemoveCallbacks(entity) };
-        componentRemoveCallbacks.callbacks.emplace_back(
-            ComponentRemoveCallback{
-                [this, entity] { removeComponentInternal<T>(entity); },
-                ++componentRemoveCallbackId_ });
-
-        auto& new_component{ 
-            components.emplace_back(Component<T>{entity, componentRemoveCallbackId_})
-        };
-
-        return *new_component;
+        return new_component.instance;
     }
 
-    template<typename T>
-    T* tryGetComponent(const Entity entity)
+    template<ComponentType type>
+    auto* tryGetComponent(const Entity entity)
     {
-        auto& components{ getComponents<T>() };
-        auto iter{ std::ranges::find_if(components,
-            [entity](const Component<T>& component)
-                { return entity == component.getOwningEntity(); }) };
-        return iter != components.end() ? &(*(*iter)) : nullptr;
+        auto& components{ getComponents<type>() };
+        auto iter{ std::ranges::find_if(components, [entity](const auto& component)
+                { return entity == component.entity; }) };
+        return iter != components.end() ? &iter->instance : nullptr;
     }
 
-    template<typename T>
-    void forEach(std::function<void(const Entity, T&)> callback)
-    {
-        for (auto& component : getComponents<T>())
-        {
-            callback(component.getOwningEntity(), *component);
-        }
-    }
-
-    template<typename T>
+    template<ComponentType type>
     void removeComponent(const Entity entity)
     {
-        const auto removeCallbackId{removeComponentInternal<T>(entity)};
-
-        auto& componentRemoveCallbacks{ getComponentRemoveCallbacks(entity) };
-        const auto pred{ [removeCallbackId](const ComponentRemoveCallback& callback)
-                { return callback.getId() == removeCallbackId; }};
-        const auto result{std::erase_if(componentRemoveCallbacks.callbacks, pred)};
-        assert(result == 1 && "No destruction callback was erased!");
-    }
-
-private:
-    template<typename T>
-    size_t removeComponentInternal(const Entity entity)
-    {
-        auto& components{ getComponents<T>() };
-        const auto iter{ std::ranges::find_if(components,
-            [entity](const Component<T> component)
-                { return entity == component.getOwningEntity(); }) };
+        auto& components{ getComponents<type>() };
+        const auto iter{ std::ranges::find_if(components, [entity](const auto& component)
+                { return entity == component.entity; }) };
         if (iter == components.end())
         {
             assert(!"Trying to remove non-existent component!");
-            return 0;
+            return;
         }
 
-        const auto removeCallbackId{iter->getRemoveCallbackId()};
         const auto index{ iter - components.begin() };
         std::swap(components[index], components.back());
         components.pop_back();
-
-        return removeCallbackId;
     }
 
-    EntityComponentRemoveCallbacks& getComponentRemoveCallbacks(const Entity entity)
+    template <ComponentType type>
+    auto& getComponents()
     {
-        auto iter{ std::ranges::find_if(componentRemoveCallbacks_,
-                    [entity](const EntityComponentRemoveCallbacks& callback)
-                        {return callback.entity == entity; }) };
-        assert(iter != componentRemoveCallbacks_.end() && "No component remove callbacks found for entity!");
-        return *iter;
-    }
-
-    template<typename T>
-    std::vector<Component<T>>& getComponents()
-    {
-        return std::get<std::vector<Component<T>>>(components_);
+        return std::get<static_cast<size_t>(type)>(components_).instances;
     }
 
 private:
-    ComponentRemoveCallbacks componentRemoveCallbacks_;
-    Components components_;
-    std::vector<Entity> entities_;
+    EntityInfo& findEntity(const Entity entity)
+    {
+        auto iter{ std::ranges::find_if(entities_, [entity](const EntityInfo& entityInfo)
+        {
+            return entityInfo.entity == entity;
+        })};
+        assert(iter != entities_.end() && "Unknown entity!");
+        return *iter;
+    }
+
+private:
+    RegisteredComponents components_;
+    std::vector<EntityInfo> entities_;
     size_t entityId_{0};
-    size_t componentRemoveCallbackId_{0};
 };

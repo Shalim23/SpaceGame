@@ -45,7 +45,7 @@ with open(f"{BIN_DATA_PATH}/textures.bin", "wb") as t_bin, \
             next_start += write_size
 
             texture_name = t.as_posix().split(f"{TEXTURES_PATH}/")[-1].replace("/", "_").replace(".png", "")
-            enum_entries.append(f"\t{texture_name} = {count}")
+            enum_entries.append(f"{texture_name} = {count}")
 
             print(f"Processed {t.as_posix()}")
 

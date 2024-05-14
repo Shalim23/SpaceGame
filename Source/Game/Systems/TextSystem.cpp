@@ -22,17 +22,14 @@ void TextSystem::init(World& world, SystemsManager& systemsManager)
 
 void TextSystem::update(World& world)
 {
-    std::vector<Entity> aliveWidgetEntities;
-    world.forEach<WidgetComponent>([&aliveWidgetEntities](const Entity widgetEntity, WidgetComponent&)
-        {
-            aliveWidgetEntities.push_back(widgetEntity);
-        });
+    const auto& widgetComponents{world.getComponents<ComponentType::Widget>()};
 
     std::vector<DynamicTextsToEntity*> dynamicTextsToRemove;
     for (auto& texts : dynamicTexts_)
     {
-        const auto iter{std::ranges::find(aliveWidgetEntities, texts.entity)};
-        if (iter == aliveWidgetEntities.end())
+        const auto iter{ std::ranges::find_if(widgetComponents, [&texts](const auto& component)
+            {   return texts.entity == component.entity; })};
+        if (iter == widgetComponents.end())
         {
             dynamicTextsToRemove.push_back(&texts);
         }

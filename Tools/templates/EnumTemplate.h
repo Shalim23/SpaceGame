@@ -4,6 +4,6 @@
 enum class {{name}}
 {
 {%- for e in entries %}
-{{ e }}{{ "," if not loop.last }}
+{{"\t"}}{{ e }}{{ "," if not loop.last }}
 {%- endfor %}
 };

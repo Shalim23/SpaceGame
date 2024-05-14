@@ -2,6 +2,7 @@
 #include "../World.h"
 #include "../SystemsManager.h"
 #include "../Constants.h"
+#include "../GameplayStatics.h"
 #include <numbers>
 
 void InputSystem::update(World& world)
@@ -9,18 +10,13 @@ void InputSystem::update(World& world)
     int len;
     const Uint8* const keyboardState{SDL_GetKeyboardState(&len)};
 
-    world.forEach<PlayerComponent>([this, &world, &keyboardState]
-        (const Entity entity, PlayerComponent&)
-        {
-            auto& transform{ *world.tryGetComponent<TransformComponent>(entity) };
-            processRotation(keyboardState, transform);
+    const auto& playerComponent{gameplayStatics::getPlayerComponent(world)};
+    auto& transform{ *world.tryGetComponent<ComponentType::Transform>(playerComponent.entity) };
+    processRotation(keyboardState, transform);
 
-            auto& movement{ *world.tryGetComponent<MovementComponent>(entity) };
-            movement.forwardVector = calculateForwardVector(transform.rotation);
-            movement.speedPerSecond =
-                keyboardState[SDL_SCANCODE_W] ?
-                movementSpeedPerSecond_ : 0.0f;
-        });
+    auto& movement{ *world.tryGetComponent<ComponentType::Movement>(playerComponent.entity) };
+    movement.forwardVector = calculateForwardVector(transform.rotation);
+    movement.speedPerSecond = keyboardState[SDL_SCANCODE_W] ? movementSpeedPerSecond_ : 0.0f;
 }
 
 void InputSystem::processRotation(const Uint8* const keyboardState, TransformComponent& transform)

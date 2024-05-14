@@ -4,10 +4,11 @@
 
 void GameplaySystem::postInit(World& world, SystemsManager& systemsManager)
 {
-    const auto entity{ world.createEntity() };
+
+    /*const auto entity{ world.createEntity() };
     auto& gameStateComppnent{world.addComponent<GameStateComponent>(entity)};
-    gameStateComppnent.gameState = GameStateType::MAIN_MENU;
-    //createPlayer(world, systemsManager);
+    gameStateComppnent.gameState = GameStateType::MAIN_MENU;*/
+    createPlayer(world, systemsManager);
 }
 
 void GameplaySystem::createPlayer(World& world, SystemsManager& systemsManager) const
@@ -15,11 +16,11 @@ void GameplaySystem::createPlayer(World& world, SystemsManager& systemsManager) 
     auto& renderSystem{ systemsManager.getSystem<RenderSystem>() };
 
     const auto entity{ world.createEntity() };
-    world.addComponent<PlayerComponent>(entity);
-    world.addComponent<MovementComponent>(entity);
-    world.addComponent<TransformComponent>(entity);
+    world.addComponent<ComponentType::Player>(entity);
+    world.addComponent<ComponentType::Movement>(entity);
+    world.addComponent<ComponentType::Transform>(entity);
 
-    auto& sprite{ world.addComponent<SpriteComponent>(entity) };
+    auto& sprite{ world.addComponent<ComponentType::Sprite>(entity) };
     const auto& texture{ renderSystem.getTexture(TextureType::PlayerShip_playerShip2_orange) };
     sprite.layer = SpriteLayer::PLAYER;
     sprite.renderData.texture = texture.texture;

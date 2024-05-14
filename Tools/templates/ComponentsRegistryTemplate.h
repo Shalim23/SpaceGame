@@ -3,13 +3,14 @@
 #include "../Types/TypesList.h"
 #include "../Types/Component.h"
 #include "AllComponents.h"
+#include "ComponentType.h"
 
 
-using RegisteredComponents = TypesList
+using RegisteredComponentsTypes = TypesList
 <
-{%- for c in components %}
-{{ c }}{{ "," if not loop.last }}
+{%- for t, c in components.items() %}
+{{"Components<"}}{{t}}{{" ,"}}{{ c }}{{">"}}{{ "," if not loop.last }}
 {%- endfor %}
 >;
 
-using Components = ComponentsList<RegisteredComponents>::type;
+using RegisteredComponents = ComponentsList<RegisteredComponentsTypes>::type;

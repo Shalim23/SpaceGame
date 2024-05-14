@@ -28,7 +28,7 @@ with open (f"{BIN_DATA_PATH}/textDescriptors.bin", "wb") as t_desc:
         t_desc.write(struct.pack(format_string, desc.text_id, desc.text_len, desc.text))
         formatted_line = line.replace(" ", "_")
         formatted_line = "".join(filter(str.isalpha, formatted_line))
-        enum_entries.append(f"\t{formatted_line} = {count}")
+        enum_entries.append(f"{formatted_line} = {count}")
 
 environment = Environment(loader=FileSystemLoader("Tools/templates/"))
 template = environment.get_template("EnumTemplate.h")

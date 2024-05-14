@@ -22,7 +22,6 @@ public:
 private:
 	void generateBackground(World& world);
 	bool isPlayerInRange(const TransformComponent& playerTransform) const;
-	std::optional<Entity> getOutOfWorldBoundsComponentEntity(World& world) const;
 
 	void createOutOfBoundsEntity(World& world) const;
 	void createBackgroundWidget(WidgetComponent& widgetComponent) const;

@@ -3,17 +3,18 @@
 #include "../Types/TypesList.h"
 #include "../Types/Component.h"
 #include "AllComponents.h"
+#include "ComponentType.h"
 
 
-using RegisteredComponents = TypesList
+using RegisteredComponentsTypes = TypesList
 <
-GameStateComponent,
-MovementComponent,
-OutOfWorldBoundsComponent,
-PlayerComponent,
-SpriteComponent,
-TransformComponent,
-WidgetComponent
+Components<ComponentType::GameState ,GameStateComponent>,
+Components<ComponentType::Movement ,MovementComponent>,
+Components<ComponentType::OutOfWorldBounds ,OutOfWorldBoundsComponent>,
+Components<ComponentType::Player ,PlayerComponent>,
+Components<ComponentType::Sprite ,SpriteComponent>,
+Components<ComponentType::Transform ,TransformComponent>,
+Components<ComponentType::Widget ,WidgetComponent>
 >;
 
-using Components = ComponentsList<RegisteredComponents>::type;
+using RegisteredComponents = ComponentsList<RegisteredComponentsTypes>::type;

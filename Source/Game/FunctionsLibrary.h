@@ -1,7 +1,7 @@
 #pragma once
 #include <numeric>
 
-namespace fl
+namespace functionsLibrary
 {
     static bool inRange(const float value, const float minValue, const float maxValue)
     {
@@ -23,17 +23,12 @@ namespace fl
     {
         return SDL_FRect{ .x = xy.x, .y = xy.y, .w = wh.x, .h = wh.y };
     }
-
-    static GameStateType getCurrentGameState(World& world)
+    
+    template<typename C, typename T>
+    static bool contains(const C& container, const T& value)
     {
-        GameStateType type{GameStateType::NONE};
-        world.forEach<GameStateComponent>([&type](const Entity entity, GameStateComponent component)
-            {
-                type = component.gameState;
-            }
-        );
-        assert(type != GameStateType::NONE);
-        return type;
+        const auto iter{std::ranges::find(container, value)};
+        return iter != container.end();
     }
 }
 

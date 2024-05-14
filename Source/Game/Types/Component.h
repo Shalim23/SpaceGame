@@ -1,31 +1,35 @@
 #pragma once
 #include "Entity.h"
+#include "../Generated/ComponentType.h"
 #include <tuple>
 #include <vector>
+#include <functional>
+
+struct EntityInfo
+{
+    Entity entity;
+    std::vector<ComponentType> components;
+    std::vector<std::function<void(const Entity)>> componentRemoveCallbacks;
+};
 
 template<typename T>
-class Component
+struct Component
 {
-public:
-    Component(const Entity entity, const size_t removeCallbackId)
-        : owner_{ entity }
-        , removeCallbackId_{ removeCallbackId }
-        , component_{}
-    {}
+    Entity entity;
+    T instance;
+};
 
-    Entity getOwningEntity() const { return owner_; }
-    T& operator*() { return component_; }
-    size_t getRemoveCallbackId() const { return removeCallbackId_; }
-
-private:
-    Entity owner_;
-    size_t removeCallbackId_;
-    T component_;
+template<ComponentType value, typename T>
+struct Components
+{
+    const ComponentType componentType = value;
+    std::vector<Component<T>> instances;
 };
 
 template<typename> struct ComponentsList;
 template<template<typename...Args> typename t, typename ...Ts>
 struct ComponentsList<t<Ts...>>
 {
-    using type = std::tuple<std::vector<Component<Ts>>...>;
+    using type = std::tuple<Ts...>;
 };
+
