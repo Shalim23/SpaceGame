@@ -1,12 +1,13 @@
 #pragma once
 #include <numeric>
+#include <chrono>
 
 namespace functionsLibrary
 {
-    static bool inRange(const float value, const float minValue, const float maxValue)
+    static bool inRange(const float value, const SDL_FPoint minMaxValue)
     {
         constexpr float epsilon{ std::numeric_limits<float>::epsilon() };
-        return (value >= minValue - epsilon && value <= maxValue + epsilon);
+        return (value >= minMaxValue.x - epsilon && value <= minMaxValue.y + epsilon);
     }
 
     static float lerp(const float startValue, const float endValue, const float delta)
@@ -29,6 +30,28 @@ namespace functionsLibrary
     {
         const auto iter{std::ranges::find(container, value)};
         return iter != container.end();
+    }
+
+    template<typename C, typename P>
+    static bool containsIf(const C& container, const P& predicate)
+    {
+        const auto iter{ std::ranges::find_if(container, predicate) };
+        return iter != container.end();
+    }
+
+    static unsigned int getCurrentTimeMs()
+    {
+        const auto now{std::chrono::system_clock::now()};
+        const auto duration{std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch())};
+        return static_cast<unsigned int>(duration.count());
+    }
+
+    static void lerpOpacity(SDL_Texture* texture, const float delta)
+    {
+        constexpr float minOpacity{ 0.0f };
+        constexpr float maxOpacity{ 255.0f };
+        const float currentOpacity{ functionsLibrary::lerp(minOpacity, maxOpacity, delta) };
+        SDL_SetTextureAlphaMod(texture, static_cast<Uint8>(currentOpacity));
     }
 }
 

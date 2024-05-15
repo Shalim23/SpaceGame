@@ -15,6 +15,7 @@ public:
     void setLayer(const WidgetLayer layer) { layer_ = layer; }
     WidgetLayer getLayer() const { return layer_; }
     Widget& addWidget() { return widgets_.emplace_back(); }
+    std::vector<Widget>& updateWidgets() { return widgets_; }
     std::vector<const RenderData*> gatherRenderData()
     {
         std::vector<const RenderData*> data;

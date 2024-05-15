@@ -20,12 +20,6 @@ struct TextDescriptor
     std::string text;
 };
 
-struct DynamicTextsToEntity
-{
-	Entity entity;
-	std::vector<SDL_Texture*> textures;
-};
-
 struct StaticText
 {
     TextType id;
@@ -36,7 +30,7 @@ public:
 	void preInit(World& world, SystemsManager& systemsManager) {}
 	void init(World& world, SystemsManager& systemsManager);
 	void postInit(World& world, SystemsManager& systemsManager){}
-	void update(World& world);
+	void update(World& world){}
 	void shutdown();
 
 	RenderData getText(const TextType type) const;
@@ -47,12 +41,10 @@ private:
 	std::vector<char> getFontRawData() const;
 	std::vector<TextDescriptor> getTextDescriptors() const;
 	TTF_Font* loadFontFromRawData(const std::vector<char>& rawData, const int fontSize) const;
-	void addDynanicText(const Entity entity, SDL_Texture* texture);
 	void initStaticText();
 
 private:
 	TTF_Font* font_{nullptr};
 	RenderSystem* renderSystem_{nullptr};
-	std::vector<DynamicTextsToEntity> dynamicTexts_;
 	std::vector<StaticText> staticTexts_;
 };

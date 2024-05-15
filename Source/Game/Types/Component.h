@@ -15,8 +15,8 @@ struct EntityInfo
 template<typename T>
 struct Component
 {
-    Entity entity;
-    T instance;
+    Entity entity{};
+    T instance{};
 };
 
 template<ComponentType value, typename T>

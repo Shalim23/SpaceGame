@@ -8,13 +8,13 @@
 
 using RegisteredComponentsTypes = TypesList
 <
-Components<ComponentType::GameState ,GameStateComponent>,
-Components<ComponentType::Movement ,MovementComponent>,
-Components<ComponentType::OutOfWorldBounds ,OutOfWorldBoundsComponent>,
-Components<ComponentType::Player ,PlayerComponent>,
-Components<ComponentType::Sprite ,SpriteComponent>,
-Components<ComponentType::Transform ,TransformComponent>,
-Components<ComponentType::Widget ,WidgetComponent>
+Components<ComponentType::GameState, GameStateComponent>,
+Components<ComponentType::Movement, MovementComponent>,
+Components<ComponentType::OutOfWorldBounds, OutOfWorldBoundsComponent>,
+Components<ComponentType::Player, PlayerComponent>,
+Components<ComponentType::Sprite, SpriteComponent>,
+Components<ComponentType::Transform, TransformComponent>,
+Components<ComponentType::Widget, WidgetComponent>
 >;
 
 using RegisteredComponents = ComponentsList<RegisteredComponentsTypes>::type;

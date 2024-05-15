@@ -19,6 +19,11 @@ void Widget::Animation::run()
     }
 }
 
+bool Widget::Animation::isAnimationFinished() const
+{
+    return SDL_GetTicks64() - animationStartTimeMs_ > animationTimeMs_;
+}
+
 RenderData& Widget::updateRenderData()
 {
     return renderData_;
@@ -37,4 +42,14 @@ void Widget::gatherRenderData(std::vector<const RenderData*>& data)
     }
 
     data.push_back(&renderData_);
+}
+
+bool Widget::hasAnimation() const
+{
+    return animation_.has_value();
+}
+
+bool Widget::isAnimationFinished() const
+{
+    return animation_->isAnimationFinished();
 }

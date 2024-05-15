@@ -23,7 +23,6 @@ private:
         uint32_t size;
     };
 
-
 public:
     void preInit(World& world, SystemsManager& systemsManager);
 	void init(World& world, SystemsManager& systemsManager){}
@@ -34,7 +33,8 @@ public:
 	void showMessageBox(const char* title, const char* message) const;
 
     const Texture& getTexture(const TextureType type);
-    SDL_Texture* createTexture(const std::vector<char>& rawData) const;
+    Texture createDynamicTexture(const TextureType type, const Entity entity);
+    void addDynamicTexture(const Entity entity, SDL_Texture* texture);
     SDL_Texture* createTextureFromSurface(SDL_Surface* surface) const;
 
     SDL_Point getTextureSize(SDL_Texture* texture) const;
@@ -44,6 +44,8 @@ public:
 
 private:
     void initTexturesDescriptors();
+    Texture createTexture(const TextureType type) const;
+    SDL_Texture* createTextureFromData(const std::vector<char>& rawData) const;
     std::vector<char> getTextureData(const TextureType type) const;
     void processSpriteData(World& world);
 
@@ -60,4 +62,5 @@ private:
     SDL_Renderer* renderer_{ nullptr };
     std::vector<TextureDescriptor> textureDescriptors_;
     std::vector<Texture> textures_;
+    std::vector<DynamicTexture> dynamicTextures_;
 };

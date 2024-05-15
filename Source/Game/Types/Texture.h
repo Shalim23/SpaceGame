@@ -8,3 +8,9 @@ struct Texture
     SDL_Texture* texture{nullptr};
     SDL_Point size;
 };
+
+struct DynamicTexture
+{
+    Entity entity;
+    std::vector<SDL_Texture*> textures;
+};

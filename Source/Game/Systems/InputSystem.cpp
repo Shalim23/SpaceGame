@@ -5,23 +5,36 @@
 #include "../GameplayStatics.h"
 #include <numbers>
 
+namespace
+{
+    constexpr double rotationRatePerSecond{ 20.0 };
+    constexpr float movementSpeedPerSecond{ 50.0 };
+}
+
 void InputSystem::update(World& world)
 {
+    const GameStateType gameState{ gameplayStatics::getCurrentGameState(world) };
+    if (gameState != GameStateType::INGAME)
+    {
+        return;
+    }
+
     int len;
     const Uint8* const keyboardState{SDL_GetKeyboardState(&len)};
 
+    
     const auto& playerComponent{gameplayStatics::getPlayerComponent(world)};
     auto& transform{ *world.tryGetComponent<ComponentType::Transform>(playerComponent.entity) };
     processRotation(keyboardState, transform);
 
     auto& movement{ *world.tryGetComponent<ComponentType::Movement>(playerComponent.entity) };
     movement.forwardVector = calculateForwardVector(transform.rotation);
-    movement.speedPerSecond = keyboardState[SDL_SCANCODE_W] ? movementSpeedPerSecond_ : 0.0f;
+    movement.speedPerSecond = keyboardState[SDL_SCANCODE_W] ? movementSpeedPerSecond : 0.0f;
 }
 
 void InputSystem::processRotation(const Uint8* const keyboardState, TransformComponent& transform)
 {
-    const double rotationDelta{ rotationRatePerSecond_ / constants::frameTimeMsD };
+    const double rotationDelta{ rotationRatePerSecond / constants::frameTimeMsD };
     if (keyboardState[SDL_SCANCODE_A])
     {
         transform.rotation -= rotationDelta;

@@ -13,6 +13,7 @@ class Widget
         explicit Animation(const Uint64 animationTimeMs,
             std::function<void(const float)> animationFunction);
         void run();
+        bool isAnimationFinished() const;
 
     private:
         Uint64 animationTimeMs_{};
@@ -26,6 +27,8 @@ public:
         std::function<void(const float)> animationFunction);
     
     void gatherRenderData(std::vector<const RenderData*>& data);
+    bool hasAnimation() const;
+    bool isAnimationFinished() const;
 
 private:
     RenderData renderData_{};

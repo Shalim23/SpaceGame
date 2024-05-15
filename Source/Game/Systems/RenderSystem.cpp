@@ -49,6 +49,7 @@ void RenderSystem::update(World& world)
     SDL_SetRenderDrawColor(renderer_, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(renderer_);
 
+    gameplayStatics::clearWidgetDynamicTextures(dynamicTextures_, world);
     processSpriteData(world);
     processWidgetData(world);
 
@@ -57,6 +58,14 @@ void RenderSystem::update(World& world)
 
 void RenderSystem::shutdown()
 {
+    for (const auto& textures : dynamicTextures_)
+    {
+        for (const auto& texture : textures.textures)
+        {
+            SDL_DestroyTexture(texture);
+        }
+    }
+    
     for (const auto& texture : textures_)
     {
         SDL_DestroyTexture(texture.texture);
@@ -82,16 +91,28 @@ const Texture& RenderSystem::getTexture(const TextureType type)
         return *iter;
     }
 
-    const auto& textureRawData{ getTextureData(type) };
-    SDL_Texture* texture{ createTexture(textureRawData) };
-    const SDL_Point textureSize{ getTextureSize(texture) };
-    const auto& newTexture{ textures_.emplace_back(
-        Texture{.type = type, .texture = texture, .size = textureSize}) };
-
-    return newTexture;
+    return textures_.emplace_back(createTexture(type));
 }
 
-SDL_Texture* RenderSystem::createTexture(const std::vector<char>& rawData) const
+Texture RenderSystem::createDynamicTexture(const TextureType type, const Entity entity)
+{
+    const Texture texture{createTexture(type)};
+    addDynamicTexture(entity, texture.texture);
+    return texture;
+}
+
+void RenderSystem::addDynamicTexture(const Entity entity, SDL_Texture* texture)
+{
+    auto iter{ std::ranges::find_if(dynamicTextures_, [entity](const DynamicTexture& texts)
+            { return texts.entity == entity; }) };
+    DynamicTexture* texts{ iter == dynamicTextures_.end() ?
+        &dynamicTextures_.emplace_back(DynamicTexture{.entity = entity }) :
+        &(*iter) };
+
+    texts->textures.push_back(texture);
+}
+
+SDL_Texture* RenderSystem::createTextureFromData(const std::vector<char>& rawData) const
 {
     return IMG_LoadTexture_RW(renderer_, SDL_RWFromConstMem(rawData.data(), rawData.size()), 1);
 }
@@ -147,6 +168,15 @@ void RenderSystem::initTexturesDescriptors()
     textures_.reserve(textureDescriptors_.size());
 }
 
+Texture RenderSystem::createTexture(const TextureType type) const
+{
+    const auto& textureRawData{ getTextureData(type) };
+    SDL_Texture* texture{ createTextureFromData(textureRawData) };
+    const SDL_Point textureSize{ getTextureSize(texture) };
+
+    return Texture{.type = type, .texture = texture, .size = textureSize};
+}
+
 std::vector<char> RenderSystem::getTextureData(const TextureType type) const
 {
     const auto textureTypeTnt{ static_cast<uint32_t>(type) };
@@ -188,6 +218,12 @@ std::vector<char> RenderSystem::getTextureData(const TextureType type) const
 
 void RenderSystem::processSpriteData(World& world)
 {
+    const GameStateType gameState{ gameplayStatics::getCurrentGameState(world) };
+    if (gameState != GameStateType::INGAME)
+    {
+        return;
+    }
+    
     std::array<std::vector<SpriteComponent*>,
         static_cast<size_t>(SpriteLayer::COUNT)> spritesToRender;
 

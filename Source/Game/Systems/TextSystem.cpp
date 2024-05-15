@@ -20,35 +20,6 @@ void TextSystem::init(World& world, SystemsManager& systemsManager)
     initStaticText();
 }
 
-void TextSystem::update(World& world)
-{
-    const auto& widgetComponents{world.getComponents<ComponentType::Widget>()};
-
-    std::vector<DynamicTextsToEntity*> dynamicTextsToRemove;
-    for (auto& texts : dynamicTexts_)
-    {
-        const auto iter{ std::ranges::find_if(widgetComponents, [&texts](const auto& component)
-            {   return texts.entity == component.entity; })};
-        if (iter == widgetComponents.end())
-        {
-            dynamicTextsToRemove.push_back(&texts);
-        }
-    }
-
-    for (const auto* textsToRemove : dynamicTextsToRemove)
-    {
-        for (SDL_Texture* texture : textsToRemove->textures)
-        {
-            SDL_DestroyTexture(texture);
-        }
-
-        std::erase_if(dynamicTexts_, [textsToRemove](const DynamicTextsToEntity& texts)
-            {
-                return textsToRemove->entity == texts.entity;
-            });
-    }
-}
-
 void TextSystem::shutdown()
 {
     for (const auto& staticText : staticTexts_)
@@ -71,7 +42,7 @@ RenderData TextSystem::getText(const TextType type) const
 RenderData TextSystem::createDynamicText(const Entity entity, std::string_view text)
 {
     RenderData data{createText(text)};
-    addDynanicText(entity, data.texture);
+    renderSystem_->addDynamicTexture(entity, data.texture);
     return data;
 }
 
@@ -168,17 +139,6 @@ TTF_Font* TextSystem::loadFontFromRawData(const std::vector<char>& rawData, cons
     }
 
     return font;
-}
-
-void TextSystem::addDynanicText(const Entity entity, SDL_Texture* texture)
-{
-    auto iter{std::ranges::find_if(dynamicTexts_, [entity](const DynamicTextsToEntity& texts)
-        { return texts.entity == entity; })};
-    DynamicTextsToEntity* texts{ iter == dynamicTexts_.end() ?
-        &dynamicTexts_.emplace_back(DynamicTextsToEntity{ .entity = entity }) :
-        &(*iter)};
-
-    texts->textures.push_back(texture);
 }
 
 void TextSystem::initStaticText()

@@ -13,6 +13,7 @@ GameplaySystem,
 WorldBoundsSystem,
 TextSystem,
 MenuSystem,
+RandomSystem,
 
 RenderSystem
 >;

@@ -28,9 +28,6 @@ private:
 	void createTextWidget(const Entity entity, WidgetComponent& widgetComponent) const;
 
 private:
-	const float boundsPixelSize_{3500.0f};
-	const int gridSize_{3};
-
 	RenderSystem* renderSystem_{nullptr};
 	TextSystem* textSystem_{nullptr};
 };

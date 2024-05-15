@@ -18,7 +18,4 @@ private:
 	void processRotation(const Uint8* const keyboardState, TransformComponent& transform);
 	SDL_FPoint calculateForwardVector(const double rotation) const;
 
-private:
-	const double rotationRatePerSecond_{20.0};
-	const float movementSpeedPerSecond_{50.0};
 };

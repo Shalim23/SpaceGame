@@ -5,6 +5,13 @@
 #include "../GameplayStatics.h"
 #include "../Constants.h"
 
+namespace
+{
+    constexpr float boundsPixelSize{ 3500.0f };
+    constexpr SDL_FPoint minMaxBounds{ .x = -boundsPixelSize, .y = boundsPixelSize };
+    constexpr int gridSize{ 3 };
+}
+
 void WorldBoundsSystem::init(World& world, SystemsManager& systemsManager)
 {
     renderSystem_ = &systemsManager.getSystem<RenderSystem>();
@@ -18,6 +25,12 @@ void WorldBoundsSystem::postInit(World& world, SystemsManager& systemsManager)
 
 void WorldBoundsSystem::update(World& world)
 {
+    const GameStateType gameState{ gameplayStatics::getCurrentGameState(world) };
+    if (gameState != GameStateType::INGAME)
+    {
+        return;
+    }
+    
     const auto& playerComponent{gameplayStatics::getPlayerComponent(world)};
     const auto& playerTransform{ *world.tryGetComponent<ComponentType::Transform>(playerComponent.entity) };
     const auto& outOfBoundsComponents{ world.getComponents<ComponentType::OutOfWorldBounds>() };
@@ -40,9 +53,9 @@ void WorldBoundsSystem::update(World& world)
 
 void WorldBoundsSystem::generateBackground(World& world)
 {
-    for (int i{ -gridSize_ }; i <= gridSize_; ++i)
+    for (int i{ -gridSize }; i <= gridSize; ++i)
     {
-        for (int k{ -gridSize_ }; k <= gridSize_; ++k)
+        for (int k{ -gridSize }; k <= gridSize; ++k)
         {
             auto e{ world.createEntity() };
 
@@ -61,8 +74,8 @@ void WorldBoundsSystem::generateBackground(World& world)
 
 bool WorldBoundsSystem::isPlayerInRange(const TransformComponent& playerTransform) const
 {
-    return functionsLibrary::inRange(playerTransform.location.x, -boundsPixelSize_, boundsPixelSize_) &&
-        functionsLibrary::inRange(playerTransform.location.y, -boundsPixelSize_, boundsPixelSize_);
+    return functionsLibrary::inRange(playerTransform.location.x, minMaxBounds) &&
+        functionsLibrary::inRange(playerTransform.location.y, minMaxBounds);
 }
 
 void WorldBoundsSystem::createOutOfBoundsEntity(World& world) const
@@ -94,10 +107,7 @@ void WorldBoundsSystem::createBackgroundWidget(WidgetComponent& widgetComponent)
     background.addAnimation(backgroundAnimationTime,
         [texture = backgroundRenderData.texture](const float delta)
         {
-            constexpr float minOpacity{ 0.0f };
-            constexpr float maxOpacity{ 255.0f };
-            const float currentOpacity{ functionsLibrary::lerp(minOpacity, maxOpacity, delta) };
-            SDL_SetTextureAlphaMod(texture, static_cast<Uint8>(currentOpacity));
+            functionsLibrary::lerpOpacity(texture, delta);
         });
 }
 

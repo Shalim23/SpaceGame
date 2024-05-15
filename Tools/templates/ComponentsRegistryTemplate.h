@@ -9,7 +9,7 @@
 using RegisteredComponentsTypes = TypesList
 <
 {%- for t, c in components.items() %}
-{{"Components<"}}{{t}}{{" ,"}}{{ c }}{{">"}}{{ "," if not loop.last }}
+{{"Components<"}}{{t}}{{", "}}{{ c }}{{">"}}{{ "," if not loop.last }}
 {%- endfor %}
 >;
 
