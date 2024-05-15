@@ -28,10 +28,12 @@ private:
 	void createMenuWidget(World& world, const GameStateType gameState) const;
 
 	void createMainMenu(World& world) const;
-	void createMainMenuBackground(const Entity entity, WidgetComponent& widgetComponent) const;
+	
+	/*void createMainMenuBackground(const Entity entity, WidgetComponent& widgetComponent) const;
 	void createMainMenuBackgroundElement(const Entity entity, WidgetComponent& widgetComponent, const SDL_FPoint& screenSize) const;
 	SDL_FRect createMainMenuBackgroundElementDestRect(const SDL_FPoint& screenSize, const SDL_Point& textureSize) const;
-	void addMainMenuBackgroundElementAnimation(Widget& widget) const;
+	void addMainMenuBackgroundElementAnimation(Widget& widget) const;*/
+	
 	void createInGameMenu(World& world) const;
 
 	WidgetComponent* getMenuWidget(World& world) const;

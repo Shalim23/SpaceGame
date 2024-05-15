@@ -36,6 +36,7 @@ public:
     Texture createDynamicTexture(const TextureType type, const Entity entity);
     void addDynamicTexture(const Entity entity, SDL_Texture* texture);
     SDL_Texture* createTextureFromSurface(SDL_Surface* surface) const;
+    SDL_Surface* createSurface(const TextureType type) const;
 
     SDL_Point getTextureSize(SDL_Texture* texture) const;
     SDL_FPoint getTextureSizeF(const SDL_Point& textureSize) const;

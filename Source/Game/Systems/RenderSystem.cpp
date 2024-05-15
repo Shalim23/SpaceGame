@@ -122,6 +122,12 @@ SDL_Texture* RenderSystem::createTextureFromSurface(SDL_Surface* surface) const
     return SDL_CreateTextureFromSurface(renderer_, surface);
 }
 
+SDL_Surface* RenderSystem::createSurface(const TextureType type) const
+{
+    const auto& textureRawData{ getTextureData(type) };
+    return IMG_Load_RW(SDL_RWFromConstMem(textureRawData.data(), textureRawData.size()), 1);
+}
+
 SDL_Point RenderSystem::getTextureSize(SDL_Texture* texture) const
 {
     SDL_Point size;

@@ -22,5 +22,8 @@ enum class TextureType
 	Stars_star1 = 16,
 	Stars_star2 = 17,
 	Stars_star3 = 18,
-	white_pixel = 19
+	UI_buttonBlue = 19,
+	UI_buttonRed = 20,
+	UI_cursor = 21,
+	white_pixel = 22
 };

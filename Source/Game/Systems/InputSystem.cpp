@@ -11,6 +11,15 @@ namespace
     constexpr float movementSpeedPerSecond{ 50.0 };
 }
 
+void InputSystem::init(World& world, SystemsManager& systemsManager)
+{
+    auto& renderSystem{systemsManager.getSystem<RenderSystem>()};
+    SDL_Surface* cursorImage{renderSystem.createSurface(TextureType::UI_cursor)};
+    SDL_Cursor* cursor{SDL_CreateColorCursor(cursorImage, 0, 0)};
+    SDL_SetCursor(cursor);
+    SDL_FreeSurface(cursorImage);
+}
+
 void InputSystem::update(World& world)
 {
     const GameStateType gameState{ gameplayStatics::getCurrentGameState(world) };
@@ -30,6 +39,16 @@ void InputSystem::update(World& world)
     auto& movement{ *world.tryGetComponent<ComponentType::Movement>(playerComponent.entity) };
     movement.forwardVector = calculateForwardVector(transform.rotation);
     movement.speedPerSecond = keyboardState[SDL_SCANCODE_W] ? movementSpeedPerSecond : 0.0f;
+}
+
+void InputSystem::showMouseCursor() const
+{
+    SDL_ShowCursor(SDL_ENABLE);
+}
+
+void InputSystem::hideMouseCursor() const
+{
+    SDL_ShowCursor(SDL_DISABLE);
 }
 
 void InputSystem::processRotation(const Uint8* const keyboardState, TransformComponent& transform)
