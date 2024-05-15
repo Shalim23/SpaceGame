@@ -1,2 +1,6 @@
 Warning!
 High radiation level!
+SPACE
+GAME
+Play
+Exit

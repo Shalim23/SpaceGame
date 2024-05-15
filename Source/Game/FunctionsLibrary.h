@@ -64,3 +64,8 @@ static SDL_FPoint operator/(const SDL_FPoint& lhs, const SDL_FPoint& rhs)
 {
     return SDL_FPoint{ .x = lhs.x / rhs.x, .y = lhs.y / rhs.y };
 }
+
+static SDL_FPoint operator*(const SDL_FPoint& lhs, const float value)
+{
+    return SDL_FPoint{ .x = lhs.x * value, .y = lhs.y * value };
+}

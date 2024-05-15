@@ -17,7 +17,7 @@ class Widget
 
     private:
         Uint64 animationTimeMs_{};
-        Uint64 animationStartTimeMs_{};
+        Uint64 currentAnimationTimeMs_{};
         std::function<void(const float)> animationFunction_{};
     };
 

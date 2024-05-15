@@ -8,11 +8,13 @@ class SystemsManager;
 class WidgetComponent;
 class RenderSystem;
 class RandomSystem;
+class TextSystem;
 class Widget;
 struct SDL_FPoint;
 struct SDL_Point;
 struct SDL_FRect;
 enum class GameStateType;
+enum class TextType;
 
 class MenuSystem
 {
@@ -28,6 +30,9 @@ private:
 	void createMenuWidget(World& world, const GameStateType gameState) const;
 
 	void createMainMenu(World& world) const;
+	void createTitle(WidgetComponent& widgetComponent) const; 
+	void createButton(WidgetComponent& widgetComponent,
+		const float endPosition, const float padding, const TextType text) const; 
 	
 	/*void createMainMenuBackground(const Entity entity, WidgetComponent& widgetComponent) const;
 	void createMainMenuBackgroundElement(const Entity entity, WidgetComponent& widgetComponent, const SDL_FPoint& screenSize) const;
@@ -41,5 +46,6 @@ private:
 private:
 	RenderSystem* renderSystem_{ nullptr };
 	RandomSystem* randomSystem_{ nullptr };
+	TextSystem* textSystem_{ nullptr };
 	
 };

@@ -2,8 +2,8 @@
 
 int main(int argc, char* args[])
 {
-    Game g{};
-    g.run();
+    std::unique_ptr<Game> g{std::make_unique<Game>()};
+    g->run();
 
     return 0;
 }

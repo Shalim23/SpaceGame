@@ -1,27 +1,27 @@
 #include "Widget.h"
+#include "../Constants.h"
 
 Widget::Animation::Animation(const Uint64 animationTimeMs,
     std::function<void(const float)> animationFunction)
     : animationTimeMs_{ animationTimeMs }
     , animationFunction_{ animationFunction }
 {
-    animationStartTimeMs_ = SDL_GetTicks64();
 }
 
 void Widget::Animation::run()
 {
-    const Uint64 currentTimeMs{ SDL_GetTicks64() };
-    const Uint64 timeSinceAnimationStart{ currentTimeMs - animationStartTimeMs_ };
-    if (timeSinceAnimationStart < animationTimeMs_)
+    if (currentAnimationTimeMs_ < animationTimeMs_)
     {
-        const float delta{ static_cast<float>(timeSinceAnimationStart) / animationTimeMs_ };
+        const float delta{ static_cast<float>(currentAnimationTimeMs_) / animationTimeMs_ };
         animationFunction_(delta);
     }
+
+    currentAnimationTimeMs_ += constants::frameTimeMs;
 }
 
 bool Widget::Animation::isAnimationFinished() const
 {
-    return SDL_GetTicks64() - animationStartTimeMs_ > animationTimeMs_;
+    return currentAnimationTimeMs_ > animationTimeMs_;
 }
 
 RenderData& Widget::updateRenderData()
