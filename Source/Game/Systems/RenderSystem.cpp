@@ -351,7 +351,7 @@ void RenderSystem::processWidgetData(World& world)
             {
                 SDL_RenderCopyExF(renderer_,
                     renderData->texture,
-                    &renderData->sourceRect,
+                    nullptr,
                     &renderData->destinationRect,
                     renderData->rotation,
                     nullptr, SDL_FLIP_NONE);

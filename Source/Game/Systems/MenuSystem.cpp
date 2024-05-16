@@ -74,9 +74,9 @@ void MenuSystem::createMainMenu(World& world) const
     auto& widget{ world.addComponent<ComponentType::Widget>(entity) };
     widget.setLayer(WidgetLayer::MENU);
 
-	//createTitle(widget);
+	createTitle(widget);
 
-    createButton(widget, 700.0f, 0.0f, TextType::Play);
+    //createButton(widget, 700.0f, 0.0f, TextType::Play);
     //createButton(widget, 850.0f, 150.0f, TextType::Exit);
 
 	//createMainMenuBackground(entity, widget);
@@ -86,7 +86,7 @@ void MenuSystem::createTitle(WidgetComponent& widgetComponent) const
 {
     const SDL_FPoint screenSize{ renderSystem_->getScreenSizeF() };
     const SDL_FPoint screenSizeModifier{ renderSystem_->getScreenSizeF() / constants::baseScreenSize };
-	constexpr float textScale{4.0f};
+	constexpr float scale{4.0f};
 	float nextTextPositionY{250.0f};
 
     {
@@ -98,22 +98,33 @@ void MenuSystem::createTitle(WidgetComponent& widgetComponent) const
         spaceTextRenderData.sourceRect = functionsLibrary::makeRect(constants::sdlZeroPoint,
             spaceTextRenderData.textureSize);
 
-        const float animationStartPosition{-spaceTextRenderData.textureSize.x
-			* screenSizeModifier.x * textScale };
-        const float animationEndPosition{600.0f * screenSizeModifier.x};
-        spaceTextRenderData.destinationRect = functionsLibrary::makeRect(
-            SDL_FPoint
-            {
-                .x = animationStartPosition,
-                .y = nextTextPositionY * screenSizeModifier.y
-            },
-            screenSizeModifier * spaceTextRenderData.textureSize * textScale
-        );
+   //     const float animationStartPosition{-spaceTextRenderData.textureSize.x
+			//* screenSizeModifier.x * textScale };
+   //     const float animationEndPosition{600.0f * screenSizeModifier.x};
+   //     spaceTextRenderData.destinationRect = functionsLibrary::makeRect(
+   //         SDL_FPoint
+   //         {
+   //             .x = animationStartPosition,
+   //             .y = nextTextPositionY * screenSizeModifier.y
+   //         },
+   //         screenSizeModifier * spaceTextRenderData.textureSize * textScale
+   //     );
 
-		nextTextPositionY =
-            spaceTextRenderData.destinationRect.y + spaceTextRenderData.textureSize.y;
+        const float scaledSizeX{ spaceTextRenderData.textureSize.x * screenSizeModifier.x };
+        const float scaledSizeY{ spaceTextRenderData.textureSize.y * screenSizeModifier.y };
+        spaceTextRenderData.destinationRect.x =
+            750.0f * screenSizeModifier.x - (scaledSizeX / 2.0f * scale);
 
-		spaceText.addAnimation(titleAnimationTimeMs,
+        spaceTextRenderData.destinationRect.y =
+            350.0f * screenSizeModifier.y - (scaledSizeY / 2.0f * scale);
+
+        spaceTextRenderData.destinationRect.w = spaceTextRenderData.textureSize.x * screenSizeModifier.x * scale;
+        spaceTextRenderData.destinationRect.h = spaceTextRenderData.textureSize.y * screenSizeModifier.y * scale;
+
+		/*nextTextPositionY =
+            spaceTextRenderData.destinationRect.y + spaceTextRenderData.textureSize.y;*/
+
+		/*spaceText.addAnimation(titleAnimationTimeMs,
 			[&destRect = spaceTextRenderData.destinationRect,
 			animationStartPosition, animationEndPosition
 			](const float delta)
@@ -122,7 +133,7 @@ void MenuSystem::createTitle(WidgetComponent& widgetComponent) const
 					animationStartPosition, animationEndPosition, delta)};
 				destRect.x = newPositionX;
 			}
-		);
+		);*/
     }
 
     {
@@ -134,18 +145,29 @@ void MenuSystem::createTitle(WidgetComponent& widgetComponent) const
         gameTextRenderData.sourceRect = functionsLibrary::makeRect(constants::sdlZeroPoint,
             gameTextRenderData.textureSize);
 
-        const float animationStartPosition{ screenSize.x };
-        const float animationEndPosition{ 900.0f * screenSizeModifier.x };
-        gameTextRenderData.destinationRect = functionsLibrary::makeRect(
-            SDL_FPoint
-            {
-                .x = animationStartPosition,
-                .y = nextTextPositionY + (90.0f * screenSizeModifier.y)
-            },
-            screenSizeModifier * gameTextRenderData.textureSize * textScale
-        );
+        //const float animationStartPosition{ screenSize.x };
+        //const float animationEndPosition{ 900.0f * screenSizeModifier.x };
+        //gameTextRenderData.destinationRect = functionsLibrary::makeRect(
+        //    SDL_FPoint
+        //    {
+        //        .x = animationStartPosition,
+        //        .y = nextTextPositionY + (90.0f * screenSizeModifier.y)
+        //    },
+        //    screenSizeModifier * gameTextRenderData.textureSize * scale
+        //);
 
-        gameText.addAnimation(titleAnimationTimeMs,
+        const float scaledSizeX{ gameTextRenderData.textureSize.x * screenSizeModifier.x };
+        const float scaledSizeY{ gameTextRenderData.textureSize.y * screenSizeModifier.y };
+        gameTextRenderData.destinationRect.x =
+            1000.0f * screenSizeModifier.x - (scaledSizeX / 2.0f * scale);
+
+        gameTextRenderData.destinationRect.y =
+            (350.0f + 150.0f) * screenSizeModifier.y - (scaledSizeY / 2.0f * scale);
+
+        gameTextRenderData.destinationRect.w = gameTextRenderData.textureSize.x * screenSizeModifier.x * scale;
+        gameTextRenderData.destinationRect.h = gameTextRenderData.textureSize.y * screenSizeModifier.y * scale;
+
+        /*gameText.addAnimation(titleAnimationTimeMs,
             [&destRect = gameTextRenderData.destinationRect,
             animationStartPosition, animationEndPosition
             ](const float delta)
@@ -154,7 +176,7 @@ void MenuSystem::createTitle(WidgetComponent& widgetComponent) const
                     animationStartPosition, animationEndPosition, delta) };
                 destRect.x = newPositionX;
             }
-        );
+        );*/
     }
 }
 
@@ -163,7 +185,7 @@ void MenuSystem::createButton(WidgetComponent& widgetComponent,
 {
     const SDL_FPoint screenSize{ renderSystem_->getScreenSizeF() };
     const SDL_FPoint screenSizeModifier{ renderSystem_->getScreenSizeF() / constants::baseScreenSize };
-    constexpr float scale{1.5f};
+    constexpr float scale{2.0f};
 
     {
         Widget& button{ widgetComponent.addWidget() };
@@ -176,19 +198,31 @@ void MenuSystem::createButton(WidgetComponent& widgetComponent,
         buttonRenderData.sourceRect = functionsLibrary::makeRect(constants::sdlZeroPoint,
             buttonRenderData.textureSize);
 
-        const float animationStartPosition{ screenSize.y + padding };
-        auto scaled = buttonRenderData.textureSize.x * scale;
-        auto scaleDiffX = buttonRenderData.textureSize.x * scale * screenSizeModifier.x - buttonRenderData.textureSize.x * screenSizeModifier.x;
-        auto scaleDiffY = buttonRenderData.textureSize.y * scale - buttonRenderData.textureSize.y;
-        const float animationEndPosition{ endPosition * screenSizeModifier.y - scaleDiffY / 2.0f };
-        buttonRenderData.destinationRect = functionsLibrary::makeRect(
+        //const float animationStartPosition{ screenSize.y + padding };
+        //auto scaled = buttonRenderData.textureSize.x * scale;
+        //auto scaleDiffX = buttonRenderData.textureSize.x * scale * screenSizeModifier.x - buttonRenderData.textureSize.x * screenSizeModifier.x;
+        //auto scaleDiffY = buttonRenderData.textureSize.y * scale - buttonRenderData.textureSize.y;
+        //const float animationEndPosition{ endPosition * screenSizeModifier.y - scaleDiffY / 2.0f };
+        /*buttonRenderData.destinationRect = functionsLibrary::makeRect(
             SDL_FPoint
             {
-                .x = screenSize.x / 2.0f - buttonRenderData.textureSize.x * screenSizeModifier.x / 2.0f - scaleDiffX / 2.0f ,
-                .y = animationEndPosition
+                .x = screenSize.x / 2.0f,
+                .y = screenSize.y / 2.0f
             },
             screenSizeModifier * buttonRenderData.textureSize * scale
-        );
+        );*/
+
+        const float scaledSizeX{ buttonRenderData.textureSize.x * screenSizeModifier.x};
+        const float scaledSizeY{ buttonRenderData.textureSize.y * screenSizeModifier.y};
+        const float animationEndPosition{700.0f};
+        buttonRenderData.destinationRect.x =
+            screenSize.x / 2.0f * screenSizeModifier.x - (scaledSizeX / 2.0f * scale);
+
+        buttonRenderData.destinationRect.y =
+            700.0f * screenSizeModifier.y - (scaledSizeY / 2.0f * scale);
+
+        buttonRenderData.destinationRect.w = buttonRenderData.textureSize.x * screenSizeModifier.x * scale;
+        buttonRenderData.destinationRect.h = buttonRenderData.textureSize.y * screenSizeModifier.y * scale;
 
         /*button.addAnimation(titleAnimationTimeMs,
             [&destRect = buttonRenderData.destinationRect,

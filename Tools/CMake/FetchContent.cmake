@@ -2,27 +2,12 @@ cmake_minimum_required(VERSION 3.28)
 
 include(FetchContent)
 
-FetchContent_Declare(
-    SDL2
-    GIT_REPOSITORY  https://github.com/libsdl-org/SDL
-    GIT_TAG         fb1497566c5a05e2babdcf45ef0ab5c7cca2c4ae
-    GIT_PROGRESS    TRUE
-)
+FetchContent_Declare(SDL2 URL https://github.com/libsdl-org/SDL/releases/download/release-2.30.3/SDL2-2.30.3.tar.gz)
+FetchContent_Declare(SDL2Image URL https://github.com/libsdl-org/SDL_image/releases/download/release-2.8.2/SDL2_image-2.8.2.tar.gz)
+FetchContent_Declare(SDL2ttf URL https://github.com/libsdl-org/SDL_ttf/releases/download/release-2.22.0/SDL2_ttf-2.22.0.tar.gz)
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
 
-FetchContent_Declare(
-    SDL2Image
-    GIT_REPOSITORY  https://github.com/libsdl-org/SDL_image
-    GIT_TAG         abcf63aa71b4e3ac32120fa9870a6500ddcdcc89
-    GIT_PROGRESS    TRUE
-)
-
-FetchContent_Declare(
-    SDL2ttf
-    GIT_REPOSITORY  https://github.com/libsdl-org/SDL_ttf
-    GIT_TAG         4a318f8dfaa1bb6f10e0c5e54052e25d3c7f3440
-    GIT_PROGRESS    TRUE
-)
-
+FetchContent_MakeAvailable(json)
 FetchContent_MakeAvailable(SDL2)
 FetchContent_MakeAvailable(SDL2Image)
 FetchContent_MakeAvailable(SDL2ttf)
