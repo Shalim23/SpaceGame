@@ -6,7 +6,13 @@ class Game
 {
 public:
     Game();
+    void init();
     void run();
+    void shutdown();
+
+private:
+    void initSDL();
+    void shutdownSDL();
 
 private:
     World world_;

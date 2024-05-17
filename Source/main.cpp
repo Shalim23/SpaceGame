@@ -2,19 +2,17 @@
 
 int main(int argc, char* args[])
 {
-    //SDLWrapper{};
-    //RenderSystem{};
-
-    
-    std::unique_ptr<Game> g{std::make_unique<Game>()};
-    g->run();
+   
+    Game g{};
+    g.init();
+    g.run();
+    g.shutdown();
 
     return 0;
 }
 
 
 //restructure:
-// - separate SDL init
 // - separate render(data consume only)
 // - game objects render data calculation
 // - ui render data calculation

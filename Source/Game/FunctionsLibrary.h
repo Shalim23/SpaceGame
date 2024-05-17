@@ -2,6 +2,14 @@
 #include <numeric>
 #include <chrono>
 
+namespace utils
+{
+    static void showMessageBox(const std::string_view title, const std::string_view message)
+    {
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title.data(), message.data(), nullptr);
+    }
+}
+
 namespace functionsLibrary
 {
     static bool inRange(const float value, const SDL_FPoint minMaxValue)

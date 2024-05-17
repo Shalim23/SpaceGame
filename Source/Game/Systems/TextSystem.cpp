@@ -8,12 +8,6 @@ void TextSystem::init(World& world, SystemsManager& systemsManager)
 {
     renderSystem_ = &systemsManager.getSystem<RenderSystem>();
 
-    if (TTF_Init() != 0)
-    {
-        renderSystem_->showMessageBox(__FUNCTION__, "Failed to init SDL TTF!");
-        throw SystemInitException{};
-    }
-
     const std::vector<char> fontRawData{ getFontRawData() };
     font_ = loadFontFromRawData(fontRawData, 40);
 
@@ -28,8 +22,6 @@ void TextSystem::shutdown()
     }
     
     TTF_CloseFont(font_);
-
-    TTF_Quit();
 }
 
 RenderData TextSystem::getText(const TextType type) const

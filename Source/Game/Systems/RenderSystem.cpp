@@ -11,18 +11,6 @@
 
 void RenderSystem::preInit(World& world, SystemsManager& systemsManager)
 {
-    if (SDL_Init(SDL_INIT_VIDEO) != 0)
-    {
-        showMessageBox(__FUNCTION__, "Failed to init SDL!");
-        throw SystemInitException{};
-    }
-
-    if ((IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG) != IMG_INIT_PNG)
-    {
-        showMessageBox(__FUNCTION__, "Failed to init SDL_Image!");
-        throw SystemInitException{};
-    }
-
     constexpr Uint32 fullscreenFlag{ 0 };
     //constexpr Uint32 fullscreenFlag{ SDL_WINDOW_FULLSCREEN_DESKTOP };
 
@@ -73,8 +61,6 @@ void RenderSystem::shutdown()
     
     SDL_DestroyRenderer(renderer_);
     SDL_DestroyWindow(window_);
-    IMG_Quit();
-    SDL_Quit();
 }
 
 void RenderSystem::showMessageBox(const char* title, const char* message) const
