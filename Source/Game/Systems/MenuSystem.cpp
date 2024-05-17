@@ -95,13 +95,13 @@ void MenuSystem::createTitle(WidgetComponent& widgetComponent) const
         RenderData& spaceTextRenderData{ spaceText.updateRenderData() };
         spaceTextRenderData = textSystem_->getText(TextType::SPACE);
 
-        spaceTextRenderData.sourceRect = functionsLibrary::makeRect(constants::sdlZeroPoint,
+        spaceTextRenderData.sourceRect = utils::makeRect(constants::sdlZeroPoint,
             spaceTextRenderData.textureSize);
 
    //     const float animationStartPosition{-spaceTextRenderData.textureSize.x
 			//* screenSizeModifier.x * textScale };
    //     const float animationEndPosition{600.0f * screenSizeModifier.x};
-   //     spaceTextRenderData.destinationRect = functionsLibrary::makeRect(
+   //     spaceTextRenderData.destinationRect = utils::makeRect(
    //         SDL_FPoint
    //         {
    //             .x = animationStartPosition,
@@ -129,7 +129,7 @@ void MenuSystem::createTitle(WidgetComponent& widgetComponent) const
 			animationStartPosition, animationEndPosition
 			](const float delta)
 			{
-				const float newPositionX{functionsLibrary::lerp(
+				const float newPositionX{utils::lerp(
 					animationStartPosition, animationEndPosition, delta)};
 				destRect.x = newPositionX;
 			}
@@ -142,12 +142,12 @@ void MenuSystem::createTitle(WidgetComponent& widgetComponent) const
         RenderData& gameTextRenderData{ gameText.updateRenderData() };
         gameTextRenderData = textSystem_->getText(TextType::GAME);
 
-        gameTextRenderData.sourceRect = functionsLibrary::makeRect(constants::sdlZeroPoint,
+        gameTextRenderData.sourceRect = utils::makeRect(constants::sdlZeroPoint,
             gameTextRenderData.textureSize);
 
         //const float animationStartPosition{ screenSize.x };
         //const float animationEndPosition{ 900.0f * screenSizeModifier.x };
-        //gameTextRenderData.destinationRect = functionsLibrary::makeRect(
+        //gameTextRenderData.destinationRect = utils::makeRect(
         //    SDL_FPoint
         //    {
         //        .x = animationStartPosition,
@@ -172,7 +172,7 @@ void MenuSystem::createTitle(WidgetComponent& widgetComponent) const
             animationStartPosition, animationEndPosition
             ](const float delta)
             {
-                const float newPositionX{ functionsLibrary::lerp(
+                const float newPositionX{ utils::lerp(
                     animationStartPosition, animationEndPosition, delta) };
                 destRect.x = newPositionX;
             }
@@ -195,7 +195,7 @@ void MenuSystem::createButton(WidgetComponent& widgetComponent,
         buttonRenderData.texture = textureInfo.texture;
         buttonRenderData.textureSize = textureInfo.size;
 
-        buttonRenderData.sourceRect = functionsLibrary::makeRect(constants::sdlZeroPoint,
+        buttonRenderData.sourceRect = utils::makeRect(constants::sdlZeroPoint,
             buttonRenderData.textureSize);
 
         //const float animationStartPosition{ screenSize.y + padding };
@@ -203,7 +203,7 @@ void MenuSystem::createButton(WidgetComponent& widgetComponent,
         //auto scaleDiffX = buttonRenderData.textureSize.x * scale * screenSizeModifier.x - buttonRenderData.textureSize.x * screenSizeModifier.x;
         //auto scaleDiffY = buttonRenderData.textureSize.y * scale - buttonRenderData.textureSize.y;
         //const float animationEndPosition{ endPosition * screenSizeModifier.y - scaleDiffY / 2.0f };
-        /*buttonRenderData.destinationRect = functionsLibrary::makeRect(
+        /*buttonRenderData.destinationRect = utils::makeRect(
             SDL_FPoint
             {
                 .x = screenSize.x / 2.0f,
@@ -229,7 +229,7 @@ void MenuSystem::createButton(WidgetComponent& widgetComponent,
             animationStartPosition, animationEndPosition
             ](const float delta)
             {
-                const float newPositionY{ functionsLibrary::lerp(
+                const float newPositionY{ utils::lerp(
                     animationStartPosition, animationEndPosition, delta) };
                 destRect.y = newPositionY;
             }
@@ -241,14 +241,14 @@ void MenuSystem::createButton(WidgetComponent& widgetComponent,
         buttonTextRenderData = textSystem_->getText(text);
         SDL_SetTextureColorMod(buttonTextRenderData.texture, 0, 0, 0);
 
-        buttonTextRenderData.sourceRect = functionsLibrary::makeRect(constants::sdlZeroPoint,
+        buttonTextRenderData.sourceRect = utils::makeRect(constants::sdlZeroPoint,
             buttonTextRenderData.textureSize);
 
         auto textScaleDiffX = buttonTextRenderData.textureSize.x * scale - buttonTextRenderData.textureSize.x;
         auto textScaleDiffY = buttonTextRenderData.textureSize.y * scale - buttonTextRenderData.textureSize.y;
         const float textAnimationStartPosition{ screenSize.y + padding };
         const float textAnimationEndPosition{ endPosition * screenSizeModifier.y + textScaleDiffY / 2.0f };
-        buttonTextRenderData.destinationRect = functionsLibrary::makeRect(
+        buttonTextRenderData.destinationRect = utils::makeRect(
             SDL_FPoint
             {
                 .x = buttonRenderData.destinationRect.x + buttonTextRenderData.textureSize.x * screenSizeModifier.x + textScaleDiffX * 2.0f,
@@ -262,7 +262,7 @@ void MenuSystem::createButton(WidgetComponent& widgetComponent,
             textAnimationStartPosition, textAnimationEndPosition
             ](const float delta)
             {
-                const float newPositionY{ functionsLibrary::lerp(
+                const float newPositionY{ utils::lerp(
                     textAnimationStartPosition, textAnimationEndPosition, delta) };
                 destRect.y = newPositionY;
             }
@@ -290,7 +290,7 @@ void MenuSystem::createButton(WidgetComponent& widgetComponent,
 //		backgroundElementTextures[2], entity) };
 //	renderData.texture = textureInfo.texture;
 //	renderData.textureSize = textureInfo.size;
-//	renderData.sourceRect = functionsLibrary::makeRect(constants::sdlZeroPoint, renderData.textureSize);
+//	renderData.sourceRect = utils::makeRect(constants::sdlZeroPoint, renderData.textureSize);
 //	
 //    renderData.destinationRect = createMainMenuBackgroundElementDestRect(screenSize, renderData.textureSize);
 //
@@ -302,7 +302,7 @@ void MenuSystem::createButton(WidgetComponent& widgetComponent,
 //SDL_FRect MenuSystem::createMainMenuBackgroundElementDestRect(const SDL_FPoint& screenSize, const SDL_Point& textureSize) const
 //{
 //	const float elementRandomScale{ randomSystem_->getRandomValue(mainMenuBackgroundElementsMinMaxScale)};
-//    return functionsLibrary::makeRect(
+//    return utils::makeRect(
 //        SDL_FPoint{
 //        .x = randomSystem_->getRandomValue(SDL_FPoint{.x = 0, .y = screenSize.x}),
 //        .y = randomSystem_->getRandomValue(SDL_FPoint{.x = 0, .y = screenSize.y})
@@ -319,7 +319,7 @@ void MenuSystem::createButton(WidgetComponent& widgetComponent,
 //    widget.addAnimation(randomAnimationTime,
 //        [texture = widget.updateRenderData().texture](const float delta)
 //        {
-//            functionsLibrary::lerpOpacity(texture, delta);
+//            utils::lerpOpacity(texture, delta);
 //        });
 //}
 

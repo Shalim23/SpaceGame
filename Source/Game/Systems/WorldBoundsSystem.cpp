@@ -1,7 +1,7 @@
 #include "WorldBoundsSystem.h"
 #include "../World.h"
 #include "../SystemsManager.h"
-#include "../FunctionsLibrary.h"
+#include "../Utils.h"
 #include "../GameplayStatics.h"
 #include "../Constants.h"
 
@@ -74,8 +74,8 @@ void WorldBoundsSystem::generateBackground(World& world)
 
 bool WorldBoundsSystem::isPlayerInRange(const TransformComponent& playerTransform) const
 {
-    return functionsLibrary::inRange(playerTransform.location.x, minMaxBounds) &&
-        functionsLibrary::inRange(playerTransform.location.y, minMaxBounds);
+    return utils::inRange(playerTransform.location.x, minMaxBounds) &&
+        utils::inRange(playerTransform.location.y, minMaxBounds);
 }
 
 void WorldBoundsSystem::createOutOfBoundsEntity(World& world) const
@@ -96,8 +96,8 @@ void WorldBoundsSystem::createBackgroundWidget(WidgetComponent& widgetComponent)
     RenderData& backgroundRenderData{ background.updateRenderData() };
     backgroundRenderData.texture = renderSystem_->getTexture(TextureType::white_pixel).texture;
 
-    backgroundRenderData.sourceRect = functionsLibrary::makeRect(constants::sdlZeroPoint, renderSystem_->getScreenSize());
-    backgroundRenderData.destinationRect = functionsLibrary::makeRect(constants::sdlZeroPointF, renderSystem_->getScreenSizeF());
+    backgroundRenderData.sourceRect = utils::makeRect(constants::sdlZeroPoint, renderSystem_->getScreenSize());
+    backgroundRenderData.destinationRect = utils::makeRect(constants::sdlZeroPointF, renderSystem_->getScreenSizeF());
 
     constexpr SDL_Color blackColor{ .r = 0, .g = 0, .b = 0 };
     SDL_SetTextureColorMod(backgroundRenderData.texture,
@@ -107,7 +107,7 @@ void WorldBoundsSystem::createBackgroundWidget(WidgetComponent& widgetComponent)
     background.addAnimation(backgroundAnimationTime,
         [texture = backgroundRenderData.texture](const float delta)
         {
-            functionsLibrary::lerpOpacity(texture, delta);
+            utils::lerpOpacity(texture, delta);
         });
 }
 
@@ -124,10 +124,10 @@ void WorldBoundsSystem::createTextWidget(const Entity entity, WidgetComponent& w
         RenderData& warningTextRenderData{ warningText.updateRenderData() };
         warningTextRenderData = textSystem_->getText(TextType::Warning);
 
-        warningTextRenderData.sourceRect = functionsLibrary::makeRect(constants::sdlZeroPoint,
+        warningTextRenderData.sourceRect = utils::makeRect(constants::sdlZeroPoint,
             warningTextRenderData.textureSize);
 
-        warningTextRenderData.destinationRect = functionsLibrary::makeRect(
+        warningTextRenderData.destinationRect = utils::makeRect(
             SDL_FPoint
             {
                 .x = screenSize.x / 2.0f -
@@ -147,10 +147,10 @@ void WorldBoundsSystem::createTextWidget(const Entity entity, WidgetComponent& w
         RenderData& radiationTextRenderData{ radiationText.updateRenderData() };
         radiationTextRenderData = textSystem_->getText(TextType::Highradiationlevel);
 
-        radiationTextRenderData.sourceRect = functionsLibrary::makeRect(constants::sdlZeroPoint,
+        radiationTextRenderData.sourceRect = utils::makeRect(constants::sdlZeroPoint,
             radiationTextRenderData.textureSize);
 
-        radiationTextRenderData.destinationRect = functionsLibrary::makeRect(
+        radiationTextRenderData.destinationRect = utils::makeRect(
             SDL_FPoint
             {
                 .x = screenSize.x / 2.0f -

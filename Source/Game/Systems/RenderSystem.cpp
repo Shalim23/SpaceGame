@@ -2,7 +2,7 @@
 #include "../World.h"
 #include "../SystemsManager.h"
 #include "../Types/Exceptions.h"
-#include "../FunctionsLibrary.h"
+#include "../Utils.h"
 #include "../GameplayStatics.h"
 #include "../Constants.h"
 #include "SDL_image.h"
@@ -268,7 +268,7 @@ void RenderSystem::processSpriteData(World& world)
         layerData.emplace_back(&sprite);
         sprite.renderData.rotation = renderTransform.rotation;
 
-        sprite.renderData.sourceRect = functionsLibrary::makeRect(
+        sprite.renderData.sourceRect = utils::makeRect(
             SDL_Point{
                 .x = std::abs(static_cast<int>(renderRect.x - intersectRect.x)),
                 .y = std::abs(static_cast<int>(renderRect.y - intersectRect.y))
@@ -306,7 +306,7 @@ SpriteComponent* RenderSystem::processPlayerData(World& w, const SDL_FPoint& hal
     auto& sprite{ *w.tryGetComponent<ComponentType::Sprite>(playerEntity) };
     sprite.renderData.rotation = playerTransform.rotation;
 
-    sprite.renderData.sourceRect = functionsLibrary::makeRect(constants::sdlZeroPoint, sprite.renderData.textureSize);
+    sprite.renderData.sourceRect = utils::makeRect(constants::sdlZeroPoint, sprite.renderData.textureSize);
 
     sprite.renderData.destinationRect = createDestinationRect(
         half_screen_size.x - sprite.renderData.textureSize.x / 2,

@@ -20,7 +20,7 @@ namespace gameplayStatics
         std::vector<const DynamicTexture*> dynamicTextsToRemove;
         for (const auto& texture : textures)
         {
-            if (!functionsLibrary::containsIf(widgetComponents, [&texture](const auto& component)
+            if (!utils::containsIf(widgetComponents, [&texture](const auto& component)
                 {   return texture.entity == component.entity; }))
             {
                 dynamicTextsToRemove.push_back(&texture);
