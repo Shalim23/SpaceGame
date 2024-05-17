@@ -3,7 +3,7 @@
 #include "../SystemsManager.h"
 #include "../Constants.h"
 
-void MovementSystem::update(World& world)
+void MovementSystem::update(World& world, const double deltaTime)
 {
     for (auto& movement : world.getComponents<ComponentType::Movement>())
     {

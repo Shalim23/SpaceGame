@@ -2,9 +2,8 @@
 #include "../World.h"
 #include "../SystemsManager.h"
 
-void GameplaySystem::postInit(World& world, SystemsManager& systemsManager)
+void GameplaySystem::init(World& world, SystemsManager& systemsManager)
 {
-
     const auto entity{ world.createEntity() };
     auto& gameStateComponent{world.addComponent<ComponentType::GameState>(entity)};
     gameStateComponent.gameState = GameStateType::MAIN_MENU;

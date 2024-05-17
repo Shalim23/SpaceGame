@@ -16,14 +16,10 @@ void WorldBoundsSystem::init(World& world, SystemsManager& systemsManager)
 {
     renderSystem_ = &systemsManager.getSystem<RenderSystem>();
     textSystem_ = &systemsManager.getSystem<TextSystem>();
-}
-
-void WorldBoundsSystem::postInit(World& world, SystemsManager& systemsManager)
-{
     generateBackground(world);
 }
 
-void WorldBoundsSystem::update(World& world)
+void WorldBoundsSystem::update(World& world, const double deltaTime)
 {
     const GameStateType gameState{ gameplayStatics::getCurrentGameState(world) };
     if (gameState != GameStateType::INGAME)

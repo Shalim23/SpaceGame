@@ -16,10 +16,9 @@ Game::Game()
 void Game::init()
 {
     initSDL();
-    //#TODO load resources(Resources system)
-    systemsManager_.preInit(world_);
+    systemsManager_.getSystem<ResourcesSystem>().loadResources();
+
     systemsManager_.init(world_);
-    systemsManager_.postInit(world_);
 }
 
 void Game::run()
@@ -45,9 +44,9 @@ void Game::run()
         //set keyboard input state
         inputSystem_.processInput(inputState_);
 
-        systemsManager_.update(world_);
+        systemsManager_.update(world_, deltaTime_);
 
-        //renderSystem_.render()
+        renderSystem_.render();
 
         const auto frameTimeEnd{ SDL_GetPerformanceCounter() };
         deltaTime_ = (frameTimeEnd - frameTimeStart)

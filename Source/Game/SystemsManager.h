@@ -1,6 +1,6 @@
 #pragma once
 #include "World.h"
-#include "SystemsRegistry.h"
+#include "Generated/SystemsRegistry.h"
 
 class SystemsManager
 {
@@ -13,28 +13,16 @@ public:
     SystemsManager& operator=(const SystemsManager& other) = delete;
     SystemsManager& operator=(SystemsManager&& other) = delete;
 
-    void preInit(World& world)
-    {
-        std::apply([&world, this](auto&&... system)
-            {((system.preInit(world, *this)), ...); }, systems_);
-    }
-
     void init(World& world)
     {
         std::apply([&world, this](auto&&... system)
             {((system.init(world, *this)), ...);}, systems_);
     }
 
-    void postInit(World& world)
+    void update(World& world, const double deltaTime)
     {
-        std::apply([&world, this](auto&&... system)
-            {((system.postInit(world, *this)), ...); }, systems_);
-    }
-
-    void update(World& world)
-    {
-        std::apply([&world](auto&&... system)
-            {((system.update(world)), ...); }, systems_);
+        std::apply([&world, deltaTime](auto&&... system)
+            {((system.update(world, deltaTime)), ...); }, systems_);
     }
 
     void shutdown()
@@ -50,5 +38,5 @@ public:
     }
 
 private:
-    Systems systems_;
+    RegisteredSystems systems_;
 };

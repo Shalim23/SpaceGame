@@ -21,8 +21,8 @@ def update_registry(obj_type: str):
 
     match obj_type:
         case "system":
-            print("Systems Registry must be updated manually!")
-            return
+            template = environment.get_template("SystemsRegistryTemplate.h")
+            content = template.render(systems=objects)
         
         case "component":
             enum_name = "ComponentType"
@@ -37,14 +37,14 @@ def update_registry(obj_type: str):
                 comps_dict[f"{enum_name}::{components[i]}"] = objects[i]
             template = environment.get_template("ComponentsRegistryTemplate.h")
             content = template.render(components=comps_dict)
-            with open(registry_path, "w") as f:
-                f.write(content)
-            print(f"Updated {registry_path}")
 
         case _:
             print(f"Unknown type {obj_type}!")
             return
 
+    with open(registry_path, "w") as f:
+        f.write(content)
+    print(f"Updated {registry_path}")
 
 def _main():
     parser = argparse.ArgumentParser()

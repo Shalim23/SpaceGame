@@ -21,7 +21,7 @@ void MenuSystem::init(World& world, SystemsManager& systemsManager)
 	textSystem_ = &systemsManager.getSystem<TextSystem>();
 }
 
-void MenuSystem::update(World& world)
+void MenuSystem::update(World& world, const double deltaTime)
 {
 	const GameStateType gameState{gameplayStatics::getCurrentGameState(world)};
 	switch (gameState)

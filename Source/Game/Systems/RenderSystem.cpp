@@ -9,7 +9,7 @@
 #include <fstream>
 #include <sstream>
 
-void RenderSystem::preInit(World& world, SystemsManager& systemsManager)
+void RenderSystem::init(World& world, SystemsManager& systemsManager)
 {
     constexpr Uint32 fullscreenFlag{ 0 };
     //constexpr Uint32 fullscreenFlag{ SDL_WINDOW_FULLSCREEN_DESKTOP };
@@ -32,7 +32,7 @@ void RenderSystem::preInit(World& world, SystemsManager& systemsManager)
     initTexturesDescriptors();
 }
 
-void RenderSystem::update(World& world)
+void RenderSystem::update(World& world, const double deltaTime)
 {
     SDL_SetRenderDrawColor(renderer_, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(renderer_);
@@ -61,6 +61,11 @@ void RenderSystem::shutdown()
     
     SDL_DestroyRenderer(renderer_);
     SDL_DestroyWindow(window_);
+}
+
+void RenderSystem::render()
+{
+
 }
 
 void RenderSystem::showMessageBox(const char* title, const char* message) const

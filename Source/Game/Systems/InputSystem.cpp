@@ -22,7 +22,7 @@ void InputSystem::init(World& world, SystemsManager& systemsManager)
     registerInput();
 }
 
-void InputSystem::update(World& world)
+void InputSystem::update(World& world, const double deltaTime)
 {
     const GameStateType gameState{ gameplayStatics::getCurrentGameState(world) };
     if (gameState != GameStateType::INGAME)
