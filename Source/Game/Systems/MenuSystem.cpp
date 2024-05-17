@@ -95,7 +95,7 @@ void MenuSystem::createTitle(WidgetComponent& widgetComponent) const
         RenderData& spaceTextRenderData{ spaceText.updateRenderData() };
         spaceTextRenderData = textSystem_->getText(TextType::SPACE);
 
-        spaceTextRenderData.sourceRect = functionsLibrary::makeRect(constants::sdlZeroPoint,
+        spaceTextRenderData.sourceRect = utils::makeRect(constants::sdlZeroPoint,
             spaceTextRenderData.textureSize);
 
    //     const float animationStartPosition{-spaceTextRenderData.textureSize.x
@@ -142,7 +142,7 @@ void MenuSystem::createTitle(WidgetComponent& widgetComponent) const
         RenderData& gameTextRenderData{ gameText.updateRenderData() };
         gameTextRenderData = textSystem_->getText(TextType::GAME);
 
-        gameTextRenderData.sourceRect = functionsLibrary::makeRect(constants::sdlZeroPoint,
+        gameTextRenderData.sourceRect = utils::makeRect(constants::sdlZeroPoint,
             gameTextRenderData.textureSize);
 
         //const float animationStartPosition{ screenSize.x };
@@ -195,7 +195,7 @@ void MenuSystem::createButton(WidgetComponent& widgetComponent,
         buttonRenderData.texture = textureInfo.texture;
         buttonRenderData.textureSize = textureInfo.size;
 
-        buttonRenderData.sourceRect = functionsLibrary::makeRect(constants::sdlZeroPoint,
+        buttonRenderData.sourceRect = utils::makeRect(constants::sdlZeroPoint,
             buttonRenderData.textureSize);
 
         //const float animationStartPosition{ screenSize.y + padding };

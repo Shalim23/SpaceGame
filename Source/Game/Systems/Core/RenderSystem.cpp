@@ -2,7 +2,7 @@
 #include "../World.h"
 #include "../SystemsManager.h"
 #include "../Types/Exceptions.h"
-#include "../FunctionsLibrary.h"
+#include "../Utils.h"
 #include "../GameplayStatics.h"
 #include "../Constants.h"
 #include "SDL_image.h"
@@ -11,18 +11,6 @@
 
 void RenderSystem::preInit(World& world, SystemsManager& systemsManager)
 {
-    if (SDL_Init(SDL_INIT_VIDEO) != 0)
-    {
-        showMessageBox(__FUNCTION__, "Failed to init SDL!");
-        throw SystemInitException{};
-    }
-
-    if ((IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG) != IMG_INIT_PNG)
-    {
-        showMessageBox(__FUNCTION__, "Failed to init SDL_Image!");
-        throw SystemInitException{};
-    }
-
     constexpr Uint32 fullscreenFlag{ 0 };
     //constexpr Uint32 fullscreenFlag{ SDL_WINDOW_FULLSCREEN_DESKTOP };
 
@@ -30,14 +18,14 @@ void RenderSystem::preInit(World& world, SystemsManager& systemsManager)
         SDL_WINDOWPOS_CENTERED, 1920, 1080, fullscreenFlag);
     if (!window_)
     {
-        showMessageBox(__FUNCTION__, "Failed to create window!");
+        utils::showMessageBox(__FUNCTION__, "Failed to create window!");
         throw SystemInitException{};
     }
 
     renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!renderer_)
     {
-        showMessageBox(__FUNCTION__, "Failed to create renderer!");
+        utils::showMessageBox(__FUNCTION__, "Failed to create renderer!");
         throw SystemInitException{};
     }
 
@@ -73,13 +61,7 @@ void RenderSystem::shutdown()
     
     SDL_DestroyRenderer(renderer_);
     SDL_DestroyWindow(window_);
-    IMG_Quit();
-    SDL_Quit();
-}
-
-void RenderSystem::showMessageBox(const char* title, const char* message) const
-{
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title, message, window_);
+    
 }
 
 const Texture& RenderSystem::getTexture(const TextureType type)
@@ -160,7 +142,7 @@ void RenderSystem::initTexturesDescriptors()
     std::ifstream descriptorsFile("Data/texturesDescriptors.bin", std::ios::binary);
     if (!descriptorsFile.is_open())
     {
-        showMessageBox(__FUNCTION__, "texturesDescriptors.bin is missing!");
+        utils::showMessageBox(__FUNCTION__, "texturesDescriptors.bin is missing!");
         throw std::exception{};
     }
 
@@ -192,21 +174,21 @@ std::vector<char> RenderSystem::getTextureData(const TextureType type) const
     {
         std::stringstream ss;
         ss << "Unknown TextureType " << textureTypeTnt << "!";
-        showMessageBox(__FUNCTION__, ss.str().c_str());
+        utils::showMessageBox(__FUNCTION__, ss.str().c_str());
         throw std::exception{};
     }
 
     std::ifstream texturesFile("Data/textures.bin", std::ios::binary);
     if (!texturesFile.is_open())
     {
-        showMessageBox(__FUNCTION__, "textures.bin is missing!");
+        utils::showMessageBox(__FUNCTION__, "textures.bin is missing!");
         throw std::exception{};
     }
 
     texturesFile.seekg(iter->position, std::ios::beg);
     if (!texturesFile)
     {
-        showMessageBox(__FUNCTION__, "textures.bin data is corrupted!");
+        utils::showMessageBox(__FUNCTION__, "textures.bin data is corrupted!");
         throw std::exception{};
     }
 
@@ -214,7 +196,7 @@ std::vector<char> RenderSystem::getTextureData(const TextureType type) const
     texturesFile.read(buffer.data(), iter->size);
     if (!texturesFile)
     {
-        showMessageBox(__FUNCTION__, "textures.bin data is corrupted!");
+        utils::showMessageBox(__FUNCTION__, "textures.bin data is corrupted!");
         throw std::exception{};
     }
 
@@ -282,7 +264,7 @@ void RenderSystem::processSpriteData(World& world)
         layerData.emplace_back(&sprite);
         sprite.renderData.rotation = renderTransform.rotation;
 
-        sprite.renderData.sourceRect = functionsLibrary::makeRect(
+        sprite.renderData.sourceRect = utils::makeRect(
             SDL_Point{
                 .x = std::abs(static_cast<int>(renderRect.x - intersectRect.x)),
                 .y = std::abs(static_cast<int>(renderRect.y - intersectRect.y))
@@ -320,7 +302,7 @@ SpriteComponent* RenderSystem::processPlayerData(World& w, const SDL_FPoint& hal
     auto& sprite{ *w.tryGetComponent<ComponentType::Sprite>(playerEntity) };
     sprite.renderData.rotation = playerTransform.rotation;
 
-    sprite.renderData.sourceRect = functionsLibrary::makeRect(constants::sdlZeroPoint, sprite.renderData.textureSize);
+    sprite.renderData.sourceRect = utils::makeRect(constants::sdlZeroPoint, sprite.renderData.textureSize);
 
     sprite.renderData.destinationRect = createDestinationRect(
         half_screen_size.x - sprite.renderData.textureSize.x / 2,
