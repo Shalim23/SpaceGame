@@ -13,11 +13,13 @@ namespace
 
 void InputSystem::init(World& world, SystemsManager& systemsManager)
 {
-    auto& renderSystem{systemsManager.getSystem<RenderSystem>()};
+    const auto& renderSystem{systemsManager.getSystem<RenderSystem>()};
     SDL_Surface* cursorImage{renderSystem.createSurface(TextureType::UI_cursor)};
     SDL_Cursor* cursor{SDL_CreateColorCursor(cursorImage, 0, 0)};
     SDL_SetCursor(cursor);
     SDL_FreeSurface(cursorImage);
+
+    registerInput();
 }
 
 void InputSystem::update(World& world)
@@ -41,6 +43,16 @@ void InputSystem::update(World& world)
     movement.speedPerSecond = keyboardState[SDL_SCANCODE_W] ? movementSpeedPerSecond : 0.0f;
 }
 
+void InputSystem::shutdown()
+{
+    SDL_FreeCursor(SDL_GetCursor());
+}
+
+void InputSystem::processInput(const Input& currentInput)
+{
+
+}
+
 void InputSystem::showMouseCursor() const
 {
     SDL_ShowCursor(SDL_ENABLE);
@@ -49,6 +61,11 @@ void InputSystem::showMouseCursor() const
 void InputSystem::hideMouseCursor() const
 {
     SDL_ShowCursor(SDL_DISABLE);
+}
+
+void InputSystem::registerInput()
+{
+
 }
 
 void InputSystem::processRotation(const Uint8* const keyboardState, TransformComponent& transform)

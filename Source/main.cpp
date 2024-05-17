@@ -2,7 +2,6 @@
 
 int main(int argc, char* args[])
 {
-   
     Game g{};
     g.init();
     g.run();
@@ -11,11 +10,6 @@ int main(int argc, char* args[])
     return 0;
 }
 
-
-//restructure:
-// - separate render(data consume only)
-// - game objects render data calculation
-// - ui render data calculation
 
 //widget builder:
 // - add debug configuration

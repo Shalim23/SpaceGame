@@ -3,30 +3,35 @@
 #include "SDL_image.h"
 #include "SDL_ttf.h"
 #include "Constants.h"
+#include "Utils.h"
 
 
 Game::Game()
-    : is_running_{true}
+    : inputSystem_{systemsManager_.getSystem<InputSystem>()}
+    , renderSystem_{systemsManager_.getSystem<RenderSystem>()}
+    , is_running_{true}
 {
 }
 
 void Game::init()
 {
     initSDL();
-    systems_manager_.preInit(world_);
-    systems_manager_.init(world_);
-    systems_manager_.postInit(world_);
+    //#TODO load resources(Resources system)
+    systemsManager_.preInit(world_);
+    systemsManager_.init(world_);
+    systemsManager_.postInit(world_);
 }
 
 void Game::run()
 {
     while (is_running_)
     {
-        const Uint64 frameTimeBegin{ SDL_GetTicks64() };
+        auto frameTimeStart{SDL_GetPerformanceCounter()};
 
         SDL_Event currentEvent;
         while (SDL_PollEvent(&currentEvent))
         {
+            //#TODO mouse buttons
             switch (currentEvent.type)
             {
             case SDL_QUIT:
@@ -37,19 +42,22 @@ void Game::run()
             }
         }
 
-        systems_manager_.update(world_);
+        //set keyboard input state
+        inputSystem_.processInput(inputState_);
 
-        const Uint64 frameTime{ SDL_GetTicks64() - frameTimeBegin };
-        if (frameTime < constants::frameTimeMs)
-        {
-            SDL_Delay(constants::frameTimeMs - frameTime);
-        }
+        systemsManager_.update(world_);
+
+        //renderSystem_.render()
+
+        const auto frameTimeEnd{ SDL_GetPerformanceCounter() };
+        deltaTime_ = (frameTimeEnd - frameTimeStart)
+            / static_cast<double>(SDL_GetPerformanceFrequency());
     }
 }
 
 void Game::shutdown()
 {
-    systems_manager_.shutdown();
+    systemsManager_.shutdown();
     shutdownSDL();
 }
 
