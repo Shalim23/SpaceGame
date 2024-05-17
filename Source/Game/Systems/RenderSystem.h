@@ -30,6 +30,8 @@ public:
 	void update(World& world);
 	void shutdown();
 
+	void showMessageBox(const char* title, const char* message) const;
+
     const Texture& getTexture(const TextureType type);
     Texture createDynamicTexture(const TextureType type, const Entity entity);
     void addDynamicTexture(const Entity entity, SDL_Texture* texture);

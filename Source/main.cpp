@@ -2,13 +2,12 @@
 
 int main(int argc, char* args[])
 {
-    std::unique_ptr<Game> g{std::make_unique<Game>()};
-    if (g->init())
-    {
-        g->run();
-    }
+    //SDLWrapper{};
+    //RenderSystem{};
 
-    g->shutdown();
+    
+    std::unique_ptr<Game> g{std::make_unique<Game>()};
+    g->run();
 
     return 0;
 }

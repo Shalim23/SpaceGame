@@ -2,12 +2,17 @@
 #include "../World.h"
 #include "../SystemsManager.h"
 #include "../Types/Exceptions.h"
-#include "../Utils.h"
 #include <fstream>
 
 void TextSystem::init(World& world, SystemsManager& systemsManager)
 {
     renderSystem_ = &systemsManager.getSystem<RenderSystem>();
+
+    if (TTF_Init() != 0)
+    {
+        renderSystem_->showMessageBox(__FUNCTION__, "Failed to init SDL TTF!");
+        throw SystemInitException{};
+    }
 
     const std::vector<char> fontRawData{ getFontRawData() };
     font_ = loadFontFromRawData(fontRawData, 40);
@@ -23,6 +28,8 @@ void TextSystem::shutdown()
     }
     
     TTF_CloseFont(font_);
+
+    TTF_Quit();
 }
 
 RenderData TextSystem::getText(const TextType type) const
@@ -46,14 +53,14 @@ RenderData TextSystem::createText(std::string_view text)
     if (!textSurface)
     {
         auto a = SDL_GetError();
-        utils::showMessageBox(__FUNCTION__, "Failed to create text surface!");
+        renderSystem_->showMessageBox(__FUNCTION__, "Failed to create text surface!");
         throw std::exception{};
     }
 
     SDL_Texture* texture{ renderSystem_->createTextureFromSurface(textSurface) };
     if (!texture)
     {
-        utils::showMessageBox(__FUNCTION__, "Failed to create texture from text surface!");
+        renderSystem_->showMessageBox(__FUNCTION__, "Failed to create texture from text surface!");
         throw std::exception{};
     }
 
@@ -72,7 +79,7 @@ std::vector<char> TextSystem::getFontRawData() const
     std::ifstream fontFile("Data/gameFont.bin", std::ios::binary);
     if (!fontFile.is_open())
     {
-        utils::showMessageBox(__FUNCTION__, "gameFont.bin is missing!");
+        renderSystem_->showMessageBox(__FUNCTION__, "gameFont.bin is missing!");
         throw SystemInitException{};
     }
 
@@ -88,7 +95,7 @@ std::vector<TextSystem::TextDescriptor> TextSystem::getTextDescriptors() const
     std::ifstream textDescriptorsFile("Data/textDescriptors.bin", std::ios::binary);
     if (!textDescriptorsFile.is_open())
     {
-        utils::showMessageBox(__FUNCTION__, "textDescriptors.bin is missing!");
+        renderSystem_->showMessageBox(__FUNCTION__, "textDescriptors.bin is missing!");
         throw SystemInitException{};
     }
 
@@ -119,14 +126,14 @@ TTF_Font* TextSystem::loadFontFromRawData(const std::vector<char>& rawData, cons
     SDL_RWops* rw{SDL_RWFromConstMem(rawData.data(), rawData.size())};
     if (!rw)
     {
-        utils::showMessageBox(__FUNCTION__, "Failed to create RWops!");
+        renderSystem_->showMessageBox(__FUNCTION__, "Failed to create RWops!");
         throw SystemInitException{};
     }
 
     TTF_Font* font{TTF_OpenFontRW(rw, 1, fontSize)};
     if (!font)
     {
-        utils::showMessageBox(__FUNCTION__, "Failed to load font!");
+        renderSystem_->showMessageBox(__FUNCTION__, "Failed to load font!");
         throw SystemInitException{};
         SDL_RWclose(rw);
     }

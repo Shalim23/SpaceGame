@@ -1,7 +1,7 @@
 #pragma once
 #include "Generated/ComponentsRegistry.h"
 #include "Types/Entity.h"
-#include "Utils.h"
+#include "FunctionsLibrary.h"
 #include <cassert>
 #include <vector>
 
@@ -37,7 +37,7 @@ public:
     auto& addComponent(const Entity entity)
     {
         auto& entityInfo{findEntity(entity)};
-        if (utils::contains(entityInfo.components, type))
+        if (functionsLibrary::contains(entityInfo.components, type))
         {
             assert(!"Entity can have only one instance of any component!");
             return *tryGetComponent<type>(entity);

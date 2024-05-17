@@ -4,7 +4,7 @@
 
 void RandomSystem::init(World& world, SystemsManager& systemsManager)
 {
-    generator_.seed(utils::getCurrentTimeMs());
+    generator_.seed(functionsLibrary::getCurrentTimeMs());
 }
 
 int RandomSystem::getRandomValue(const SDL_Point& range)

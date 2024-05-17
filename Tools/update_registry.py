@@ -7,7 +7,7 @@ from data import GAME_PATH, GENERATED_PATH, OBJ_TYPE_TO_FOLDER
 def update_registry(obj_type: str):
     folder = OBJ_TYPE_TO_FOLDER[obj_type]
     objects_path = f"{GAME_PATH}/{folder}"
-    
+    registry_path = f"{GENERATED_PATH}/{folder}Registry.h"
     blob_path = f"{GENERATED_PATH}/All{folder}.h"
     environment = Environment(loader=FileSystemLoader("Tools/templates/"))
 
@@ -21,12 +21,8 @@ def update_registry(obj_type: str):
 
     match obj_type:
         case "system":
-            template = environment.get_template("GameSystemsRegistryTemplate.h")
-            content = template.render(systems=objects)
-            registry_path = f"{GENERATED_PATH}/Game{folder}Registry.h"
-            with open(registry_path, "w") as f:
-                f.write(content)
-            print(f"Updated {registry_path}")
+            print("Systems Registry must be updated manually!")
+            return
         
         case "component":
             enum_name = "ComponentType"
@@ -41,7 +37,6 @@ def update_registry(obj_type: str):
                 comps_dict[f"{enum_name}::{components[i]}"] = objects[i]
             template = environment.get_template("ComponentsRegistryTemplate.h")
             content = template.render(components=comps_dict)
-            registry_path = f"{GENERATED_PATH}/{folder}Registry.h"
             with open(registry_path, "w") as f:
                 f.write(content)
             print(f"Updated {registry_path}")

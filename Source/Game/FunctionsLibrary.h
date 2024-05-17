@@ -1,15 +1,9 @@
 #pragma once
-#include "SDL.h"
 #include <numeric>
 #include <chrono>
 
-namespace utils
+namespace functionsLibrary
 {
-    static void showMessageBox(const std::string_view title, const std::string_view message)
-    {
-        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title.data(), message.data(), nullptr);
-    }
-    
     static bool inRange(const float value, const SDL_FPoint minMaxValue)
     {
         constexpr float epsilon{ std::numeric_limits<float>::epsilon() };
@@ -56,7 +50,7 @@ namespace utils
     {
         constexpr float minOpacity{ 0.0f };
         constexpr float maxOpacity{ 255.0f };
-        const float currentOpacity{ utils::lerp(minOpacity, maxOpacity, delta) };
+        const float currentOpacity{ functionsLibrary::lerp(minOpacity, maxOpacity, delta) };
         SDL_SetTextureAlphaMod(texture, static_cast<Uint8>(currentOpacity));
     }
 }
