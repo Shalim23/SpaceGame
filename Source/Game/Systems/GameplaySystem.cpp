@@ -6,7 +6,12 @@ void GameplaySystem::init(World& world, SystemsManager& systemsManager)
 {
     const auto entity{ world.createEntity() };
     auto& gameStateComponent{world.addComponent<ComponentType::GameState>(entity)};
+#ifdef WIDGETBUILDER
+    gameStateComponent.gameState = GameStateType::NONE;
+#else
     gameStateComponent.gameState = GameStateType::MAIN_MENU;
+#endif
+
     //createPlayer(world, systemsManager);
 }
 

@@ -27,10 +27,11 @@ void Game::run()
     {
         auto frameTimeStart{SDL_GetPerformanceCounter()};
 
+        inputState_.clear();
+
         SDL_Event currentEvent;
         while (SDL_PollEvent(&currentEvent))
         {
-            //#TODO mouse buttons
             switch (currentEvent.type)
             {
             case SDL_QUIT:
@@ -39,10 +40,11 @@ void Game::run()
                 return;
             }
             }
+
+            inputState_.processEvent(currentEvent);
         }
 
-        //set keyboard input state
-        inputSystem_.processInput(inputState_);
+        inputSystem_.processInput(inputState_, world_, deltaTime_);
 
         systemsManager_.update(world_, deltaTime_);
 

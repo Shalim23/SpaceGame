@@ -1,7 +1,7 @@
 import subprocess
 import argparse
 
-CONFIGURATIONS = "Debug;MinSizeRel;DebugServer;MinSizeRelServer"
+CONFIGURATIONS = "Debug;MinSizeRel;DebugServer;MinSizeRelServer;WidgetBuilder"
 
 
 def _main():

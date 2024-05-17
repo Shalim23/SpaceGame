@@ -1,5 +1,7 @@
 #pragma once
 #include "SDL.h"
+#include <vector>
+#include <functional>
 
 class World;
 class SystemsManager;
@@ -8,13 +10,19 @@ struct Input;
 
 class InputSystem
 {
+
+struct RegisteredKeyboardInput
+{
+	SDL_Scancode key;
+	std::function<void(World&, const double)> onPressed;
+	std::function<void(World&, const double)> onReleased;
+};
+
 public:
-	void preInit(World& world, SystemsManager& systemsManager) {}
 	void init(World& world, SystemsManager& systemsManager);
-	void postInit(World& world, SystemsManager& systemsManager) {}
-	void update(World& world, const double deltaTime);
+	void update(World& world, const double deltaTime){}
 	void shutdown();
-	void processInput(const Input& currentInput);
+	void processInput(const Input& currentInput, World& world, const double deltaTime);
 
 	void showMouseCursor() const;
 	void hideMouseCursor() const;
@@ -22,8 +30,11 @@ public:
 private:
 	void registerInput();
 
-private:
-	void processRotation(const Uint8* const keyboardState, TransformComponent& transform);
-	SDL_FPoint calculateForwardVector(const double rotation) const;
+	void processRotation(World& world, const double delteTime) const;
 
+	SDL_FPoint calculateForwardVector(const double rotation) const;
+	bool isInGame(World& world) const;
+
+private:
+	std::vector<RegisteredKeyboardInput> registeredKeyboardInput_;
 };

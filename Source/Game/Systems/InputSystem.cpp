@@ -3,6 +3,7 @@
 #include "../SystemsManager.h"
 #include "../Constants.h"
 #include "../GameplayStatics.h"
+#include "../Types/Input.h"
 #include <numbers>
 
 namespace
@@ -22,35 +23,28 @@ void InputSystem::init(World& world, SystemsManager& systemsManager)
     registerInput();
 }
 
-void InputSystem::update(World& world, const double deltaTime)
-{
-    const GameStateType gameState{ gameplayStatics::getCurrentGameState(world) };
-    if (gameState != GameStateType::INGAME)
-    {
-        return;
-    }
-
-    int len;
-    const Uint8* const keyboardState{SDL_GetKeyboardState(&len)};
-
-    
-    const auto& playerComponent{gameplayStatics::getPlayerComponent(world)};
-    auto& transform{ *world.tryGetComponent<ComponentType::Transform>(playerComponent.entity) };
-    processRotation(keyboardState, transform);
-
-    auto& movement{ *world.tryGetComponent<ComponentType::Movement>(playerComponent.entity) };
-    movement.forwardVector = calculateForwardVector(transform.rotation);
-    movement.speedPerSecond = keyboardState[SDL_SCANCODE_W] ? movementSpeedPerSecond : 0.0f;
-}
-
 void InputSystem::shutdown()
 {
     SDL_FreeCursor(SDL_GetCursor());
 }
 
-void InputSystem::processInput(const Input& currentInput)
+void InputSystem::processInput(const Input& currentInput, World& world, const double deltaTime)
 {
-
+    for (const auto& registeredInput : registeredKeyboardInput_)
+    {
+        const auto state{currentInput.getKeyState(registeredInput.key)};
+        if (state != std::nullopt)
+        {
+            if (state.value() && registeredInput.onPressed)
+            {
+                registeredInput.onPressed(world, deltaTime);
+            }
+            else if (registeredInput.onReleased)
+            {
+                registeredInput.onReleased(world, deltaTime);
+            }
+        }
+    }
 }
 
 void InputSystem::showMouseCursor() const
@@ -65,22 +59,73 @@ void InputSystem::hideMouseCursor() const
 
 void InputSystem::registerInput()
 {
+#ifdef WIDGETBUILDER
+    //#TODO add refresh input
+#else
+    registeredKeyboardInput_.emplace_back(
+        RegisteredKeyboardInput{
+            .key = SDL_SCANCODE_W,
+            .onPressed = [this](World& world, const double)
+            {
+                if (!isInGame(world))
+                {
+                    return;
+                }
+                
+                const auto& playerComponent{ gameplayStatics::getPlayerComponent(world) };
+                const auto& transform{ *world.tryGetComponent<ComponentType::Transform>(playerComponent.entity) };
 
+                auto& movement{ *world.tryGetComponent<ComponentType::Movement>(playerComponent.entity) };
+                movement.forwardVector = calculateForwardVector(transform.rotation);
+                movement.speedPerSecond = movementSpeedPerSecond;
+            },
+            .onReleased = [this](World& world, const double)
+            {
+                if(!isInGame(world))
+                {
+                    return;
+                }
+                
+                const auto& playerComponent{ gameplayStatics::getPlayerComponent(world) };
+                auto& movement{ *world.tryGetComponent<ComponentType::Movement>(playerComponent.entity) };
+                movement.speedPerSecond = float{};
+            }
+        });
+
+    registeredKeyboardInput_.emplace_back(
+        RegisteredKeyboardInput{
+            .key = SDL_SCANCODE_A,
+            .onPressed = [this](World& world, const double deltaTime)
+            {
+                processRotation(world, -deltaTime);
+            }
+        });
+
+    registeredKeyboardInput_.emplace_back(
+        RegisteredKeyboardInput{
+            .key = SDL_SCANCODE_D,
+            .onPressed = [this](World& world, const double deltaTime)
+            {
+                processRotation(world, deltaTime);
+            }
+        });
+#endif
 }
 
-void InputSystem::processRotation(const Uint8* const keyboardState, TransformComponent& transform)
+void InputSystem::processRotation(World& world, const double deltaTime) const
 {
-    const double rotationDelta{ rotationRatePerSecond / constants::frameTimeMsD };
-    if (keyboardState[SDL_SCANCODE_A])
+    if (!isInGame(world))
     {
-        transform.rotation -= rotationDelta;
+        return;
     }
-    if (keyboardState[SDL_SCANCODE_D])
-    {
-        transform.rotation += rotationDelta;
-    }
+    
+    const auto& playerComponent{ gameplayStatics::getPlayerComponent(world) };
+    auto& transform{ *world.tryGetComponent<ComponentType::Transform>(playerComponent.entity) };
+    
+    const double rotationDelta{ rotationRatePerSecond / deltaTime };
+    transform.rotation += rotationDelta;
 
-    constexpr double epsilon{std::numeric_limits<double>::epsilon()};
+    constexpr double epsilon{ std::numeric_limits<double>::epsilon() };
     while (transform.rotation < 0.0 - epsilon)
     {
         transform.rotation += constants::fullCircleDegreesD;
@@ -96,4 +141,10 @@ SDL_FPoint InputSystem::calculateForwardVector(const double rotation) const
     const float radians{static_cast<float>(rotation * std::numbers::pi
         / (constants::fullCircleDegreesD / 2.0))};
     return SDL_FPoint{.x = sin(radians), .y = cos(radians) * -1.0f };
+}
+
+bool InputSystem::isInGame(World& world) const
+{
+    const GameStateType gameState{ gameplayStatics::getCurrentGameState(world) };
+    return gameState == GameStateType::INGAME;
 }
