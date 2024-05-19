@@ -18,7 +18,7 @@ void MenuSystem::init(World& world, SystemsManager& systemsManager)
 {
 	renderSystem_ = &systemsManager.getSystem<RenderSystem>();
 	randomSystem_ = &systemsManager.getSystem<RandomSystem>();
-	textSystem_ = &systemsManager.getSystem<TextSystem>();
+    dbSystem_ = &systemsManager.getSystem<DatabaseSystem>();
 }
 
 void MenuSystem::update(World& world, const double deltaTime)
@@ -93,7 +93,9 @@ void MenuSystem::createTitle(WidgetComponent& widgetComponent) const
 		Widget& spaceText{ widgetComponent.addWidget() };
 
         RenderData& spaceTextRenderData{ spaceText.updateRenderData() };
-        spaceTextRenderData = textSystem_->getText(TextType::SPACE);
+        const auto& textureInfo{dbSystem_->getText(TextType::SPACE)};
+        spaceTextRenderData.texture = textureInfo.texture;
+        spaceTextRenderData.textureSize = textureInfo.size;
 
         spaceTextRenderData.sourceRect = utils::makeRect(constants::sdlZeroPoint,
             spaceTextRenderData.textureSize);
@@ -140,7 +142,9 @@ void MenuSystem::createTitle(WidgetComponent& widgetComponent) const
         Widget& gameText{ widgetComponent.addWidget() };
 
         RenderData& gameTextRenderData{ gameText.updateRenderData() };
-        gameTextRenderData = textSystem_->getText(TextType::GAME);
+        const auto& textureInfo{ dbSystem_->getText(TextType::GAME) };
+        gameTextRenderData.texture = textureInfo.texture;
+        gameTextRenderData.textureSize = textureInfo.size;
 
         gameTextRenderData.sourceRect = utils::makeRect(constants::sdlZeroPoint,
             gameTextRenderData.textureSize);
@@ -191,7 +195,7 @@ void MenuSystem::createButton(WidgetComponent& widgetComponent,
         Widget& button{ widgetComponent.addWidget() };
 
         RenderData& buttonRenderData{ button.updateRenderData() };
-        const auto& textureInfo{ renderSystem_->getTexture(TextureType::UI_buttonBlue)};
+        const auto& textureInfo{ dbSystem_->getTexture(TextureType::UI_buttonBlue)};
         buttonRenderData.texture = textureInfo.texture;
         buttonRenderData.textureSize = textureInfo.size;
 

@@ -6,38 +6,13 @@
 #include "../GameplayStatics.h"
 #include "../Constants.h"
 #include "SDL_image.h"
-#include <fstream>
 #include <sstream>
-
-void RenderSystem::init(World& world, SystemsManager& systemsManager)
-{
-    constexpr Uint32 fullscreenFlag{ 0 };
-    //constexpr Uint32 fullscreenFlag{ SDL_WINDOW_FULLSCREEN_DESKTOP };
-
-    window_ = SDL_CreateWindow("Space Game", SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED, 1920, 1080, fullscreenFlag);
-    if (!window_)
-    {
-        showMessageBox(__FUNCTION__, "Failed to create window!");
-        throw SystemInitException{};
-    }
-
-    renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (!renderer_)
-    {
-        showMessageBox(__FUNCTION__, "Failed to create renderer!");
-        throw SystemInitException{};
-    }
-
-    initTexturesDescriptors();
-}
 
 void RenderSystem::update(World& world, const double deltaTime)
 {
     SDL_SetRenderDrawColor(renderer_, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(renderer_);
 
-    gameplayStatics::clearWidgetDynamicTextures(dynamicTextures_, world);
     processSpriteData(world);
     processWidgetData(world);
 
@@ -46,21 +21,11 @@ void RenderSystem::update(World& world, const double deltaTime)
 
 void RenderSystem::shutdown()
 {
-    for (const auto& textures : dynamicTextures_)
-    {
-        for (const auto& texture : textures.textures)
-        {
-            SDL_DestroyTexture(texture);
-        }
-    }
-    
-    for (const auto& texture : textures_)
-    {
-        SDL_DestroyTexture(texture.texture);
-    }
-    
     SDL_DestroyRenderer(renderer_);
     SDL_DestroyWindow(window_);
+
+    renderer_ = nullptr;
+    window_ = nullptr;
 }
 
 void RenderSystem::render()
@@ -68,39 +33,28 @@ void RenderSystem::render()
 
 }
 
-void RenderSystem::showMessageBox(const char* title, const char* message) const
+void RenderSystem::createWindow()
 {
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title, message, window_);
-}
+    assert(!window_ && "Window is already created!");
+    assert(!renderer_ && "Renderer is already created!");
+    
+    constexpr Uint32 fullscreenFlag{ 0 };
+    //constexpr Uint32 fullscreenFlag{ SDL_WINDOW_FULLSCREEN_DESKTOP };
 
-const Texture& RenderSystem::getTexture(const TextureType type)
-{
-    const auto iter{ std::ranges::find_if(textures_,
-        [type](const Texture& texture) { return texture.type == type; }) };
-    if (iter != textures_.end())
+    window_ = SDL_CreateWindow("Space Game", SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED, 1920, 1080, fullscreenFlag);
+    if (!window_)
     {
-        return *iter;
+        utils::showMessageBox(__FUNCTION__, "Failed to create window!");
+        throw SystemInitException{};
     }
 
-    return textures_.emplace_back(createTexture(type));
-}
-
-Texture RenderSystem::createDynamicTexture(const TextureType type, const Entity entity)
-{
-    const Texture texture{createTexture(type)};
-    addDynamicTexture(entity, texture.texture);
-    return texture;
-}
-
-void RenderSystem::addDynamicTexture(const Entity entity, SDL_Texture* texture)
-{
-    auto iter{ std::ranges::find_if(dynamicTextures_, [entity](const DynamicTexture& texts)
-            { return texts.entity == entity; }) };
-    DynamicTexture* texts{ iter == dynamicTextures_.end() ?
-        &dynamicTextures_.emplace_back(DynamicTexture{.entity = entity }) :
-        &(*iter) };
-
-    texts->textures.push_back(texture);
+    renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (!renderer_)
+    {
+        utils::showMessageBox(__FUNCTION__, "Failed to create renderer!");
+        throw SystemInitException{};
+    }
 }
 
 SDL_Texture* RenderSystem::createTextureFromData(const std::vector<char>& rawData) const
@@ -113,10 +67,9 @@ SDL_Texture* RenderSystem::createTextureFromSurface(SDL_Surface* surface) const
     return SDL_CreateTextureFromSurface(renderer_, surface);
 }
 
-SDL_Surface* RenderSystem::createSurface(const TextureType type) const
+SDL_Surface* RenderSystem::createSurface(const std::vector<char>& rawData) const
 {
-    const auto& textureRawData{ getTextureData(type) };
-    return IMG_Load_RW(SDL_RWFromConstMem(textureRawData.data(), textureRawData.size()), 1);
+    return IMG_Load_RW(SDL_RWFromConstMem(rawData.data(), rawData.size()), 1);
 }
 
 SDL_Point RenderSystem::getTextureSize(SDL_Texture* texture) const
@@ -144,73 +97,6 @@ SDL_FPoint RenderSystem::getScreenSizeF() const
     const SDL_Point s{getScreenSize()};
     return SDL_FPoint{static_cast<float>(s.x),
         static_cast<float>(s.y)};
-}
-
-void RenderSystem::initTexturesDescriptors()
-{
-    std::ifstream descriptorsFile("Data/texturesDescriptors.bin", std::ios::binary);
-    if (!descriptorsFile.is_open())
-    {
-        showMessageBox(__FUNCTION__, "texturesDescriptors.bin is missing!");
-        throw std::exception{};
-    }
-
-    TextureDescriptor desc{};
-    while (descriptorsFile.read(reinterpret_cast<char*>(&desc), sizeof(TextureDescriptor)))
-    {
-        textureDescriptors_.push_back(desc);
-    }
-
-    descriptorsFile.close();
-    textures_.reserve(textureDescriptors_.size());
-}
-
-Texture RenderSystem::createTexture(const TextureType type) const
-{
-    const auto& textureRawData{ getTextureData(type) };
-    SDL_Texture* texture{ createTextureFromData(textureRawData) };
-    const SDL_Point textureSize{ getTextureSize(texture) };
-
-    return Texture{.type = type, .texture = texture, .size = textureSize};
-}
-
-std::vector<char> RenderSystem::getTextureData(const TextureType type) const
-{
-    const auto textureTypeTnt{ static_cast<uint32_t>(type) };
-    const auto iter{ std::ranges::find_if(textureDescriptors_,
-        [textureTypeTnt](const TextureDescriptor& desc) { return desc.id == textureTypeTnt; }) };
-    if (iter == textureDescriptors_.end())
-    {
-        std::stringstream ss;
-        ss << "Unknown TextureType " << textureTypeTnt << "!";
-        showMessageBox(__FUNCTION__, ss.str().c_str());
-        throw std::exception{};
-    }
-
-    std::ifstream texturesFile("Data/textures.bin", std::ios::binary);
-    if (!texturesFile.is_open())
-    {
-        showMessageBox(__FUNCTION__, "textures.bin is missing!");
-        throw std::exception{};
-    }
-
-    texturesFile.seekg(iter->position, std::ios::beg);
-    if (!texturesFile)
-    {
-        showMessageBox(__FUNCTION__, "textures.bin data is corrupted!");
-        throw std::exception{};
-    }
-
-    std::vector<char> buffer(iter->size);
-    texturesFile.read(buffer.data(), iter->size);
-    if (!texturesFile)
-    {
-        showMessageBox(__FUNCTION__, "textures.bin data is corrupted!");
-        throw std::exception{};
-    }
-
-    texturesFile.close();
-    return buffer;
 }
 
 void RenderSystem::processSpriteData(World& world)

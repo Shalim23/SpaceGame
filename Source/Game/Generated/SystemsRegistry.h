@@ -7,14 +7,13 @@
 
 using RegisteredSystemsTypes = TypesList
 <
+DatabaseSystem,
 GameplaySystem,
 InputSystem,
 MenuSystem,
 MovementSystem,
 RandomSystem,
 RenderSystem,
-ResourcesSystem,
-TextSystem,
 WorldBoundsSystem
 >;
 

@@ -14,8 +14,7 @@ namespace
 
 void WorldBoundsSystem::init(World& world, SystemsManager& systemsManager)
 {
-    renderSystem_ = &systemsManager.getSystem<RenderSystem>();
-    textSystem_ = &systemsManager.getSystem<TextSystem>();
+    dbSystem_ = &systemsManager.getSystem<DatabaseSystem>();
     generateBackground(world);
 }
 
@@ -56,7 +55,7 @@ void WorldBoundsSystem::generateBackground(World& world)
             auto e{ world.createEntity() };
 
             auto& sprite{ world.addComponent<ComponentType::Sprite>(e) };
-            auto& texture{ renderSystem_->getTexture(TextureType::Backgrounds_big_purple) };
+            auto& texture{ dbSystem_->getTexture(TextureType::Backgrounds_big_purple) };
             sprite.layer = SpriteLayer::BACKGROUND;
             sprite.renderData.texture = texture.texture;
             sprite.renderData.textureSize = texture.size;
@@ -90,10 +89,11 @@ void WorldBoundsSystem::createBackgroundWidget(WidgetComponent& widgetComponent)
     Widget& background{ widgetComponent.addWidget() };
 
     RenderData& backgroundRenderData{ background.updateRenderData() };
-    backgroundRenderData.texture = renderSystem_->getTexture(TextureType::white_pixel).texture;
+    backgroundRenderData.texture = dbSystem_->getTexture(TextureType::white_pixel).texture;
 
-    backgroundRenderData.sourceRect = utils::makeRect(constants::sdlZeroPoint, renderSystem_->getScreenSize());
-    backgroundRenderData.destinationRect = utils::makeRect(constants::sdlZeroPointF, renderSystem_->getScreenSizeF());
+    //#TODO
+    //backgroundRenderData.sourceRect = utils::makeRect(constants::sdlZeroPoint, renderSystem_->getScreenSize());
+    //backgroundRenderData.destinationRect = utils::makeRect(constants::sdlZeroPointF, renderSystem_->getScreenSizeF());
 
     constexpr SDL_Color blackColor{ .r = 0, .g = 0, .b = 0 };
     SDL_SetTextureColorMod(backgroundRenderData.texture,
@@ -109,7 +109,9 @@ void WorldBoundsSystem::createBackgroundWidget(WidgetComponent& widgetComponent)
 
 void WorldBoundsSystem::createTextWidget(const Entity entity, WidgetComponent& widgetComponent) const
 {
-    const SDL_FPoint screenSize{ renderSystem_->getScreenSizeF() };
+    //#TODO
+    
+    /*const SDL_FPoint screenSize{ renderSystem_->getScreenSizeF() };
     const SDL_FPoint screenSizeModifier{renderSystem_->getScreenSizeF() / constants::baseScreenSize};
 
     float nextTextPosition{780.0f};
@@ -155,6 +157,6 @@ void WorldBoundsSystem::createTextWidget(const Entity entity, WidgetComponent& w
             },
             screenSizeModifier * radiationTextRenderData.textureSize
         );
-    }
+    }*/
 }
 

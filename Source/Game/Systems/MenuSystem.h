@@ -8,7 +8,7 @@ class SystemsManager;
 class WidgetComponent;
 class RenderSystem;
 class RandomSystem;
-class TextSystem;
+class DatabaseSystem;
 class Widget;
 struct SDL_FPoint;
 struct SDL_Point;
@@ -46,6 +46,6 @@ private:
 private:
 	RenderSystem* renderSystem_{ nullptr };
 	RandomSystem* randomSystem_{ nullptr };
-	TextSystem* textSystem_{ nullptr };
+	DatabaseSystem* dbSystem_{ nullptr };
 	
 };

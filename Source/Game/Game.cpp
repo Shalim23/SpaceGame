@@ -16,7 +16,8 @@ Game::Game()
 void Game::init()
 {
     initSDL();
-    systemsManager_.getSystem<ResourcesSystem>().loadResources();
+    renderSystem_.createWindow();
+    systemsManager_.getSystem<DatabaseSystem>().load(systemsManager_);
 
     systemsManager_.init(world_);
 }

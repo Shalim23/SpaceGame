@@ -5,8 +5,7 @@
 
 class World;
 class SystemsManager;
-class RenderSystem;
-class TextSystem;
+class DatabaseSystem;
 class WidgetComponent;
 struct TransformComponent;
 
@@ -26,6 +25,5 @@ private:
 	void createTextWidget(const Entity entity, WidgetComponent& widgetComponent) const;
 
 private:
-	RenderSystem* renderSystem_{nullptr};
-	TextSystem* textSystem_{nullptr};
+	DatabaseSystem* dbSystem_{nullptr};
 };
