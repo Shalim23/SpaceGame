@@ -11,18 +11,20 @@ set(CMAKE_C_FLAGS_WIDGETBUILDER "${CMAKE_C_FLAGS_DEBUG} -DWIDGETBUILDER=1")
 set(CMAKE_EXE_LINKER_FLAGS_WIDGETBUILDER "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -DWIDGETBUILDER=1")
 set(CMAKE_SHARED_LINKER_FLAGS_WIDGETBUILDER "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} -DWIDGETBUILDER=1")
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/Tools/CMake/ServerConfig.cmake)
-include(${CMAKE_CURRENT_SOURCE_DIR}/Tools/CMake/FetchContent.cmake)
+set(ADDITIONAL_INCLUDE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Tools/CMake")
+
+include(${ADDITIONAL_INCLUDE_PATH}/ServerConfig.cmake)
+include(${ADDITIONAL_INCLUDE_PATH}/FetchContent.cmake)
+include(${ADDITIONAL_INCLUDE_PATH}/Imgui.cmake)
 
 set(SDL_LIBRARIES ${SDL_LIBRARIES} SDL2main SDL2 SDL2_image SDL2_ttf)
 
 set(SRC_DIR "${CMAKE_SOURCE_DIR}/Source")
 file(GLOB_RECURSE src "${SRC_DIR}/*.h" "${SRC_DIR}/*.cpp")
-target_include_directories(imgui PUBLIC ${imgui_SOURCE_DIR})
 
 add_executable(${PROJECT_NAME} ${src})
 
-target_link_libraries("${PROJECT_NAME}" PRIVATE ${SDL_LIBRARIES} nlohmann_json::nlohmann_json imgui)
+target_link_libraries("${PROJECT_NAME}" PRIVATE ${SDL_LIBRARIES} nlohmann_json::nlohmann_json imgui_lib)
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different

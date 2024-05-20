@@ -8,10 +8,24 @@
 #include "SDL_image.h"
 #include <sstream>
 
+#ifndef NDEBUG
+#include "imgui.h"
+#include "imgui_impl_sdl2.h"
+#include "imgui_impl_sdlrenderer2.h"
+#endif
+
 void RenderSystem::update(World& world, const double deltaTime)
 {
     SDL_SetRenderDrawColor(renderer_, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(renderer_);
+
+    ImGui_ImplSDLRenderer2_NewFrame();
+    ImGui_ImplSDL2_NewFrame();
+    ImGui::NewFrame();
+
+    ImGui::Render();
+
+    ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
 
     processSpriteData(world);
     processWidgetData(world);
@@ -21,6 +35,10 @@ void RenderSystem::update(World& world, const double deltaTime)
 
 void RenderSystem::shutdown()
 {
+    ImGui_ImplSDLRenderer2_Shutdown();
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
+    
     SDL_DestroyRenderer(renderer_);
     SDL_DestroyWindow(window_);
 
@@ -30,7 +48,7 @@ void RenderSystem::shutdown()
 
 void RenderSystem::render()
 {
-
+    
 }
 
 void RenderSystem::createWindow()
@@ -55,6 +73,15 @@ void RenderSystem::createWindow()
         utils::showMessageBox(__FUNCTION__, "Failed to create renderer!");
         throw SystemInitException{};
     }
+
+#ifndef NDEBUG
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io{ ImGui::GetIO() };
+
+    ImGui_ImplSDL2_InitForSDLRenderer(window_, renderer_);
+    ImGui_ImplSDLRenderer2_Init(renderer_);
+#endif
 }
 
 SDL_Texture* RenderSystem::createTextureFromData(const std::vector<char>& rawData) const

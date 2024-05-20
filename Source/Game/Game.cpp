@@ -5,6 +5,9 @@
 #include "Constants.h"
 #include "Utils.h"
 
+#ifndef NDEBUG
+#include "imgui_impl_sdl2.h"
+#endif
 
 Game::Game()
     : inputSystem_{systemsManager_.getSystem<InputSystem>()}
@@ -33,6 +36,9 @@ void Game::run()
         SDL_Event currentEvent;
         while (SDL_PollEvent(&currentEvent))
         {
+#ifndef NDEBUG
+            ImGui_ImplSDL2_ProcessEvent(&currentEvent);
+#endif
             switch (currentEvent.type)
             {
             case SDL_QUIT:

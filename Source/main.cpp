@@ -10,6 +10,7 @@ int main(int argc, char* args[])
     return 0;
 }
 
+// render system - create 2 windows for widget editor mode
 
 //widget builder:
 // - add debug configuration
