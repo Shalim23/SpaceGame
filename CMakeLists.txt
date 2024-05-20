@@ -18,10 +18,11 @@ set(SDL_LIBRARIES ${SDL_LIBRARIES} SDL2main SDL2 SDL2_image SDL2_ttf)
 
 set(SRC_DIR "${CMAKE_SOURCE_DIR}/Source")
 file(GLOB_RECURSE src "${SRC_DIR}/*.h" "${SRC_DIR}/*.cpp")
+target_include_directories(imgui PUBLIC ${imgui_SOURCE_DIR})
 
 add_executable(${PROJECT_NAME} ${src})
 
-target_link_libraries("${PROJECT_NAME}" PRIVATE ${SDL_LIBRARIES} nlohmann_json::nlohmann_json)
+target_link_libraries("${PROJECT_NAME}" PRIVATE ${SDL_LIBRARIES} nlohmann_json::nlohmann_json imgui)
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
