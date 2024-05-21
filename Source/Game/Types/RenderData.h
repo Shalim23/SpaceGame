@@ -8,4 +8,5 @@ struct RenderData
     SDL_Rect sourceRect{};
     SDL_FRect destinationRect{};
     double rotation{};
+    float scale{};
 };

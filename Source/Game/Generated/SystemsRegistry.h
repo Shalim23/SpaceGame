@@ -14,6 +14,7 @@ MenuSystem,
 MovementSystem,
 RandomSystem,
 RenderSystem,
+ViewportSystem,
 WorldBoundsSystem
 >;
 

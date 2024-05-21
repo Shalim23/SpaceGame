@@ -76,7 +76,7 @@ void MenuSystem::createMainMenu(World& world) const
 
 	createTitle(widget);
 
-    //createButton(widget, 700.0f, 0.0f, TextType::Play);
+    createButton(widget, 700.0f, 0.0f, TextType::Play);
     //createButton(widget, 850.0f, 150.0f, TextType::Exit);
 
 	//createMainMenuBackground(entity, widget);
@@ -84,10 +84,7 @@ void MenuSystem::createMainMenu(World& world) const
 
 void MenuSystem::createTitle(WidgetComponent& widgetComponent) const
 {
-    const SDL_FPoint screenSize{ renderSystem_->getScreenSizeF() };
-    const SDL_FPoint screenSizeModifier{ renderSystem_->getScreenSizeF() / constants::baseScreenSize };
 	constexpr float scale{4.0f};
-	float nextTextPositionY{250.0f};
 
     {
 		Widget& spaceText{ widgetComponent.addWidget() };
@@ -112,16 +109,9 @@ void MenuSystem::createTitle(WidgetComponent& widgetComponent) const
    //         screenSizeModifier * spaceTextRenderData.textureSize * textScale
    //     );
 
-        const float scaledSizeX{ spaceTextRenderData.textureSize.x * screenSizeModifier.x };
-        const float scaledSizeY{ spaceTextRenderData.textureSize.y * screenSizeModifier.y };
-        spaceTextRenderData.destinationRect.x =
-            750.0f * screenSizeModifier.x - (scaledSizeX / 2.0f * scale);
-
-        spaceTextRenderData.destinationRect.y =
-            350.0f * screenSizeModifier.y - (scaledSizeY / 2.0f * scale);
-
-        spaceTextRenderData.destinationRect.w = spaceTextRenderData.textureSize.x * screenSizeModifier.x * scale;
-        spaceTextRenderData.destinationRect.h = spaceTextRenderData.textureSize.y * screenSizeModifier.y * scale;
+        spaceTextRenderData.destinationRect.x = 750.0f;
+        spaceTextRenderData.destinationRect.y = 350.0f;
+        spaceTextRenderData.scale = scale;
 
 		/*nextTextPositionY =
             spaceTextRenderData.destinationRect.y + spaceTextRenderData.textureSize.y;*/
@@ -160,16 +150,9 @@ void MenuSystem::createTitle(WidgetComponent& widgetComponent) const
         //    screenSizeModifier * gameTextRenderData.textureSize * scale
         //);
 
-        const float scaledSizeX{ gameTextRenderData.textureSize.x * screenSizeModifier.x };
-        const float scaledSizeY{ gameTextRenderData.textureSize.y * screenSizeModifier.y };
-        gameTextRenderData.destinationRect.x =
-            1000.0f * screenSizeModifier.x - (scaledSizeX / 2.0f * scale);
-
-        gameTextRenderData.destinationRect.y =
-            (350.0f + 150.0f) * screenSizeModifier.y - (scaledSizeY / 2.0f * scale);
-
-        gameTextRenderData.destinationRect.w = gameTextRenderData.textureSize.x * screenSizeModifier.x * scale;
-        gameTextRenderData.destinationRect.h = gameTextRenderData.textureSize.y * screenSizeModifier.y * scale;
+        gameTextRenderData.destinationRect.x = 1000.0f;
+        gameTextRenderData.destinationRect.y = 500.0f;
+        gameTextRenderData.scale = scale;
 
         /*gameText.addAnimation(titleAnimationTimeMs,
             [&destRect = gameTextRenderData.destinationRect,
@@ -187,8 +170,6 @@ void MenuSystem::createTitle(WidgetComponent& widgetComponent) const
 void MenuSystem::createButton(WidgetComponent& widgetComponent,
     const float endPosition, const float padding, const TextType text) const
 {
-    const SDL_FPoint screenSize{ renderSystem_->getScreenSizeF() };
-    const SDL_FPoint screenSizeModifier{ renderSystem_->getScreenSizeF() / constants::baseScreenSize };
     constexpr float scale{2.0f};
 
     {
@@ -216,17 +197,10 @@ void MenuSystem::createButton(WidgetComponent& widgetComponent,
             screenSizeModifier * buttonRenderData.textureSize * scale
         );*/
 
-        const float scaledSizeX{ buttonRenderData.textureSize.x * screenSizeModifier.x};
-        const float scaledSizeY{ buttonRenderData.textureSize.y * screenSizeModifier.y};
-        const float animationEndPosition{700.0f};
-        buttonRenderData.destinationRect.x =
-            screenSize.x / 2.0f * screenSizeModifier.x - (scaledSizeX / 2.0f * scale);
+        buttonRenderData.destinationRect.x = 960.0f;
+        buttonRenderData.destinationRect.y = 700.0f;
+        buttonRenderData.scale = scale;
 
-        buttonRenderData.destinationRect.y =
-            700.0f * screenSizeModifier.y - (scaledSizeY / 2.0f * scale);
-
-        buttonRenderData.destinationRect.w = buttonRenderData.textureSize.x * screenSizeModifier.x * scale;
-        buttonRenderData.destinationRect.h = buttonRenderData.textureSize.y * screenSizeModifier.y * scale;
 
         /*button.addAnimation(titleAnimationTimeMs,
             [&destRect = buttonRenderData.destinationRect,

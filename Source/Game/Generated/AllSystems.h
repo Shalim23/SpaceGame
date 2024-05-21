@@ -8,4 +8,5 @@
 #include "../Systems/MovementSystem.h"
 #include "../Systems/RandomSystem.h"
 #include "../Systems/RenderSystem.h"
+#include "../Systems/ViewportSystem.h"
 #include "../Systems/WorldBoundsSystem.h"

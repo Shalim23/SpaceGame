@@ -14,23 +14,9 @@
 #include "imgui_impl_sdlrenderer2.h"
 #endif
 
-void RenderSystem::update(World& world, const double deltaTime)
+void RenderSystem::init(World& world, SystemsManager& systemsManager)
 {
-    SDL_SetRenderDrawColor(renderer_, 0, 0, 0, SDL_ALPHA_OPAQUE);
-    SDL_RenderClear(renderer_);
-
-    ImGui_ImplSDLRenderer2_NewFrame();
-    ImGui_ImplSDL2_NewFrame();
-    ImGui::NewFrame();
-
-    ImGui::Render();
-
-    ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
-
-    processSpriteData(world);
-    processWidgetData(world);
-
-    SDL_RenderPresent(renderer_);
+    viewportSystem_ = &systemsManager.getSystem<ViewportSystem>();
 }
 
 void RenderSystem::shutdown()
@@ -48,7 +34,29 @@ void RenderSystem::shutdown()
 
 void RenderSystem::render()
 {
-    
+    SDL_SetRenderDrawColor(renderer_, 0, 0, 0, SDL_ALPHA_OPAQUE);
+    SDL_RenderClear(renderer_);
+
+    /*ImGui_ImplSDLRenderer2_NewFrame();
+    ImGui_ImplSDL2_NewFrame();
+    ImGui::NewFrame();
+
+    ImGui::Render();
+
+    ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());*/
+
+    const auto& renderData{viewportSystem_->getRenderData()};
+    for (const auto& data : renderData)
+    {
+        SDL_RenderCopyExF(renderer_,
+            data.texture,
+            &data.sourceRect,
+            &data.destinationRect,
+            data.rotation,
+            nullptr, SDL_FLIP_NONE);
+    }
+
+    SDL_RenderPresent(renderer_);
 }
 
 void RenderSystem::createWindow()
@@ -236,33 +244,10 @@ SpriteComponent* RenderSystem::processPlayerData(World& w, const SDL_FPoint& hal
     return &sprite;
 }
 
-void RenderSystem::processWidgetData(World& world)
-{
-    std::array<std::vector<WidgetComponent*>,
-        static_cast<size_t>(WidgetLayer::COUNT)> widgetsToRender;
-
-    for (auto& widgetComponent : world.getComponents<ComponentType::Widget>())
-    {
-        auto& layerData{ widgetsToRender[static_cast<size_t>(widgetComponent.instance.getLayer())] };
-        layerData.emplace_back(&widgetComponent.instance);
-    }
-
-    for (const auto& layer : widgetsToRender)
-    {
-        for (const auto& widget : layer)
-        {
-            for (const auto& renderData : widget->gatherRenderData())
-            {
-                SDL_RenderCopyExF(renderer_,
-                    renderData->texture,
-                    nullptr,
-                    &renderData->destinationRect,
-                    renderData->rotation,
-                    nullptr, SDL_FLIP_NONE);
-            }
-        }
-    }
-}
+//void RenderSystem::processWidgetData(World& world)
+//{
+//    
+//}
 
 SDL_FRect RenderSystem::createDestinationRect(const float x, const float y, const float w, const float h)
 {

@@ -24,7 +24,8 @@ file(GLOB_RECURSE src "${SRC_DIR}/*.h" "${SRC_DIR}/*.cpp")
 
 add_executable(${PROJECT_NAME} ${src})
 
-target_link_libraries("${PROJECT_NAME}" PRIVATE ${SDL_LIBRARIES} nlohmann_json::nlohmann_json imgui_lib)
+target_link_libraries("${PROJECT_NAME}" PRIVATE ${SDL_LIBRARIES} nlohmann_json::nlohmann_json)
+target_link_libraries("${PROJECT_NAME}" PRIVATE debug imgui_lib)
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different

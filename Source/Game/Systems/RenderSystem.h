@@ -8,6 +8,7 @@
 
 class World;
 class SystemsManager;
+class ViewportSystem;
 struct TransformComponent;
 struct SpriteComponent;
 
@@ -15,8 +16,8 @@ class RenderSystem
 {
 
 public:
-	void init(World& world, SystemsManager& systemsManager){}
-	void update(World& world, const double deltaTime);
+	void init(World& world, SystemsManager& systemsManager);
+	void update(World& world, const double deltaTime){}
 	void shutdown();
 
     void render();
@@ -42,7 +43,7 @@ private:
     SpriteComponent* processPlayerData(World& world, const SDL_FPoint& halfScreenSize,
         const Entity playerEntity, const TransformComponent& playerTransform);
 
-    void processWidgetData(World& world);
+    
 
     SDL_FRect createDestinationRect(const float x, const float y,
         const float w, const float h);
@@ -50,4 +51,6 @@ private:
 private:
     SDL_Window* window_{ nullptr };
     SDL_Renderer* renderer_{ nullptr };
+
+    ViewportSystem* viewportSystem_{nullptr};
 };
