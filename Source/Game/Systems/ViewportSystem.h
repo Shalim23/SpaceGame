@@ -20,6 +20,6 @@ private:
 	void prepareUIRenderData(World& world);
 
 private:
-	RenderSystem* renderSystem_;
+	RenderSystem* renderSystem_{nullptr};
 	std::vector<RenderData> renderData_;
 };

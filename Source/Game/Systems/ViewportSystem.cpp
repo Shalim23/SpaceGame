@@ -37,7 +37,7 @@ void ViewportSystem::prepareUIRenderData(World& world)
     
     std::vector<WidgetComponent*> uiToRender{static_cast<size_t>(WidgetLayer::COUNT)};
 
-    for (auto& widgetComponent : world.getComponents<ComponentType::Widget>())
+    for (auto& widgetComponent : world.getComponents<WidgetComponent>())
     {
         auto& layerWidgetComponent{ uiToRender[static_cast<size_t>(widgetComponent.instance.getLayer())] };
         assert(!layerWidgetComponent);

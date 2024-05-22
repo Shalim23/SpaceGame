@@ -18,85 +18,109 @@ public:
 
     Entity createEntity()
     {
-        return entities_.emplace_back(EntityInfo{ .entity = ++entityId_ }).entity;
+        const auto [iter, result]{entities_.insert({ ++entityId_, {} })};
+        assert(result);
+        const auto& [entity, components]{*iter};
+        return entity;
     }
 
     void destroyEntity(const Entity entity)
     {
-        const auto& entityInfo{ findEntity(entity) };
-        for (const auto& callback : entityInfo.componentRemoveCallbacks)
+        const auto iter{entities_.find(entity)};
+        assert(iter != entities_.end());
+        const auto& [found_entity, componentRemoveCallbacks]{*iter};
+        for (const auto& callback : componentRemoveCallbacks)
         {
             callback(entity);
         }
 
-        std::erase_if(entities_,
-            [entity](const EntityInfo& info){ return info.entity == entity; });
+        entities_.erase(iter);
     }
 
-    template<ComponentType type>
-    auto& addComponent(const Entity entity)
+    template<typename T>
+    T& addComponent(const Entity entity)
     {
-        auto& entityInfo{findEntity(entity)};
-        if (utils::contains(entityInfo.components, type))
+        assert(entities_.contains(entity));
+
+        auto& [components, indexes] { getComponentsInternal<T>()};
+        if (indexes.contains(entity))
         {
             assert(!"Entity can have only one instance of any component!");
-            return *tryGetComponent<type>(entity);
+            return components[indexes[entity]].instance;
         }
         
-        auto& new_component{ getComponents<type>().emplace_back()};
-        new_component.entity = entity;
-        entityInfo.components.emplace_back(type);
-        entityInfo.componentRemoveCallbacks.emplace_back(
-            [this](const Entity entity){ removeComponent<type>(entity); });
+        auto& new_component{ components.emplace_back(Component<T>{.entity = entity})};
+        indexes[entity] = components.size() - 1;
+
+        entities_[entity].emplace_back([this](const Entity entity){ removeComponent<T>(entity); });
 
         return new_component.instance;
     }
 
-    template<ComponentType type>
+    template<typename T>
     auto* tryGetComponent(const Entity entity)
     {
-        auto& components{ getComponents<type>() };
-        auto iter{ std::ranges::find_if(components, [entity](const auto& component)
-                { return entity == component.entity; }) };
-        return iter != components.end() ? &iter->instance : nullptr;
+        auto& [components, indexes] { getComponentsInternal<T>() };
+        return indexes.contains(entity) ?
+            &components[indexes[entity]].instance : nullptr;
     }
 
-    template<ComponentType type>
+    template<typename T>
     void removeComponent(const Entity entity)
     {
-        auto& components{ getComponents<type>() };
-        const auto iter{ std::ranges::find_if(components, [entity](const auto& component)
-                { return entity == component.entity; }) };
-        if (iter == components.end())
+        Components<T> c{ getComponentsInternal<T>() };
+        auto& components{c.instances};
+        auto& indexes{c.entityToComponentIndex};
+        const auto iter{ indexes.find(entity) };
+        if (iter == indexes.end())
         {
             assert(!"Trying to remove non-existent component!");
             return;
         }
 
-        const auto index{ iter - components.begin() };
-        std::swap(components[index], components.back());
+        const auto& [foundEntity, componentIndex]{*iter};
+        assert(components.size() - 1 >= componentIndex);
+        std::swap(components[componentIndex], components.back());
         components.pop_back();
+        indexes[components[componentIndex].entity] = componentIndex;
+        indexes.erase(iter);
     }
 
-    template <ComponentType type>
-    auto& getComponents()
+    template <typename T>
+    std::vector<Component<T>>& getComponents()
     {
-        return std::get<static_cast<size_t>(type)>(components_).instances;
+        return std::get<Components<T>>(components_).instances;
+    }
+
+    template <typename T>
+    ComponentType getComponentType()
+    {
+        return std::get<ComponentInfo<T>>(componentInfos_).componentType;
     }
 
 private:
-    EntityInfo& findEntity(const Entity entity)
+    template <typename T>
+    auto& getComponentsInternal()
     {
-        auto iter{ std::ranges::find_if(entities_, [entity](const EntityInfo& entityInfo)
-        {
-            return entityInfo.entity == entity;
-        })};
-        assert(iter != entities_.end() && "Unknown entity!");
-        return *iter;
+        return std::get<Components<T>>(components_);
     }
+
+    /*template <typename T, size_t I>
+    constexpr ComponentType getComponentTypeRecursive() const
+    {
+        using Info = std::tuple_element_t<I, ComponentInfos>::type;
+        if constexpr (std::is_same<T, Info>)
+        {
+            return Info{}.componentType;
+        }
+
+        static_assert(I + 1 < std::tuple_size_v<ComponentInfos>, "Component not registered");
+        getComponentTypeRecursive<T, I + 1>();
+    }*/
 
 private:
     RegisteredComponents components_;
-    std::vector<EntityInfo> entities_;
+    const ComponentInfos componentInfos_{ getComponentInfos()};
+    std::unordered_map<Entity, std::vector<std::function<void(const Entity)>>> entities_;
     size_t entityId_{0};
 };

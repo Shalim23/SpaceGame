@@ -1,7 +1,7 @@
 //GENERATED FILE! DO NOT MODIFY DIRECTLY!
 #pragma once
 #include "../Types/TypesList.h"
-#include "../Types/Component.h"
+#include "../Types/System.h"
 #include "AllSystems.h"
 
 
@@ -18,4 +18,4 @@ ViewportSystem,
 WorldBoundsSystem
 >;
 
-using RegisteredSystems = ComponentsList<RegisteredSystemsTypes>::type;
+using RegisteredSystems = SystemsList<RegisteredSystemsTypes>::type;

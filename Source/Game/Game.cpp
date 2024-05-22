@@ -23,6 +23,7 @@ void Game::init()
     systemsManager_.getSystem<DatabaseSystem>().load(systemsManager_);
 
     systemsManager_.init(world_);
+
 }
 
 void Game::run()

@@ -12,6 +12,8 @@ int main(int argc, char* args[])
 
 // render system - create 2 windows for widget editor mode
 
+//render component - generalize(separate ui and game objects by separate tags)
+
 //widget builder:
 // - add debug configuration
 // - add class 

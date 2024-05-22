@@ -27,8 +27,8 @@ void WorldBoundsSystem::update(World& world, const double deltaTime)
     }
     
     const auto& playerComponent{gameplayStatics::getPlayerComponent(world)};
-    const auto& playerTransform{ *world.tryGetComponent<ComponentType::Transform>(playerComponent.entity) };
-    const auto& outOfBoundsComponents{ world.getComponents<ComponentType::OutOfWorldBounds>() };
+    const auto& playerTransform{ *world.tryGetComponent<TransformComponent>(playerComponent.entity) };
+    const auto& outOfBoundsComponents{ world.getComponents<OutOfWorldBoundsComponent>() };
 
     if (isPlayerInRange(playerTransform))
     {
@@ -54,13 +54,13 @@ void WorldBoundsSystem::generateBackground(World& world)
         {
             auto e{ world.createEntity() };
 
-            auto& sprite{ world.addComponent<ComponentType::Sprite>(e) };
+            auto& sprite{ world.addComponent<SpriteComponent>(e) };
             auto& texture{ dbSystem_->getTexture(TextureType::Backgrounds_big_purple) };
             sprite.layer = SpriteLayer::BACKGROUND;
             sprite.renderData.texture = texture.texture;
             sprite.renderData.textureSize = texture.size;
 
-            auto& transform{ world.addComponent<ComponentType::Transform>(e) };
+            auto& transform{ world.addComponent<TransformComponent>(e) };
             transform.location.x = sprite.renderData.textureSize.x * i;
             transform.location.y = sprite.renderData.textureSize.y * k;
         }
@@ -76,12 +76,12 @@ bool WorldBoundsSystem::isPlayerInRange(const TransformComponent& playerTransfor
 void WorldBoundsSystem::createOutOfBoundsEntity(World& world) const
 {
     const Entity entity{world.createEntity()};
-    world.addComponent<ComponentType::OutOfWorldBounds>(entity);
-    auto& widget{world.addComponent<ComponentType::Widget>(entity)};
-    widget.setLayer(WidgetLayer::EFFECTS);
+    world.addComponent<OutOfWorldBoundsComponent>(entity);
+    //auto& widget{world.addComponent<WidgetComponent>(entity)};
+    //widget.setLayer(WidgetLayer::EFFECTS);
 
-    createBackgroundWidget(widget);
-    createTextWidget(entity, widget);
+    //createBackgroundWidget(widget);
+    //createTextWidget(entity, widget);
 }
 
 void WorldBoundsSystem::createBackgroundWidget(WidgetComponent& widgetComponent) const

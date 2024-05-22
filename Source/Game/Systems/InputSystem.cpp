@@ -73,9 +73,9 @@ void InputSystem::registerInput()
                 }
                 
                 const auto& playerComponent{ gameplayStatics::getPlayerComponent(world) };
-                const auto& transform{ *world.tryGetComponent<ComponentType::Transform>(playerComponent.entity) };
+                const auto& transform{ *world.tryGetComponent<TransformComponent>(playerComponent.entity) };
 
-                auto& movement{ *world.tryGetComponent<ComponentType::Movement>(playerComponent.entity) };
+                auto& movement{ *world.tryGetComponent<MovementComponent>(playerComponent.entity) };
                 movement.forwardVector = calculateForwardVector(transform.rotation);
                 movement.speedPerSecond = movementSpeedPerSecond;
             },
@@ -87,7 +87,7 @@ void InputSystem::registerInput()
                 }
                 
                 const auto& playerComponent{ gameplayStatics::getPlayerComponent(world) };
-                auto& movement{ *world.tryGetComponent<ComponentType::Movement>(playerComponent.entity) };
+                auto& movement{ *world.tryGetComponent<MovementComponent>(playerComponent.entity) };
                 movement.speedPerSecond = float{};
             }
         });
@@ -120,7 +120,7 @@ void InputSystem::processRotation(World& world, const double deltaTime) const
     }
     
     const auto& playerComponent{ gameplayStatics::getPlayerComponent(world) };
-    auto& transform{ *world.tryGetComponent<ComponentType::Transform>(playerComponent.entity) };
+    auto& transform{ *world.tryGetComponent<TransformComponent>(playerComponent.entity) };
     
     const double rotationDelta{ rotationRatePerSecond / deltaTime };
     transform.rotation += rotationDelta;

@@ -5,31 +5,36 @@
 #include <vector>
 #include <functional>
 
-struct EntityInfo
-{
-    Entity entity;
-    std::vector<ComponentType> components;
-    std::vector<std::function<void(const Entity)>> componentRemoveCallbacks;
-};
-
 template<typename T>
 struct Component
 {
-    Entity entity{};
+    Entity entity;
     T instance{};
 };
 
-template<ComponentType value, typename T>
+template<typename T>
 struct Components
 {
-    const ComponentType componentType = value;
     std::vector<Component<T>> instances;
+    std::unordered_map<Entity, size_t> entityToComponentIndex;
 };
 
 template<typename> struct ComponentsList;
 template<template<typename...Args> typename t, typename ...Ts>
 struct ComponentsList<t<Ts...>>
 {
-    using type = std::tuple<Ts...>;
+    using type = std::tuple<Components<Ts>...>;
 };
 
+template<typename T>
+struct ComponentInfo
+{
+    const ComponentType componentType;
+};
+
+template<typename> struct ComponentInfoList;
+template<template<typename...Args> typename t, typename ...Ts>
+struct ComponentInfoList<t<Ts...>>
+{
+    using type = std::tuple<Ts...>;
+};

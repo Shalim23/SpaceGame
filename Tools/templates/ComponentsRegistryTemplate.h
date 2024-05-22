@@ -9,8 +9,17 @@
 using RegisteredComponentsTypes = TypesList
 <
 {%- for t, c in components.items() %}
-{{"Components<"}}{{t}}{{", "}}{{ c }}{{">"}}{{ "," if not loop.last }}
+{{ c }}{{ "," if not loop.last }}
 {%- endfor %}
 >;
 
 using RegisteredComponents = ComponentsList<RegisteredComponentsTypes>::type;
+
+using ComponentInfosList = TypesList
+<
+{%- for t, c in components.items() %}
+{{"ComponentInfo<"}}{{ c }}{{", "}}{{t}}{{">"}}{{ "," if not loop.last }}
+{%- endfor %}
+>;
+
+using ComponentInfos = ComponentInfoList<ComponentInfosList>::type;

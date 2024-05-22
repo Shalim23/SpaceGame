@@ -33,7 +33,7 @@ void MenuSystem::update(World& world, const double deltaTime)
 		{
 			for (auto& widget : component->updateWidgets())
 			{
-				if (widget->hasAnimation() && widget->isAnimationFinished())
+				if (widget.hasAnimation() && widget.isAnimationFinished())
 				{
 					
 				}
@@ -71,7 +71,7 @@ void MenuSystem::createMenuWidget(World& world, const GameStateType gameState) c
 void MenuSystem::createMainMenu(World& world) const
 {
     const Entity entity{ world.createEntity() };
-    auto& widget{ world.addComponent<ComponentType::Widget>(entity) };
+    auto& widget{ world.addComponent<WidgetComponent>(entity) };
     widget.setLayer(WidgetLayer::MENU);
 
 	createTitle(widget);
@@ -307,7 +307,7 @@ void MenuSystem::createInGameMenu(World& world) const
 
 WidgetComponent* MenuSystem::getMenuWidget(World& world) const
 {
-    auto& widgets{ world.getComponents<ComponentType::Widget>() };
+    auto& widgets{ world.getComponents<WidgetComponent>() };
 	auto iter{std::ranges::find_if(widgets, [](const auto& component)
 		{ return component.instance.getLayer() == WidgetLayer::MENU; })};
 

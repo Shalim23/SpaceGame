@@ -152,7 +152,7 @@ void RenderSystem::processSpriteData(World& world)
     const SDL_FPoint halfScreenSize{.x = screenSize.x / 2.0f,
         .y = screenSize.y / 2.0f};
 
-    const auto& playerTransform{ *world.tryGetComponent<ComponentType::Transform>(playerEntity) };
+    const auto& playerTransform{ *world.tryGetComponent<TransformComponent>(playerEntity) };
     SpriteComponent* playerSprite{ processPlayerData(world, halfScreenSize, playerEntity, playerTransform) };
     spritesToRender[static_cast<size_t>(playerSprite->layer)].emplace_back(playerSprite);
 
@@ -163,7 +163,7 @@ void RenderSystem::processSpriteData(World& world)
         .h = screenSize.y
     };
 
-    for (auto& spriteComponent : world.getComponents<ComponentType::Sprite>())
+    for (auto& spriteComponent : world.getComponents<SpriteComponent>())
     {
         if (spriteComponent.entity == playerEntity)
         {
@@ -176,7 +176,7 @@ void RenderSystem::processSpriteData(World& world)
             getTextureSizeF(sprite.renderData.textureSize)
         };
 
-        const auto& renderTransform{ *world.tryGetComponent<ComponentType::Transform>(spriteComponent.entity) };
+        const auto& renderTransform{ *world.tryGetComponent<TransformComponent>(spriteComponent.entity) };
         const SDL_FRect renderRect{
             .x = renderTransform.location.x - textureSize.x / 2.0f,
             .y = renderTransform.location.y - textureSize.y / 2.0f,
@@ -229,7 +229,7 @@ void RenderSystem::processSpriteData(World& world)
 SpriteComponent* RenderSystem::processPlayerData(World& w, const SDL_FPoint& half_screen_size,
     const Entity playerEntity, const TransformComponent& playerTransform)
 {
-    auto& sprite{ *w.tryGetComponent<ComponentType::Sprite>(playerEntity) };
+    auto& sprite{ *w.tryGetComponent<SpriteComponent>(playerEntity) };
     sprite.renderData.rotation = playerTransform.rotation;
 
     sprite.renderData.sourceRect = utils::makeRect(constants::sdlZeroPoint, sprite.renderData.textureSize);

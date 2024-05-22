@@ -5,7 +5,7 @@
 void GameplaySystem::init(World& world, SystemsManager& systemsManager)
 {
     const auto entity{ world.createEntity() };
-    auto& gameStateComponent{world.addComponent<ComponentType::GameState>(entity)};
+    auto& gameStateComponent{world.addComponent<GameStateComponent>(entity)};
 #ifdef WIDGETBUILDER
     gameStateComponent.gameState = GameStateType::NONE;
 #else
@@ -20,11 +20,11 @@ void GameplaySystem::createPlayer(World& world, SystemsManager& systemsManager) 
     auto& dbSystem{ systemsManager.getSystem<DatabaseSystem>() };
 
     const auto entity{ world.createEntity() };
-    world.addComponent<ComponentType::Player>(entity);
-    world.addComponent<ComponentType::Movement>(entity);
-    world.addComponent<ComponentType::Transform>(entity);
+    world.addComponent<PlayerComponent>(entity);
+    world.addComponent<MovementComponent>(entity);
+    world.addComponent<TransformComponent>(entity);
 
-    auto& sprite{ world.addComponent<ComponentType::Sprite>(entity) };
+    auto& sprite{ world.addComponent<SpriteComponent>(entity) };
     const auto& texture{ dbSystem.getTexture(TextureType::PlayerShip_playerShip2_orange) };
     sprite.layer = SpriteLayer::PLAYER;
     sprite.renderData.texture = texture.texture;
