@@ -37,6 +37,11 @@ def update_registry(obj_type: str):
                 comps_dict[f"{enum_name}::{components[i]}"] = objects[i]
             template = environment.get_template("ComponentsRegistryTemplate.h")
             content = template.render(components=comps_dict)
+            
+            info_template = environment.get_template("ComponentsInfoTemplate.h")
+            info_content = info_template.render(components=comps_dict)
+            with open(f"{GENERATED_PATH}/ComponentsInfo.h", "w") as f:
+                f.write(info_content)
 
         case _:
             print(f"Unknown type {obj_type}!")

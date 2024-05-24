@@ -25,16 +25,3 @@ struct ComponentsList<t<Ts...>>
 {
     using type = std::tuple<Components<Ts>...>;
 };
-
-template<typename T>
-struct ComponentInfo
-{
-    const ComponentType componentType;
-};
-
-template<typename> struct ComponentInfoList;
-template<template<typename...Args> typename t, typename ...Ts>
-struct ComponentInfoList<t<Ts...>>
-{
-    using type = std::tuple<Ts...>;
-};

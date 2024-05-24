@@ -1,5 +1,6 @@
 #pragma once
 #include "Generated/ComponentsRegistry.h"
+#include "Generated/ComponentsInfo.h"
 #include "Types/Entity.h"
 #include "Utils.h"
 #include <cassert>
@@ -95,7 +96,7 @@ public:
     template <typename T>
     ComponentType getComponentType()
     {
-        return std::get<ComponentInfo<T>>(componentInfos_).componentType;
+        return std::get<ComponentInfo<T>>(ComponentInfos).componentType;
     }
 
 private:
@@ -105,22 +106,8 @@ private:
         return std::get<Components<T>>(components_);
     }
 
-    /*template <typename T, size_t I>
-    constexpr ComponentType getComponentTypeRecursive() const
-    {
-        using Info = std::tuple_element_t<I, ComponentInfos>::type;
-        if constexpr (std::is_same<T, Info>)
-        {
-            return Info{}.componentType;
-        }
-
-        static_assert(I + 1 < std::tuple_size_v<ComponentInfos>, "Component not registered");
-        getComponentTypeRecursive<T, I + 1>();
-    }*/
-
 private:
     RegisteredComponents components_;
-    const ComponentInfos componentInfos_{ getComponentInfos()};
     std::unordered_map<Entity, std::vector<std::function<void(const Entity)>>> entities_;
     size_t entityId_{0};
 };
