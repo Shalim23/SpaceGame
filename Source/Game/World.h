@@ -25,17 +25,9 @@ public:
         return entity;
     }
 
-    void destroyEntity(const Entity entity)
+    void queueEntityToDestoy(const Entity entity)
     {
-        const auto iter{entities_.find(entity)};
-        assert(iter != entities_.end());
-        const auto& [found_entity, componentRemoveCallbacks]{*iter};
-        for (const auto& callback : componentRemoveCallbacks)
-        {
-            callback(entity);
-        }
-
-        entities_.erase(iter);
+        pendingDestroyEntities_.push_back(entity);
     }
 
     template <typename... Comps>
@@ -81,9 +73,7 @@ public:
     template<typename T>
     void removeComponent(const Entity entity)
     {
-        Components<T> c{ getComponentsInternal<T>() };
-        auto& components{c.instances};
-        auto& indexes{c.entityToComponentIndex};
+        auto& [components, indexes]{ getComponentsInternal<T>() };
         const auto iter{ indexes.find(entity) };
         if (iter == indexes.end())
         {
@@ -92,10 +82,15 @@ public:
         }
 
         const auto& [foundEntity, componentIndex]{*iter};
-        assert(components.size() - 1 >= componentIndex);
-        std::swap(components[componentIndex], components.back());
+        const auto compoinentsSize{ components.size() };
+        assert(compoinentsSize - 1 >= componentIndex);
+        if (compoinentsSize > 1)
+        {
+            std::swap(components[componentIndex], components.back());
+            indexes[components[componentIndex].entity] = componentIndex;
+        }
+
         components.pop_back();
-        indexes[components[componentIndex].entity] = componentIndex;
         indexes.erase(iter);
     }
 
@@ -111,6 +106,29 @@ public:
         return std::get<ComponentInfo<T>>(ComponentInfos).componentType;
     }
 
+    void destroyEntities()
+    {
+        if (pendingDestroyEntities_.size() == 0)
+        {
+            return;
+        }
+        
+        for (const auto entity : pendingDestroyEntities_)
+        {
+            const auto iter{ entities_.find(entity) };
+            assert(iter != entities_.end());
+            const auto& [found_entity, componentRemoveCallbacks] {*iter};
+            for (const auto& callback : componentRemoveCallbacks)
+            {
+                callback(entity);
+            }
+
+            entities_.erase(iter);
+        }
+
+        pendingDestroyEntities_.clear();
+    }
+
 private:
     template <typename T>
     auto& getComponentsInternal()
@@ -121,5 +139,6 @@ private:
 private:
     RegisteredComponents components_;
     std::unordered_map<Entity, std::vector<std::function<void(const Entity)>>> entities_;
+    std::vector<Entity> pendingDestroyEntities_;
     size_t entityId_{0};
 };

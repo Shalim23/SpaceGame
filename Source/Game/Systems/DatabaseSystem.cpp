@@ -6,31 +6,27 @@
 
 void DatabaseSystem::update(World& world, const double deltaTime)
 {
-    //#TODO
-    /*const auto& widgetComponents{ world.getComponents<ComponentType::Widget>() };
+    const auto& renderComponents{ world.getComponents<RenderComponent>() };
+    decltype(dynamicTextures_) dynamicTexturesToRemove;
 
-    std::vector<const DynamicTexture*> dynamicTextsToRemove;
-    for (const auto& texture : textures)
+    for (const auto& [entity, texture] : dynamicTextures_)
     {
-        if (!utils::containsIf(widgetComponents, [&texture](const auto& component)
-            {   return texture.entity == component.entity; }))
+        if (!utils::containsIf(renderComponents, [&entity](const auto& component)
+            {   return entity == component.entity; }))
         {
-            dynamicTextsToRemove.push_back(&texture);
+            dynamicTexturesToRemove.push_back({entity, texture});
         }
     }
 
-    for (const auto* textsToRemove : dynamicTextsToRemove)
+    for (const auto& [entity, texture] : dynamicTexturesToRemove)
     {
-        for (SDL_Texture* texture : textsToRemove->textures)
-        {
-            SDL_DestroyTexture(texture);
-        }
+        SDL_DestroyTexture(texture);
 
-        std::erase_if(textures, [textsToRemove](const DynamicTexture& texts)
+        std::erase_if(dynamicTextures_, [entity](const auto& data)
             {
-                return textsToRemove->entity == texts.entity;
+                return entity == data.first;
             });
-    }*/
+    }
 }
 
 void DatabaseSystem::shutdown()

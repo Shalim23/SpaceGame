@@ -1,12 +1,10 @@
 #pragma once
 #include "SDL.h"
 #include "../Types/Entity.h"
-#include <optional>
 
 class World;
 class SystemsManager;
 class DatabaseSystem;
-class WidgetComponent;
 struct TransformComponent;
 
 class WorldBoundsSystem
@@ -20,10 +18,12 @@ private:
 	void generateBackground(World& world);
 	bool isPlayerInRange(const TransformComponent& playerTransform) const;
 
-	void createOutOfBoundsEntity(World& world) const;
-	void createBackgroundWidget(WidgetComponent& widgetComponent) const;
-	void createTextWidget(const Entity entity, WidgetComponent& widgetComponent) const;
+	void createOutOfBoundsWidget(World& world) const;
+	Entity createOutOfBoundsEntity(World& world) const;
+	void createBackground(World& world) const;
+	void createText(World& world) const;
 
 private:
 	DatabaseSystem* dbSystem_{nullptr};
+	SDL_FPoint screenSizeF_{};
 };

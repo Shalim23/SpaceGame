@@ -43,7 +43,7 @@ void Game::run()
             {
             case SDL_QUIT:
             {
-                is_running_ = ~is_running_;
+                is_running_ = false;
                 return;
             }
             }
@@ -54,6 +54,7 @@ void Game::run()
         inputSystem_.processInput(inputState_, world_, deltaTime_);
 
         systemsManager_.update(world_, deltaTime_);
+        world_.destroyEntities();
 
         renderSystem_.render();
 

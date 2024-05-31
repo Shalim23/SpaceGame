@@ -15,6 +15,9 @@ namespace
 void WorldBoundsSystem::init(World& world, SystemsManager& systemsManager)
 {
     dbSystem_ = &systemsManager.getSystem<DatabaseSystem>();
+    const auto& renderSystem{systemsManager.getSystem<RenderSystem>()};
+    screenSizeF_ = renderSystem.getScreenSizeF();
+
     generateBackground(world);
 }
 
@@ -34,7 +37,10 @@ void WorldBoundsSystem::update(World& world, const double deltaTime)
     {
         if (outOfBoundsComponents.size() > 0)
         {
-            world.destroyEntity(outOfBoundsComponents.at(0).entity);
+            for (const auto& oobComponent : outOfBoundsComponents)
+            {
+                world.queueEntityToDestoy(oobComponent.entity);
+            }
         }
 
         return;
@@ -42,7 +48,7 @@ void WorldBoundsSystem::update(World& world, const double deltaTime)
 
     if (outOfBoundsComponents.size() == 0)
     {
-        createOutOfBoundsEntity(world);
+        createOutOfBoundsWidget(world);
     }
 }
 
@@ -74,31 +80,40 @@ bool WorldBoundsSystem::isPlayerInRange(const TransformComponent& playerTransfor
         utils::inRange(playerTransform.location.y, minMaxBounds);
 }
 
-void WorldBoundsSystem::createOutOfBoundsEntity(World& world) const
+void WorldBoundsSystem::createOutOfBoundsWidget(World& world) const
 {
-    const Entity entity{world.createEntity()};
-    world.addComponent<OutOfWorldBoundsComponent>(entity);
-    //auto& widget{world.addComponent<WidgetComponent>(entity)};
-    //widget.setLayer(WidgetLayer::EFFECTS);
-
-    //createBackgroundWidget(widget);
-    //createTextWidget(entity, widget);
+    createBackground(world);
+    createText(world);
 }
 
-void WorldBoundsSystem::createBackgroundWidget(WidgetComponent& widgetComponent) const
+Entity WorldBoundsSystem::createOutOfBoundsEntity(World& world) const
 {
-    //Widget& background{ widgetComponent.addWidget() };
+    const Entity entity{ world.createEntity() };
+    world.addComponents<OutOfWorldBoundsComponent, UIComponent>(entity);
+    auto& render{ world.addComponent<RenderComponent>(entity) };
+    render.layer = RenderLayer::UIEffects;
 
-    //RenderData& backgroundRenderData{ background.updateRenderData() };
-    //backgroundRenderData.texture = dbSystem_->getTexture(TextureType::white_pixel).texture;
+    return entity;
+}
 
-    ////#TODO
-    ////backgroundRenderData.sourceRect = utils::makeRect(constants::sdlZeroPoint, renderSystem_->getScreenSize());
-    ////backgroundRenderData.destinationRect = utils::makeRect(constants::sdlZeroPointF, renderSystem_->getScreenSizeF());
+void WorldBoundsSystem::createBackground(World& world) const
+{
+    auto entity{ createOutOfBoundsEntity(world)};
 
-    //constexpr SDL_Color blackColor{ .r = 0, .g = 0, .b = 0 };
-    //SDL_SetTextureColorMod(backgroundRenderData.texture,
-    //    blackColor.r, blackColor.g, blackColor.b);
+    auto& renderData{world.tryGetComponent<RenderComponent>(entity)->data};
+    const auto& info{dbSystem_->createDynamicTexture(TextureType::white_pixel, entity)};
+    renderData.texture = info.texture;
+    renderData.textureSize = info.size;
+
+    renderData.sourceRect = utils::makeRect(constants::sdlZeroPoint, renderData.textureSize);
+    renderData.destinationRect = utils::makeRect(screenSizeF_ / 2.0f, screenSizeF_);
+    renderData.scale = screenSizeF_.x;
+
+    constexpr SDL_Color blackColor{ .r = 0, .g = 0, .b = 0 };
+    SDL_SetTextureColorMod(renderData.texture,
+       blackColor.r, blackColor.g, blackColor.b);
+
+    SDL_SetTextureAlphaMod(renderData.texture, 128);
 
     //constexpr Uint64 backgroundAnimationTime{ 7000 };
     //background.addAnimation(backgroundAnimationTime,
@@ -108,56 +123,56 @@ void WorldBoundsSystem::createBackgroundWidget(WidgetComponent& widgetComponent)
     //    });
 }
 
-void WorldBoundsSystem::createTextWidget(const Entity entity, WidgetComponent& widgetComponent) const
+void WorldBoundsSystem::createText(World& world) const
 {
-    //#TODO
-    
-    /*const SDL_FPoint screenSize{ renderSystem_->getScreenSizeF() };
-    const SDL_FPoint screenSizeModifier{renderSystem_->getScreenSizeF() / constants::baseScreenSize};
-
-    float nextTextPosition{780.0f};
-
     {
-        Widget& warningText{ widgetComponent.addWidget() };
+        auto entity{ createOutOfBoundsEntity(world) };
+        auto& renderData{ world.tryGetComponent<RenderComponent>(entity)->data };
+        
+        const auto& info{ dbSystem_->getText(TextType::Warning)};
+        renderData.texture = info.texture;
+        renderData.textureSize = info.size;
 
-        RenderData& warningTextRenderData{ warningText.updateRenderData() };
-        warningTextRenderData = textSystem_->getText(TextType::Warning);
+        renderData.sourceRect = utils::makeRect(constants::sdlZeroPoint,
+            renderData.textureSize);
 
-        warningTextRenderData.sourceRect = utils::makeRect(constants::sdlZeroPoint,
-            warningTextRenderData.textureSize);
-
-        warningTextRenderData.destinationRect = utils::makeRect(
+        renderData.destinationRect = utils::makeRect(
             SDL_FPoint
             {
-                .x = screenSize.x / 2.0f -
-                    (warningTextRenderData.textureSize.x / 2.0f * screenSizeModifier.x),
-                .y = nextTextPosition * screenSizeModifier.y
+                .x = screenSizeF_.x / 2.0f,
+                .y = 780.0f
             },
-            screenSizeModifier * warningTextRenderData.textureSize
+            SDL_FPoint
+            {
+                .x = static_cast<float>(renderData.textureSize.x),
+                .y = static_cast<float>(renderData.textureSize.y)
+            }
             );
-
-        nextTextPosition =
-            warningTextRenderData.destinationRect.y  + warningTextRenderData.textureSize.y;
     }
 
     {
-        Widget& radiationText{ widgetComponent.addWidget() };
+        auto entity{ createOutOfBoundsEntity(world) };
+        auto& renderData{ world.tryGetComponent<RenderComponent>(entity)->data };
 
-        RenderData& radiationTextRenderData{ radiationText.updateRenderData() };
-        radiationTextRenderData = textSystem_->getText(TextType::Highradiationlevel);
+        const auto& info{ dbSystem_->getText(TextType::Highradiationlevel) };
+        renderData.texture = info.texture;
+        renderData.textureSize = info.size;
 
-        radiationTextRenderData.sourceRect = utils::makeRect(constants::sdlZeroPoint,
-            radiationTextRenderData.textureSize);
+        renderData.sourceRect = utils::makeRect(constants::sdlZeroPoint,
+            renderData.textureSize);
 
-        radiationTextRenderData.destinationRect = utils::makeRect(
+        renderData.destinationRect = utils::makeRect(
             SDL_FPoint
             {
-                .x = screenSize.x / 2.0f -
-                    (radiationTextRenderData.textureSize.x / 2.0f * screenSizeModifier.x),
-                .y = nextTextPosition + (10.0f * screenSizeModifier.y)
+                .x = screenSizeF_.x / 2.0f,
+                .y = 850.0f
             },
-            screenSizeModifier * radiationTextRenderData.textureSize
+            SDL_FPoint
+            {
+                .x = static_cast<float>(renderData.textureSize.x),
+                .y = static_cast<float>(renderData.textureSize.y)
+            }
         );
-    }*/
+    }
 }
 

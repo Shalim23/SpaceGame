@@ -9,10 +9,10 @@ void GameplaySystem::init(World& world, SystemsManager& systemsManager)
 #ifdef WIDGETBUILDER
     gameStateComponent.gameState = GameStateType::NONE;
 #else
-    gameStateComponent.gameState = GameStateType::MAIN_MENU;
+    gameStateComponent.gameState = GameStateType::INGAME;
 #endif
 
-    //createPlayer(world, systemsManager);
+    createPlayer(world, systemsManager);
 }
 
 void GameplaySystem::createPlayer(World& world, SystemsManager& systemsManager) const
