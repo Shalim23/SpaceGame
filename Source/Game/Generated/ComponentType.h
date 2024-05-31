@@ -10,5 +10,6 @@ enum class ComponentType
 	Player,
 	Render,
 	Transform,
-	UI
+	UI,
+	WidgetAnimation
 };

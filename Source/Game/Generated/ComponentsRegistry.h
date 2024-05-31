@@ -14,7 +14,8 @@ OutOfWorldBoundsComponent,
 PlayerComponent,
 RenderComponent,
 TransformComponent,
-UIComponent
+UIComponent,
+WidgetAnimationComponent
 >;
 
 using RegisteredComponents = ComponentsList<RegisteredComponentsTypes>::type;

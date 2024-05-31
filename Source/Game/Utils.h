@@ -51,14 +51,6 @@ namespace utils
         const auto duration{std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch())};
         return static_cast<unsigned int>(duration.count());
     }
-
-    static void lerpOpacity(SDL_Texture* texture, const float delta)
-    {
-        constexpr float minOpacity{ 0.0f };
-        constexpr float maxOpacity{ 255.0f };
-        const float currentOpacity{ utils::lerp(minOpacity, maxOpacity, delta) };
-        SDL_SetTextureAlphaMod(texture, static_cast<Uint8>(currentOpacity));
-    }
 }
 
 static SDL_FPoint operator*(const SDL_FPoint& lhs, const SDL_Point& rhs)

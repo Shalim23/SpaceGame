@@ -9,3 +9,4 @@
 #include "../Components/RenderComponent.h"
 #include "../Components/TransformComponent.h"
 #include "../Components/UIComponent.h"
+#include "../Components/WidgetAnimationComponent.h"

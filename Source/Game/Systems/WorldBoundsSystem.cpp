@@ -113,14 +113,16 @@ void WorldBoundsSystem::createBackground(World& world) const
     SDL_SetTextureColorMod(renderData.texture,
        blackColor.r, blackColor.g, blackColor.b);
 
-    SDL_SetTextureAlphaMod(renderData.texture, 128);
-
-    //constexpr Uint64 backgroundAnimationTime{ 7000 };
-    //background.addAnimation(backgroundAnimationTime,
-    //    [texture = backgroundRenderData.texture](const float delta)
-    //    {
-    //        utils::lerpOpacity(texture, delta);
-    //    });
+    auto& animationComponent{world.addComponent<WidgetAnimationComponent>(entity)};
+    animationComponent.totalAnimationTime = 7.0;
+    animationComponent.animation = 
+        [texture = renderData.texture](const float delta)
+        {
+            constexpr float minOpacity{ 0.0f };
+            constexpr float maxOpacity{ 255.0f };
+            const float currentOpacity{ utils::lerp(minOpacity, maxOpacity, delta) };
+            SDL_SetTextureAlphaMod(texture, static_cast<Uint8>(currentOpacity));
+        };
 }
 
 void WorldBoundsSystem::createText(World& world) const
@@ -139,7 +141,7 @@ void WorldBoundsSystem::createText(World& world) const
         renderData.destinationRect = utils::makeRect(
             SDL_FPoint
             {
-                .x = screenSizeF_.x / 2.0f,
+                .x = 1920.0f / 2.0f,
                 .y = 780.0f
             },
             SDL_FPoint
@@ -164,7 +166,7 @@ void WorldBoundsSystem::createText(World& world) const
         renderData.destinationRect = utils::makeRect(
             SDL_FPoint
             {
-                .x = screenSizeF_.x / 2.0f,
+                .x = 1920.0f / 2.0f,
                 .y = 850.0f
             },
             SDL_FPoint

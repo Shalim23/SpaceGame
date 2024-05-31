@@ -17,6 +17,7 @@ ComponentInfo<OutOfWorldBoundsComponent>{.componentType = ComponentType::OutOfWo
 ComponentInfo<PlayerComponent>{.componentType = ComponentType::Player},
 ComponentInfo<RenderComponent>{.componentType = ComponentType::Render},
 ComponentInfo<TransformComponent>{.componentType = ComponentType::Transform},
-ComponentInfo<UIComponent>{.componentType = ComponentType::UI}
+ComponentInfo<UIComponent>{.componentType = ComponentType::UI},
+ComponentInfo<WidgetAnimationComponent>{.componentType = ComponentType::WidgetAnimation}
     )
 };

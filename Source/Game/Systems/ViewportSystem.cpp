@@ -44,6 +44,15 @@ void ViewportSystem::update(World& world, const double deltaTime)
         {
             auto& component{renderComponent.instance};
             auto& layer{ renderDataByLayer_[static_cast<size_t>(component.layer)]};
+            if (auto* animationComponent = world.tryGetComponent<WidgetAnimationComponent>(renderComponent.entity))
+            {
+                if (animationComponent->currentAnimationTime <= animationComponent->totalAnimationTime)
+                {
+                    animationComponent->currentAnimationTime += deltaTime;
+                    animationComponent->animation(
+                        animationComponent->currentAnimationTime / animationComponent->totalAnimationTime);
+                }
+            }
             layer.emplace_back(setupUIRenderData(component.data));
 
             continue;
