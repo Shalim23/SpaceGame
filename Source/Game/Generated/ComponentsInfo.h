@@ -10,12 +10,13 @@ struct ComponentInfo
 static constexpr auto ComponentInfos
 {
     std::make_tuple(
+ComponentInfo<GameObjectComponent>{.componentType = ComponentType::GameObject},
 ComponentInfo<GameStateComponent>{.componentType = ComponentType::GameState},
 ComponentInfo<MovementComponent>{.componentType = ComponentType::Movement},
 ComponentInfo<OutOfWorldBoundsComponent>{.componentType = ComponentType::OutOfWorldBounds},
 ComponentInfo<PlayerComponent>{.componentType = ComponentType::Player},
-ComponentInfo<SpriteComponent>{.componentType = ComponentType::Sprite},
+ComponentInfo<RenderComponent>{.componentType = ComponentType::Render},
 ComponentInfo<TransformComponent>{.componentType = ComponentType::Transform},
-ComponentInfo<WidgetComponent>{.componentType = ComponentType::Widget}
+ComponentInfo<UIComponent>{.componentType = ComponentType::UI}
     )
 };

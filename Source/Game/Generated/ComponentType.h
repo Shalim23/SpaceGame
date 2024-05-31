@@ -3,11 +3,12 @@
 
 enum class ComponentType
 {
+	GameObject,
 	GameState,
 	Movement,
 	OutOfWorldBounds,
 	Player,
-	Sprite,
+	Render,
 	Transform,
-	Widget
+	UI
 };

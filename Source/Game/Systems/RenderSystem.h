@@ -22,9 +22,7 @@ public:
 
     void render();
     void createWindow();
-    
-    
-    
+
     SDL_Texture* createTextureFromData(const std::vector<char>& rawData) const;
     SDL_Texture* createTextureFromSurface(SDL_Surface* surface) const;
     SDL_Surface* createSurface(const std::vector<char>& rawData) const;
@@ -35,18 +33,8 @@ public:
     SDL_FPoint getScreenSizeF() const;
 
 private:
-    
-    
-    
-    void processSpriteData(World& world);
-
-    SpriteComponent* processPlayerData(World& world, const SDL_FPoint& halfScreenSize,
-        const Entity playerEntity, const TransformComponent& playerTransform);
 
     
-
-    SDL_FRect createDestinationRect(const float x, const float y,
-        const float w, const float h);
 
 private:
     SDL_Window* window_{ nullptr };

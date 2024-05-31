@@ -7,13 +7,14 @@
 
 using RegisteredComponentsTypes = TypesList
 <
+GameObjectComponent,
 GameStateComponent,
 MovementComponent,
 OutOfWorldBoundsComponent,
 PlayerComponent,
-SpriteComponent,
+RenderComponent,
 TransformComponent,
-WidgetComponent
+UIComponent
 >;
 
 using RegisteredComponents = ComponentsList<RegisteredComponentsTypes>::type;

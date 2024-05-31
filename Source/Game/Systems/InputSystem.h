@@ -14,6 +14,8 @@ class InputSystem
 struct RegisteredKeyboardInput
 {
 	SDL_Scancode key;
+	bool isOneTimeAction{true};
+	bool isPressed{false};
 	std::function<void(World&, const double)> onPressed;
 	std::function<void(World&, const double)> onReleased;
 };

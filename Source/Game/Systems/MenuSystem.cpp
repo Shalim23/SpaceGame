@@ -29,22 +29,23 @@ void MenuSystem::update(World& world, const double deltaTime)
 	case GameStateType::MAIN_MENU:
 	case GameStateType::INGAME_MENU:
 	{
-		if (WidgetComponent* component = getMenuWidget(world))
-		{
-			for (auto& widget : component->updateWidgets())
-			{
-				if (widget.hasAnimation() && widget.isAnimationFinished())
-				{
-					
-				}
-			}
-			//#TODO
-			// track mouse click position
-		}
-		else
-		{
-			createMenuWidget(world, gameState);
-		}
+		//#TODO refactor fix
+        //if (WidgetComponent* component = getMenuWidget(world))
+		//{
+		//	for (auto& widget : component->updateWidgets())
+		//	{
+		//		if (widget.hasAnimation() && widget.isAnimationFinished())
+		//		{
+		//			
+		//		}
+		//	}
+		//	//#TODO
+		//	// track mouse click position
+		//}
+		//else
+		//{
+		//	createMenuWidget(world, gameState);
+		//}
 		
 		break;
     }
@@ -70,16 +71,17 @@ void MenuSystem::createMenuWidget(World& world, const GameStateType gameState) c
 
 void MenuSystem::createMainMenu(World& world) const
 {
-    const Entity entity{ world.createEntity() };
-    auto& widget{ world.addComponent<WidgetComponent>(entity) };
-    widget.setLayer(WidgetLayer::MENU);
+    //#TODO refactor fix
+ //   const Entity entity{ world.createEntity() };
+ //   auto& widget{ world.addComponent<WidgetComponent>(entity) };
+ //   widget.setLayer(WidgetLayer::MENU);
 
-	createTitle(widget);
+	//createTitle(widget);
 
-    createButton(widget, 700.0f, 0.0f, TextType::Play);
-    //createButton(widget, 850.0f, 150.0f, TextType::Exit);
+ //   createButton(widget, 700.0f, 0.0f, TextType::Play);
+ //   //createButton(widget, 850.0f, 150.0f, TextType::Exit);
 
-	//createMainMenuBackground(entity, widget);
+	////createMainMenuBackground(entity, widget);
 }
 
 void MenuSystem::createTitle(WidgetComponent& widgetComponent) const
@@ -87,7 +89,8 @@ void MenuSystem::createTitle(WidgetComponent& widgetComponent) const
 	constexpr float scale{4.0f};
 
     {
-		Widget& spaceText{ widgetComponent.addWidget() };
+        //#TODO refactor fix
+        /*Widget& spaceText{ widgetComponent.addWidget() };
 
         RenderData& spaceTextRenderData{ spaceText.updateRenderData() };
         const auto& textureInfo{dbSystem_->getText(TextType::SPACE)};
@@ -95,7 +98,7 @@ void MenuSystem::createTitle(WidgetComponent& widgetComponent) const
         spaceTextRenderData.textureSize = textureInfo.size;
 
         spaceTextRenderData.sourceRect = utils::makeRect(constants::sdlZeroPoint,
-            spaceTextRenderData.textureSize);
+            spaceTextRenderData.textureSize);*/
 
    //     const float animationStartPosition{-spaceTextRenderData.textureSize.x
 			//* screenSizeModifier.x * textScale };
@@ -109,9 +112,10 @@ void MenuSystem::createTitle(WidgetComponent& widgetComponent) const
    //         screenSizeModifier * spaceTextRenderData.textureSize * textScale
    //     );
 
-        spaceTextRenderData.destinationRect.x = 750.0f;
+        //#TODO refactor fix
+        /*spaceTextRenderData.destinationRect.x = 750.0f;
         spaceTextRenderData.destinationRect.y = 350.0f;
-        spaceTextRenderData.scale = scale;
+        spaceTextRenderData.scale = scale;*/
 
 		/*nextTextPositionY =
             spaceTextRenderData.destinationRect.y + spaceTextRenderData.textureSize.y;*/
@@ -129,7 +133,8 @@ void MenuSystem::createTitle(WidgetComponent& widgetComponent) const
     }
 
     {
-        Widget& gameText{ widgetComponent.addWidget() };
+        //#TODO refactor fix
+        /*Widget& gameText{ widgetComponent.addWidget() };
 
         RenderData& gameTextRenderData{ gameText.updateRenderData() };
         const auto& textureInfo{ dbSystem_->getText(TextType::GAME) };
@@ -137,7 +142,7 @@ void MenuSystem::createTitle(WidgetComponent& widgetComponent) const
         gameTextRenderData.textureSize = textureInfo.size;
 
         gameTextRenderData.sourceRect = utils::makeRect(constants::sdlZeroPoint,
-            gameTextRenderData.textureSize);
+            gameTextRenderData.textureSize);*/
 
         //const float animationStartPosition{ screenSize.x };
         //const float animationEndPosition{ 900.0f * screenSizeModifier.x };
@@ -150,9 +155,10 @@ void MenuSystem::createTitle(WidgetComponent& widgetComponent) const
         //    screenSizeModifier * gameTextRenderData.textureSize * scale
         //);
 
-        gameTextRenderData.destinationRect.x = 1000.0f;
+        //#TODO refactor fix
+        /*gameTextRenderData.destinationRect.x = 1000.0f;
         gameTextRenderData.destinationRect.y = 500.0f;
-        gameTextRenderData.scale = scale;
+        gameTextRenderData.scale = scale;*/
 
         /*gameText.addAnimation(titleAnimationTimeMs,
             [&destRect = gameTextRenderData.destinationRect,
@@ -173,7 +179,9 @@ void MenuSystem::createButton(WidgetComponent& widgetComponent,
     constexpr float scale{2.0f};
 
     {
-        Widget& button{ widgetComponent.addWidget() };
+        //#TODO refactor fix
+        
+        /*Widget& button{ widgetComponent.addWidget() };
 
         RenderData& buttonRenderData{ button.updateRenderData() };
         const auto& textureInfo{ dbSystem_->getTexture(TextureType::UI_buttonBlue)};
@@ -181,7 +189,7 @@ void MenuSystem::createButton(WidgetComponent& widgetComponent,
         buttonRenderData.textureSize = textureInfo.size;
 
         buttonRenderData.sourceRect = utils::makeRect(constants::sdlZeroPoint,
-            buttonRenderData.textureSize);
+            buttonRenderData.textureSize);*/
 
         //const float animationStartPosition{ screenSize.y + padding };
         //auto scaled = buttonRenderData.textureSize.x * scale;
@@ -197,9 +205,10 @@ void MenuSystem::createButton(WidgetComponent& widgetComponent,
             screenSizeModifier * buttonRenderData.textureSize * scale
         );*/
 
-        buttonRenderData.destinationRect.x = 960.0f;
+        //#TODO refactor fix
+        /*buttonRenderData.destinationRect.x = 960.0f;
         buttonRenderData.destinationRect.y = 700.0f;
-        buttonRenderData.scale = scale;
+        buttonRenderData.scale = scale;*/
 
 
         /*button.addAnimation(titleAnimationTimeMs,
@@ -307,9 +316,11 @@ void MenuSystem::createInGameMenu(World& world) const
 
 WidgetComponent* MenuSystem::getMenuWidget(World& world) const
 {
-    auto& widgets{ world.getComponents<WidgetComponent>() };
-	auto iter{std::ranges::find_if(widgets, [](const auto& component)
-		{ return component.instance.getLayer() == WidgetLayer::MENU; })};
+    //#TODO refactor fix
+    /*auto& widgets{ world.getComponents<WidgetComponent>() };
+    auto iter{std::ranges::find_if(widgets, [](const auto& component)
+        { return component.instance.getLayer() == WidgetLayer::MENU; })};
 
-	return iter == widgets.end() ? nullptr : &iter->instance;
+    return iter == widgets.end() ? nullptr : &iter->instance;*/
+    return nullptr;
 }

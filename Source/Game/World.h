@@ -38,6 +38,12 @@ public:
         entities_.erase(iter);
     }
 
+    template <typename... Comps>
+    void addComponents(const Entity entity)
+    {
+        (addComponent<Comps>(entity), ...);
+    }
+
     template<typename T>
     T& addComponent(const Entity entity)
     {
@@ -56,6 +62,12 @@ public:
         entities_[entity].emplace_back([this](const Entity entity){ removeComponent<T>(entity); });
 
         return new_component.instance;
+    }
+
+    template <typename T>
+    bool hasComponent(const Entity entity)
+    {
+        return getComponentsInternal<T>().entityToComponentIndex.contains(entity);
     }
 
     template<typename T>

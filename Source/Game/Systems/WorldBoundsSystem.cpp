@@ -53,16 +53,17 @@ void WorldBoundsSystem::generateBackground(World& world)
         for (int k{ -gridSize }; k <= gridSize; ++k)
         {
             auto e{ world.createEntity() };
+            world.addComponent<GameObjectComponent>(e);
 
-            auto& sprite{ world.addComponent<SpriteComponent>(e) };
+            auto& render{ world.addComponent<RenderComponent>(e) };
             auto& texture{ dbSystem_->getTexture(TextureType::Backgrounds_big_purple) };
-            sprite.layer = SpriteLayer::BACKGROUND;
-            sprite.renderData.texture = texture.texture;
-            sprite.renderData.textureSize = texture.size;
+            render.layer = RenderLayer::Background;
+            render.data.texture = texture.texture;
+            render.data.textureSize = texture.size;
 
             auto& transform{ world.addComponent<TransformComponent>(e) };
-            transform.location.x = sprite.renderData.textureSize.x * i;
-            transform.location.y = sprite.renderData.textureSize.y * k;
+            transform.location.x = render.data.textureSize.x * i;
+            transform.location.y = render.data.textureSize.y * k;
         }
     }
 }
@@ -86,25 +87,25 @@ void WorldBoundsSystem::createOutOfBoundsEntity(World& world) const
 
 void WorldBoundsSystem::createBackgroundWidget(WidgetComponent& widgetComponent) const
 {
-    Widget& background{ widgetComponent.addWidget() };
+    //Widget& background{ widgetComponent.addWidget() };
 
-    RenderData& backgroundRenderData{ background.updateRenderData() };
-    backgroundRenderData.texture = dbSystem_->getTexture(TextureType::white_pixel).texture;
+    //RenderData& backgroundRenderData{ background.updateRenderData() };
+    //backgroundRenderData.texture = dbSystem_->getTexture(TextureType::white_pixel).texture;
 
-    //#TODO
-    //backgroundRenderData.sourceRect = utils::makeRect(constants::sdlZeroPoint, renderSystem_->getScreenSize());
-    //backgroundRenderData.destinationRect = utils::makeRect(constants::sdlZeroPointF, renderSystem_->getScreenSizeF());
+    ////#TODO
+    ////backgroundRenderData.sourceRect = utils::makeRect(constants::sdlZeroPoint, renderSystem_->getScreenSize());
+    ////backgroundRenderData.destinationRect = utils::makeRect(constants::sdlZeroPointF, renderSystem_->getScreenSizeF());
 
-    constexpr SDL_Color blackColor{ .r = 0, .g = 0, .b = 0 };
-    SDL_SetTextureColorMod(backgroundRenderData.texture,
-        blackColor.r, blackColor.g, blackColor.b);
+    //constexpr SDL_Color blackColor{ .r = 0, .g = 0, .b = 0 };
+    //SDL_SetTextureColorMod(backgroundRenderData.texture,
+    //    blackColor.r, blackColor.g, blackColor.b);
 
-    constexpr Uint64 backgroundAnimationTime{ 7000 };
-    background.addAnimation(backgroundAnimationTime,
-        [texture = backgroundRenderData.texture](const float delta)
-        {
-            utils::lerpOpacity(texture, delta);
-        });
+    //constexpr Uint64 backgroundAnimationTime{ 7000 };
+    //background.addAnimation(backgroundAnimationTime,
+    //    [texture = backgroundRenderData.texture](const float delta)
+    //    {
+    //        utils::lerpOpacity(texture, delta);
+    //    });
 }
 
 void WorldBoundsSystem::createTextWidget(const Entity entity, WidgetComponent& widgetComponent) const

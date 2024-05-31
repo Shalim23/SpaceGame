@@ -20,13 +20,11 @@ void GameplaySystem::createPlayer(World& world, SystemsManager& systemsManager) 
     auto& dbSystem{ systemsManager.getSystem<DatabaseSystem>() };
 
     const auto entity{ world.createEntity() };
-    world.addComponent<PlayerComponent>(entity);
-    world.addComponent<MovementComponent>(entity);
-    world.addComponent<TransformComponent>(entity);
+    world.addComponents<PlayerComponent, MovementComponent, TransformComponent, GameObjectComponent>(entity);
 
-    auto& sprite{ world.addComponent<SpriteComponent>(entity) };
+    auto& render{ world.addComponent<RenderComponent>(entity) };
     const auto& texture{ dbSystem.getTexture(TextureType::PlayerShip_playerShip2_orange) };
-    sprite.layer = SpriteLayer::PLAYER;
-    sprite.renderData.texture = texture.texture;
-    sprite.renderData.textureSize = texture.size;
+    render.layer = RenderLayer::Player;
+    render.data.texture = texture.texture;
+    render.data.textureSize = texture.size;
 }

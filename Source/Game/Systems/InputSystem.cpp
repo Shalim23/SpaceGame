@@ -8,8 +8,8 @@
 
 namespace
 {
-    constexpr double rotationRatePerSecond{ 20.0 };
-    constexpr float movementSpeedPerSecond{ 50.0 };
+    constexpr double rotationRatePerSecond{ 100.0 };
+    constexpr float movementSpeedPerSecond{ 250.0 };
 }
 
 void InputSystem::init(World& world, SystemsManager& systemsManager)
@@ -30,19 +30,41 @@ void InputSystem::shutdown()
 
 void InputSystem::processInput(const Input& currentInput, World& world, const double deltaTime)
 {
-    for (const auto& registeredInput : registeredKeyboardInput_)
+    for (auto& registeredInput : registeredKeyboardInput_)
     {
         const auto state{currentInput.getKeyState(registeredInput.key)};
         if (state != std::nullopt)
         {
-            if (state.value() && registeredInput.onPressed)
+            if (state.value())
             {
-                registeredInput.onPressed(world, deltaTime);
+                if(registeredInput.onPressed)
+                {
+                    if(registeredInput.isOneTimeAction)
+                    {
+                        registeredInput.onPressed(world, deltaTime);
+                    }
+                    else
+                    {
+                        registeredInput.isPressed = true;
+                    }
+                }
             }
-            else if (registeredInput.onReleased)
+            else
             {
-                registeredInput.onReleased(world, deltaTime);
+                if (registeredInput.onReleased)
+                {
+                    registeredInput.onReleased(world, deltaTime);
+                }
+                if (!registeredInput.isOneTimeAction)
+                {
+                    registeredInput.isPressed = false;
+                }
             }
+        }
+
+        if(registeredInput.isPressed)
+        {
+            registeredInput.onPressed(world, deltaTime);
         }
     }
 }
@@ -65,6 +87,7 @@ void InputSystem::registerInput()
     registeredKeyboardInput_.emplace_back(
         RegisteredKeyboardInput{
             .key = SDL_SCANCODE_W,
+            .isOneTimeAction = false,
             .onPressed = [this](World& world, const double)
             {
                 if (!isInGame(world))
@@ -95,6 +118,7 @@ void InputSystem::registerInput()
     registeredKeyboardInput_.emplace_back(
         RegisteredKeyboardInput{
             .key = SDL_SCANCODE_A,
+            .isOneTimeAction = false,
             .onPressed = [this](World& world, const double deltaTime)
             {
                 processRotation(world, -deltaTime);
@@ -104,6 +128,7 @@ void InputSystem::registerInput()
     registeredKeyboardInput_.emplace_back(
         RegisteredKeyboardInput{
             .key = SDL_SCANCODE_D,
+            .isOneTimeAction = false,
             .onPressed = [this](World& world, const double deltaTime)
             {
                 processRotation(world, deltaTime);
@@ -122,7 +147,7 @@ void InputSystem::processRotation(World& world, const double deltaTime) const
     const auto& playerComponent{ gameplayStatics::getPlayerComponent(world) };
     auto& transform{ *world.tryGetComponent<TransformComponent>(playerComponent.entity) };
     
-    const double rotationDelta{ rotationRatePerSecond / deltaTime };
+    const double rotationDelta{ rotationRatePerSecond * deltaTime };
     transform.rotation += rotationDelta;
 
     constexpr double epsilon{ std::numeric_limits<double>::epsilon() };

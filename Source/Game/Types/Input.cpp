@@ -11,12 +11,18 @@ void Input::processEvent(const SDL_Event& event_)
     {
     case SDL_KEYDOWN:
     {
-        currentKeysState_.push_back(std::make_pair(event_.key.keysym.scancode, true));
+        if (!event_.key.repeat)
+        {
+            currentKeysState_.push_back(std::make_pair(event_.key.keysym.scancode, true));
+        }
         break;
     }
     case SDL_KEYUP:
     {
-        currentKeysState_.push_back(std::make_pair(event_.key.keysym.scancode, false));
+        if (!event_.key.repeat)
+        {
+            currentKeysState_.push_back(std::make_pair(event_.key.keysym.scancode, false));
+        }
         break;
     }
     }
