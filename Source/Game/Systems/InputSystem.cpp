@@ -1,7 +1,6 @@
 #include "InputSystem.h"
 #include "../World.h"
 #include "../SystemsManager.h"
-#include "../Constants.h"
 #include "../GameplayStatics.h"
 #include "../Types/Input.h"
 #include <numbers>
@@ -10,6 +9,7 @@ namespace
 {
     constexpr double rotationRatePerSecond{ 100.0 };
     constexpr float movementSpeedPerSecond{ 250.0 };
+    constexpr double fullCircleDegreesD{ 360.0 };
 }
 
 void InputSystem::init(World& world, SystemsManager& systemsManager)
@@ -153,18 +153,18 @@ void InputSystem::processRotation(World& world, const double deltaTime) const
     constexpr double epsilon{ std::numeric_limits<double>::epsilon() };
     while (transform.rotation < 0.0 - epsilon)
     {
-        transform.rotation += constants::fullCircleDegreesD;
+        transform.rotation += fullCircleDegreesD;
     }
-    while (transform.rotation >= constants::fullCircleDegreesD + epsilon)
+    while (transform.rotation >= fullCircleDegreesD + epsilon)
     {
-        transform.rotation -= constants::fullCircleDegreesD;
+        transform.rotation -= fullCircleDegreesD;
     }
 }
 
 SDL_FPoint InputSystem::calculateForwardVector(const double rotation) const
 {
     const float radians{static_cast<float>(rotation * std::numbers::pi
-        / (constants::fullCircleDegreesD / 2.0))};
+        / (fullCircleDegreesD / 2.0))};
     return SDL_FPoint{.x = sin(radians), .y = cos(radians) * -1.0f };
 }
 

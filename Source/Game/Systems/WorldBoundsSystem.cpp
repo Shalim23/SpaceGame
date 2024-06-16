@@ -3,7 +3,6 @@
 #include "../SystemsManager.h"
 #include "../Utils.h"
 #include "../GameplayStatics.h"
-#include "../Constants.h"
 
 namespace
 {
@@ -105,7 +104,7 @@ void WorldBoundsSystem::createBackground(World& world) const
     renderData.texture = info.texture;
     renderData.textureSize = info.size;
 
-    renderData.sourceRect = utils::makeRect(constants::sdlZeroPoint, renderData.textureSize);
+    renderData.sourceRect = utils::makeRect(SDL_Point{.x = 0, .y = 0}, renderData.textureSize);
     renderData.destinationRect = utils::makeRect(screenSizeF_ / 2.0f, screenSizeF_);
     renderData.scale = screenSizeF_.x;
 
@@ -135,7 +134,7 @@ void WorldBoundsSystem::createText(World& world) const
         renderData.texture = info.texture;
         renderData.textureSize = info.size;
 
-        renderData.sourceRect = utils::makeRect(constants::sdlZeroPoint,
+        renderData.sourceRect = utils::makeRect(SDL_Point{.x = 0, .y = 0},
             renderData.textureSize);
 
         renderData.destinationRect = utils::makeRect(
@@ -160,7 +159,7 @@ void WorldBoundsSystem::createText(World& world) const
         renderData.texture = info.texture;
         renderData.textureSize = info.size;
 
-        renderData.sourceRect = utils::makeRect(constants::sdlZeroPoint,
+        renderData.sourceRect = utils::makeRect(SDL_Point{.x = 0, .y = 0},
             renderData.textureSize);
 
         renderData.destinationRect = utils::makeRect(

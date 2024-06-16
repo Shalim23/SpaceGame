@@ -1,7 +1,6 @@
 #include "ViewportSystem.h"
 #include "../World.h"
 #include "../SystemsManager.h"
-#include "../Constants.h"
 
 namespace
 {
@@ -94,7 +93,7 @@ std::optional<RenderData> ViewportSystem::setupGameObjectRenderData(World& world
         
         dataToRender.rotation = playerTransform.rotation;
 
-        dataToRender.sourceRect = utils::makeRect(constants::sdlZeroPoint, dataToRender.textureSize);
+        dataToRender.sourceRect = utils::makeRect(SDL_Point{.x = 0, .y = 0}, dataToRender.textureSize);
 
         const SDL_Point halfTextureSize{ dataToRender.textureSize / 2};
         dataToRender.destinationRect = createDestinationRect(

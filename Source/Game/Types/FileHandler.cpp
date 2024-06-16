@@ -7,7 +7,7 @@ FileHandler::FileHandler(std::string_view path)
     if (!file_.is_open())
     {
         std::stringstream ss;
-        ss << "Cannot open " << path;
+        ss << "Cannot open " << path << "!";
         utils::showMessageBox("File open error!", ss.str());
         throw std::exception{};
     }

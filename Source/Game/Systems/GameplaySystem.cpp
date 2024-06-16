@@ -6,9 +6,7 @@ void GameplaySystem::init(World& world, SystemsManager& systemsManager)
 {
     const auto entity{ world.createEntity() };
     auto& gameStateComponent{world.addComponent<GameStateComponent>(entity)};
-#ifdef WIDGETBUILDER
-    gameStateComponent.gameState = GameStateType::NONE;
-#else
+#ifndef WIDGETBUILDER
     gameStateComponent.gameState = GameStateType::INGAME;
 #endif
 

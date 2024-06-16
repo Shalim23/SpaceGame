@@ -1,7 +1,6 @@
 #include "MovementSystem.h"
 #include "../World.h"
 #include "../SystemsManager.h"
-#include "../Constants.h"
 
 void MovementSystem::update(World& world, const double deltaTime)
 {

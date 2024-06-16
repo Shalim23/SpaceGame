@@ -60,7 +60,11 @@ void DataSystem::load(SystemsManager& systemsManager)
     
     initDataDescriptors();
 
-    initTexturesDescriptors();
+    //#TODO
+    //data handlers for each data type
+    //tuple of data handlers
+
+    //initTexturesDescriptors();
 
     //const std::vector<char> fontRawData{ getFontRawData() };
     //font_ = loadFontFromRawData(fontRawData, 40);
