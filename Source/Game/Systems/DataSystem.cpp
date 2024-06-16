@@ -1,10 +1,11 @@
-#include "DatabaseSystem.h"
+#include "DataSystem.h"
 #include "../World.h"
 #include "../SystemsManager.h"
 #include "../Types/Exceptions.h"
+#include "../Types/FileHandler.h"
 #include <fstream>
 
-void DatabaseSystem::update(World& world, const double deltaTime)
+void DataSystem::update(World& world, const double deltaTime)
 {
     const auto& renderComponents{ world.getComponents<RenderComponent>() };
     decltype(dynamicTextures_) dynamicTexturesToRemove;
@@ -29,7 +30,7 @@ void DatabaseSystem::update(World& world, const double deltaTime)
     }
 }
 
-void DatabaseSystem::shutdown()
+void DataSystem::shutdown()
 {
     for (const auto& [type, info] : staticTexts_)
     {
@@ -53,19 +54,21 @@ void DatabaseSystem::shutdown()
     TTF_CloseFont(font_);
 }
 
-void DatabaseSystem::load(SystemsManager& systemsManager)
+void DataSystem::load(SystemsManager& systemsManager)
 {
     renderSystem_ = &systemsManager.getSystem<RenderSystem>();
     
+    initDataDescriptors();
+
     initTexturesDescriptors();
 
-    const std::vector<char> fontRawData{ getFontRawData() };
-    font_ = loadFontFromRawData(fontRawData, 40);
+    //const std::vector<char> fontRawData{ getFontRawData() };
+    //font_ = loadFontFromRawData(fontRawData, 40);
 
-    initStaticText();
+    //initStaticText();
 }
 
-const TextureInfo& DatabaseSystem::getTexture(const TextureType type)
+const TextureInfo& DataSystem::getTexture(const TextureType type)
 {
     const auto iter{ std::ranges::find_if(textures_,
             [type](const auto& texture) { return texture.first == type; }) };
@@ -77,39 +80,39 @@ const TextureInfo& DatabaseSystem::getTexture(const TextureType type)
     return textures_.emplace_back(std::make_pair(type, createTexture(type))).second;
 }
 
-const TextureInfo& DatabaseSystem::getText(const TextType type) const
+const TextureInfo& DataSystem::getText(const TextType type) const
 {
     auto iter{ std::ranges::find_if(staticTexts_,
             [type](const auto& text) { return text.first == type; })};
     return iter->second;
 }
 
-TextureInfo DatabaseSystem::createDynamicText(const Entity entity, std::string_view text)
+TextureInfo DataSystem::createDynamicText(const Entity entity, std::string_view text)
 {
     TextureInfo data{ createText(text) };
     addDynamicTexture(entity, data.texture);
     return data;
 }
 
-TextureInfo DatabaseSystem::createDynamicTexture(const TextureType type, const Entity entity)
+TextureInfo DataSystem::createDynamicTexture(const TextureType type, const Entity entity)
 {
     TextureInfo info{ createTexture(type) };
     addDynamicTexture(entity, info.texture);
     return info;
 }
 
-SDL_Surface* DatabaseSystem::createSurface(const TextureType type) const
+SDL_Surface* DataSystem::createSurface(const TextureType type) const
 {
     const auto& textureRawData{ getTextureData(type) };
     return renderSystem_->createSurface(textureRawData);
 }
 
-void DatabaseSystem::addDynamicTexture(const Entity entity, SDL_Texture* texture)
+void DataSystem::addDynamicTexture(const Entity entity, SDL_Texture* texture)
 {
     dynamicTextures_.emplace_back(std::make_pair(entity, texture));
 }
 
-void DatabaseSystem::initTexturesDescriptors()
+void DataSystem::initTexturesDescriptors()
 {
     std::ifstream descriptorsFile("Data/texturesDescriptors.bin", std::ios::binary);
     if (!descriptorsFile.is_open())
@@ -128,7 +131,35 @@ void DatabaseSystem::initTexturesDescriptors()
     textures_.reserve(textureDescriptors_.size());
 }
 
-void DatabaseSystem::initStaticText()
+void DataSystem::initDataDescriptors()
+{
+    FileHandler dataFile{ "Data/data.bin" };
+
+    uint32_t dataTypesCount{};
+    if (dataFile.read(reinterpret_cast<char*>(&dataTypesCount), sizeof(uint32_t)))
+    {
+        for (size_t i{ 0 }; i < dataTypesCount; ++i)
+        {
+            DataDescriptor desc{};
+            if (dataFile.read(reinterpret_cast<char*>(&desc), sizeof(DataDescriptor)))
+            {
+                dataDescriptors_.emplace_back(desc);
+            }
+            else
+            {
+                utils::showMessageBox(__FUNCTION__, "data.bin is corrupted!");
+                throw std::exception{};
+            }
+        }
+    }
+    else
+    {
+        utils::showMessageBox(__FUNCTION__, "data.bin is corrupted!");
+        throw std::exception{};
+    }
+}
+
+void DataSystem::initStaticText()
 {
     const std::vector<TextDescriptor> textDescriptors{ getTextDescriptors() };
 
@@ -141,7 +172,7 @@ void DatabaseSystem::initStaticText()
     }
 }
 
-std::vector<char> DatabaseSystem::getFontRawData() const
+std::vector<char> DataSystem::getFontRawData() const
 {
     std::ifstream fontFile("Data/gameFont.bin", std::ios::binary);
     if (!fontFile.is_open())
@@ -157,7 +188,7 @@ std::vector<char> DatabaseSystem::getFontRawData() const
     return fontRawData;
 }
 
-std::vector<char> DatabaseSystem::getTextureData(const TextureType type) const
+std::vector<char> DataSystem::getTextureData(const TextureType type) const
 {
     const auto textureTypeTnt{ static_cast<uint32_t>(type) };
     const auto iter{ std::ranges::find_if(textureDescriptors_,
@@ -196,7 +227,7 @@ std::vector<char> DatabaseSystem::getTextureData(const TextureType type) const
     return buffer;
 }
 
-std::vector<TextDescriptor> DatabaseSystem::getTextDescriptors() const
+std::vector<TextDescriptor> DataSystem::getTextDescriptors() const
 {
     std::ifstream textDescriptorsFile("Data/textDescriptors.bin", std::ios::binary);
     if (!textDescriptorsFile.is_open())
@@ -210,11 +241,12 @@ std::vector<TextDescriptor> DatabaseSystem::getTextDescriptors() const
     while (!textDescriptorsFile.eof())
     {
         TextDescriptor desc{};
+        uint32_t len{};
         if (textDescriptorsFile.read(reinterpret_cast<char*>(&desc.id), sizeof(desc.id)) &&
-            textDescriptorsFile.read(reinterpret_cast<char*>(&desc.len), sizeof(desc.len)))
+            textDescriptorsFile.read(reinterpret_cast<char*>(&len), sizeof(len)))
         {
-            std::vector<char> buffer(desc.len);
-            if (textDescriptorsFile.read(buffer.data(), desc.len))
+            std::vector<char> buffer(len);
+            if (textDescriptorsFile.read(buffer.data(), len))
             {
                 desc.text.assign(buffer.begin(), buffer.end());
                 textDescriptors.push_back(desc);
@@ -227,7 +259,7 @@ std::vector<TextDescriptor> DatabaseSystem::getTextDescriptors() const
     return textDescriptors;
 }
 
-TTF_Font* DatabaseSystem::loadFontFromRawData(const std::vector<char>& rawData, const int fontSize) const
+TTF_Font* DataSystem::loadFontFromRawData(const std::vector<char>& rawData, const int fontSize) const
 {
     SDL_RWops* rw{ SDL_RWFromConstMem(rawData.data(), rawData.size()) };
     if (!rw)
@@ -247,7 +279,7 @@ TTF_Font* DatabaseSystem::loadFontFromRawData(const std::vector<char>& rawData, 
     return font;
 }
 
-TextureInfo DatabaseSystem::createText(std::string_view text) const
+TextureInfo DataSystem::createText(std::string_view text) const
 {
     SDL_Surface* textSurface{ TTF_RenderText_Solid(font_, text.data(),
             SDL_Color{.r = 255, .g = 255, .b = 255, .a = 255}) };
@@ -272,7 +304,7 @@ TextureInfo DatabaseSystem::createText(std::string_view text) const
         .size = textureSize };
 }
 
-TextureInfo DatabaseSystem::createTexture(const TextureType type) const
+TextureInfo DataSystem::createTexture(const TextureType type) const
 {
     const auto& textureRawData{ getTextureData(type) };
     SDL_Texture* texture{ renderSystem_->createTextureFromData(textureRawData) };

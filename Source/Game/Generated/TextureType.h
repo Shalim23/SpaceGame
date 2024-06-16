@@ -1,7 +1,7 @@
 //GENERATED FILE! DO NOT MODIFY DIRECTLY!
 #pragma once
 
-enum class TextureType : size_t
+enum class TextureType : uint32_t
 {
 	Backgrounds_big_black = 1249301418,
 	Backgrounds_big_blue = 1641668273,

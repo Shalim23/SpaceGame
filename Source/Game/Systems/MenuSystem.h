@@ -8,13 +8,13 @@ class SystemsManager;
 class WidgetComponent;
 class RenderSystem;
 class RandomSystem;
-class DatabaseSystem;
+class DataSystem;
 class Widget;
 struct SDL_FPoint;
 struct SDL_Point;
 struct SDL_FRect;
 enum class GameStateType;
-enum class TextType;
+enum class TextType : uint32_t;
 
 class MenuSystem
 {
@@ -46,6 +46,6 @@ private:
 private:
 	RenderSystem* renderSystem_{ nullptr };
 	RandomSystem* randomSystem_{ nullptr };
-	DatabaseSystem* dbSystem_{ nullptr };
+	DataSystem* dbSystem_{ nullptr };
 	
 };

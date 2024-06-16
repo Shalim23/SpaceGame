@@ -14,7 +14,7 @@ namespace
 
 void WorldBoundsSystem::init(World& world, SystemsManager& systemsManager)
 {
-    dbSystem_ = &systemsManager.getSystem<DatabaseSystem>();
+    dbSystem_ = &systemsManager.getSystem<DataSystem>();
     const auto& renderSystem{systemsManager.getSystem<RenderSystem>()};
     screenSizeF_ = renderSystem.getScreenSizeF();
 

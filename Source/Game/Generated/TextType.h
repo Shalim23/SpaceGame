@@ -1,7 +1,7 @@
 //GENERATED FILE! DO NOT MODIFY DIRECTLY!
 #pragma once
 
-enum class TextType
+enum class TextType : uint32_t
 {
 	Warning = 0,
 	Highradiationlevel = 1,

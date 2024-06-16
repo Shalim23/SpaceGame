@@ -1,8 +1,6 @@
 import os
-import argparse
 from jinja2 import Environment, FileSystemLoader
-from data import GAME_PATH, OBJ_TYPE_TO_FOLDER
-from update_registry import update_registry
+from .._data import GAME_PATH, OBJ_TYPE_TO_FOLDER
 
 
 def _object_exists(obj_type: str, name: str) -> bool:
@@ -18,7 +16,7 @@ def _object_exists(obj_type: str, name: str) -> bool:
     return False
 
 
-def _generate(obj_type: str, name: str) -> bool:
+def generate(obj_type: str, name: str) -> bool:
     if _object_exists(obj_type, name):
         return False
     
@@ -57,18 +55,3 @@ def _generate(obj_type: str, name: str) -> bool:
             return False
 
     return True
-
-
-def _main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("obj_type", type=str,
-                        choices=["system", "component"], help="New type")
-    parser.add_argument("obj_name", type=str, help="New type name")
-    args = parser.parse_args()
-
-    if _generate(args.obj_type, args.obj_name):
-        update_registry(args.obj_type)
-
-
-if __name__ == "__main__":
-    _main()

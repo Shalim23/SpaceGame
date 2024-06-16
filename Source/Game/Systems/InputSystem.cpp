@@ -14,7 +14,7 @@ namespace
 
 void InputSystem::init(World& world, SystemsManager& systemsManager)
 {
-    const auto& dbSystem{systemsManager.getSystem<DatabaseSystem>()};
+    const auto& dbSystem{systemsManager.getSystem<DataSystem>()};
     SDL_Surface* cursorImage{ dbSystem.createSurface(TextureType::UI_cursor)};
     SDL_Cursor* cursor{SDL_CreateColorCursor(cursorImage, 0, 0)};
     SDL_SetCursor(cursor);

@@ -7,7 +7,7 @@
 
 using RegisteredSystemsTypes = TypesList
 <
-DatabaseSystem,
+DataSystem,
 GameplaySystem,
 InputSystem,
 MenuSystem,

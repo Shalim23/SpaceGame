@@ -1,7 +1,7 @@
 //GENERATED FILE! DO NOT MODIFY DIRECTLY!
 #pragma once
 
-#include "../Systems/DatabaseSystem.h"
+#include "../Systems/DataSystem.h"
 #include "../Systems/GameplaySystem.h"
 #include "../Systems/InputSystem.h"
 #include "../Systems/MenuSystem.h"

@@ -4,7 +4,7 @@
 
 class World;
 class SystemsManager;
-class DatabaseSystem;
+class DataSystem;
 struct TransformComponent;
 
 class WorldBoundsSystem
@@ -24,6 +24,6 @@ private:
 	void createText(World& world) const;
 
 private:
-	DatabaseSystem* dbSystem_{nullptr};
+	DataSystem* dbSystem_{nullptr};
 	SDL_FPoint screenSizeF_{};
 };

@@ -17,7 +17,7 @@ void GameplaySystem::init(World& world, SystemsManager& systemsManager)
 
 void GameplaySystem::createPlayer(World& world, SystemsManager& systemsManager) const
 {
-    auto& dbSystem{ systemsManager.getSystem<DatabaseSystem>() };
+    auto& dbSystem{ systemsManager.getSystem<DataSystem>() };
 
     const auto entity{ world.createEntity() };
     world.addComponents<PlayerComponent, MovementComponent, TransformComponent, GameObjectComponent>(entity);

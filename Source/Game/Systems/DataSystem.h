@@ -10,7 +10,7 @@ class World;
 class SystemsManager;
 class RenderSystem;
 
-class DatabaseSystem
+class DataSystem
 {
 public:
 	void init(World& world, SystemsManager& systemsManager){}
@@ -27,6 +27,7 @@ public:
 private:
     void addDynamicTexture(const Entity entity, SDL_Texture* texture);
 	void initTexturesDescriptors();
+	void initDataDescriptors();
     void initStaticText();
     std::vector<char> getFontRawData() const;
     std::vector<char> getTextureData(const TextureType type) const;
@@ -37,6 +38,7 @@ private:
 
 private:
     TTF_Font* font_{ nullptr };
+    std::vector<DataDescriptor> dataDescriptors_;
     std::vector<DataDescriptor> textureDescriptors_;
     std::vector<std::pair<TextureType, TextureInfo>> textures_;
     std::vector<std::pair<TextType, TextureInfo>> staticTexts_;

@@ -18,7 +18,7 @@ void MenuSystem::init(World& world, SystemsManager& systemsManager)
 {
 	renderSystem_ = &systemsManager.getSystem<RenderSystem>();
 	randomSystem_ = &systemsManager.getSystem<RandomSystem>();
-    dbSystem_ = &systemsManager.getSystem<DatabaseSystem>();
+    dbSystem_ = &systemsManager.getSystem<DataSystem>();
 }
 
 void MenuSystem::update(World& world, const double deltaTime)

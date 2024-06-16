@@ -1,7 +1,6 @@
 import os
-import argparse
 from jinja2 import Environment, FileSystemLoader
-from data import GAME_PATH, GENERATED_PATH, OBJ_TYPE_TO_FOLDER
+from .._data import GAME_PATH, GENERATED_PATH, OBJ_TYPE_TO_FOLDER
 
 
 def update_registry(obj_type: str):
@@ -50,15 +49,3 @@ def update_registry(obj_type: str):
     with open(registry_path, "w") as f:
         f.write(content)
     print(f"Updated {registry_path}")
-
-def _main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("obj_type", type=str,
-                        choices=["system", "component"], help="New type")
-    args = parser.parse_args()
-
-    update_registry(args.obj_type)
-
-
-if __name__ == "__main__":
-    _main()
