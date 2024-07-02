@@ -15,8 +15,13 @@ DATA_PATH = "Data"
 
 class FontDataType(DataTypeBase):
 
+    """
+    Workaround:
+    Font data appears to be corrupted when converted from .ttf to binary by simple reading from .ttf file.
+    Current font data is already converted to .bin by https://convertio.co/ttf-bin/.
+    """
     def binarize(self) -> bytes:
-        with open(f"{DATA_PATH}/DinaRemaster.ttf", "rb") as file:
+        with open(f"{DATA_PATH}/Fonts/DinaRemaster.bin", "rb") as file:
             return file.read()
 
     def get_data_type_name(self) -> str:

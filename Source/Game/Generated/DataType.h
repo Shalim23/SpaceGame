@@ -4,6 +4,7 @@
 
 enum class DataType : uint32_t
 {
-	Text = 460186943,
-	Font = 3707494940
+	Font = 1454736301,
+	Text = 3220026819,
+	Texture = 584473759
 };

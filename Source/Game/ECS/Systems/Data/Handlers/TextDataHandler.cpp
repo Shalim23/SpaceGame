@@ -7,13 +7,6 @@
 #include "../FileHandler.h"
 #include <filesystem>
 
-namespace
-{
-    const std::string_view tempFontFileName{ "tempFontFile.ttf" };
-    const std::filesystem::path tempFontFilePath{
-        std::filesystem::temp_directory_path().append(tempFontFileName) };
-}
-
 void TextDataHandler::init(RenderSystem* renderSystem, const std::vector<DataDescriptor>& dataDescriptors)
 {
     renderSystem_ = renderSystem;
@@ -50,8 +43,6 @@ void TextDataHandler::shutdown()
     staticTexts_.clear();
     
     TTF_CloseFont(font_);
-
-    std::filesystem::remove(tempFontFilePath);
 }
 
 const TextureInfo& TextDataHandler::getText(const TextType type) const
@@ -154,22 +145,9 @@ TextureInfo TextDataHandler::createText(std::string_view text) const
 
 std::vector<char> TextDataHandler::getFontRawData(const DataDescriptor& desc) const
 {
-    // Workaround: Font data appears corrupted when packed in Python.
-    // Saving the font data to a temporary file and reading it back as binary resolves the issue.
-
-    FileHandler tempFontFile{ std::string_view{tempFontFilePath.string()} };
-    {
-        std::vector<char> fontRawData(desc.size);
-        {
-            FileHandler dataFile{ utils::getDataFilePath() };
-            dataFile.setPosition(desc.position);
-            dataFile.read(fontRawData.data(), desc.size);
-        }
-
-        tempFontFile.write(fontRawData.data(), fontRawData.size());
-    }
-
-    tempFontFile.setPosition(0);
-
-    return tempFontFile.readAllFile();
+    std::vector<char> fontRawData(desc.size);
+    FileHandler dataFile{ utils::getDataFilePath() };
+    dataFile.setPosition(desc.position);
+    dataFile.read(fontRawData.data(), desc.size);
+    return fontRawData;
 }

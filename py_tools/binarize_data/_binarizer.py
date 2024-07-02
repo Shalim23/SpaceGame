@@ -1,5 +1,6 @@
 import struct
 import ctypes
+import hashlib
 from dataclasses import dataclass, field
 from jinja2 import Environment, FileSystemLoader
 from . import DataTypeBase
@@ -17,10 +18,7 @@ class Binarizer():
         size: ctypes.c_uint32 = field(default=ctypes.c_uint32)
 
     def __init__(self) -> None:
-        self._data_types = set()
-        self._data_types.add(FontDataType)
-        self._data_types.add(TextDataType)
-        self._data_types.add(TextureDataType)
+        self._data_types = [FontDataType, TextDataType, TextureDataType]
 
     #uint -> data types amount
     #struct * data types amount -> data types info
@@ -39,7 +37,9 @@ class Binarizer():
             next_start: ctypes.c_uint32 = 0
 
             for name, data in data_to_write:
-                name_hash = hash(name) & 0xFFFFFFFF
+                hash_obj = hashlib.sha256(name.encode())
+                name_hash = int.from_bytes(hash_obj.digest())
+                name_hash = name_hash & 0xFFFFFFFF
                 data_size = len(data)
                 enum_entries.append(f"{name} = {name_hash}")
                 data_desc = self._DataDescriptor(name_hash, next_start, data_size)
