@@ -1,7 +1,7 @@
 #pragma once
 #include "ECS/World.h"
 #include "ECS/SystemsManager.h"
-#include "Types/Input.h"
+#include "ECS/Systems/Input/Input.h"
 
 class Game
 {

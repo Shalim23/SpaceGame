@@ -3,7 +3,7 @@
 
 #include "../ECS/Systems/Data/DataSystem.h"
 #include "../ECS/Systems/GameplaySystem.h"
-#include "../ECS/Systems/InputSystem.h"
+#include "../ECS/Systems/Input/InputSystem.h"
 #include "../ECS/Systems/MenuSystem.h"
 #include "../ECS/Systems/MovementSystem.h"
 #include "../ECS/Systems/RandomSystem.h"

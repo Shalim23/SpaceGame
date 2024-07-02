@@ -1,8 +1,8 @@
 #include "DataSystem.h"
 #include "../../World.h"
 #include "../../SystemsManager.h"
-#include "../../../Types/Exceptions.h"
-#include "../../../Types/FileHandler.h"
+#include "../../Types/Exceptions.h"
+#include "FileHandler.h"
 #include <fstream>
 
 void DataSystem::update(World& world, const double deltaTime)

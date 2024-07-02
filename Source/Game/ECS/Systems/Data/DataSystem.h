@@ -1,5 +1,5 @@
 #pragma once
-#include "../../../Types/DataDescriptor.h"
+#include "DataDescriptor.h"
 #include "TextureInfo.h"
 #include "../../Types/Entity.h"
 #include "../../../Generated/TextType.h"
