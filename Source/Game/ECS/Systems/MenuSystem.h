@@ -1,6 +1,6 @@
 #pragma once
 #include <array>
-#include "../Generated/TextureType.h"
+#include "../../Generated/TextureType.h"
 #include "../Types/Entity.h"
 
 class World;
@@ -9,10 +9,6 @@ class WidgetComponent;
 class RenderSystem;
 class RandomSystem;
 class DataSystem;
-class Widget;
-struct SDL_FPoint;
-struct SDL_Point;
-struct SDL_FRect;
 enum class GameStateType;
 enum class TextType : uint32_t;
 
@@ -33,11 +29,6 @@ private:
 	void createTitle(WidgetComponent& widgetComponent) const; 
 	void createButton(WidgetComponent& widgetComponent,
 		const float endPosition, const float padding, const TextType text) const; 
-	
-	/*void createMainMenuBackground(const Entity entity, WidgetComponent& widgetComponent) const;
-	void createMainMenuBackgroundElement(const Entity entity, WidgetComponent& widgetComponent, const SDL_FPoint& screenSize) const;
-	SDL_FRect createMainMenuBackgroundElementDestRect(const SDL_FPoint& screenSize, const SDL_Point& textureSize) const;
-	void addMainMenuBackgroundElementAnimation(Widget& widget) const;*/
 	
 	void createInGameMenu(World& world) const;
 

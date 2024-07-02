@@ -1,8 +1,8 @@
 #include "WorldBoundsSystem.h"
 #include "../World.h"
 #include "../SystemsManager.h"
-#include "../Utils.h"
-#include "../GameplayStatics.h"
+#include "../../Utils.h"
+#include "../../GameplayStatics.h"
 
 namespace
 {

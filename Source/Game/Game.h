@@ -1,6 +1,6 @@
 #pragma once
-#include "World.h"
-#include "SystemsManager.h"
+#include "ECS/World.h"
+#include "ECS/SystemsManager.h"
 #include "Types/Input.h"
 
 class Game

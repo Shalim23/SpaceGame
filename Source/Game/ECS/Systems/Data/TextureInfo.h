@@ -1,5 +1,5 @@
 #pragma once
-#include "../Generated/TextureType.h"
+#include "../../../Generated/TextureType.h"
 #include "SDL.h"
 
 struct TextureInfo

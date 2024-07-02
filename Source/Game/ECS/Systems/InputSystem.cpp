@@ -1,8 +1,8 @@
 #include "InputSystem.h"
 #include "../World.h"
 #include "../SystemsManager.h"
-#include "../GameplayStatics.h"
-#include "../Types/Input.h"
+#include "../../GameplayStatics.h"
+#include "../../Types/Input.h"
 #include <numbers>
 
 namespace

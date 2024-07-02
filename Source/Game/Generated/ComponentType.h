@@ -1,7 +1,8 @@
 //GENERATED FILE! DO NOT MODIFY DIRECTLY!
 #pragma once
+#include <cstdint>
 
-enum class ComponentType
+enum class ComponentType : uint32_t
 {
 	GameObject,
 	GameState,

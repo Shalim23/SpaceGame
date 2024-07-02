@@ -1,8 +1,8 @@
 #pragma once
-#include "Generated/ComponentsRegistry.h"
-#include "Generated/ComponentsInfo.h"
+#include "../Generated/ComponentsRegistry.h"
+#include "../Generated/ComponentsInfo.h"
 #include "Types/Entity.h"
-#include "Utils.h"
+#include "../Utils.h"
 #include <cassert>
 #include <vector>
 

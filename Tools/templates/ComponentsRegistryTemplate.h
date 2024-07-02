@@ -1,7 +1,7 @@
 //GENERATED FILE! DO NOT MODIFY DIRECTLY!
 #pragma once
-#include "../Types/TypesList.h"
-#include "../Types/Component.h"
+#include "../ECS/Types/TypesList.h"
+#include "../ECS/Types/Component.h"
 #include "AllComponents.h"
 
 

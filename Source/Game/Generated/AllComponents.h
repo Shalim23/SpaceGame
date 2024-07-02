@@ -1,12 +1,12 @@
 //GENERATED FILE! DO NOT MODIFY DIRECTLY!
 #pragma once
 
-#include "../Components/GameObjectComponent.h"
-#include "../Components/GameStateComponent.h"
-#include "../Components/MovementComponent.h"
-#include "../Components/OutOfWorldBoundsComponent.h"
-#include "../Components/PlayerComponent.h"
-#include "../Components/RenderComponent.h"
-#include "../Components/TransformComponent.h"
-#include "../Components/UIComponent.h"
-#include "../Components/WidgetAnimationComponent.h"
+#include "../ECS/Components/GameObjectComponent.h"
+#include "../ECS/Components/GameStateComponent.h"
+#include "../ECS/Components/MovementComponent.h"
+#include "../ECS/Components/OutOfWorldBoundsComponent.h"
+#include "../ECS/Components/PlayerComponent.h"
+#include "../ECS/Components/RenderComponent.h"
+#include "../ECS/Components/TransformComponent.h"
+#include "../ECS/Components/UIComponent.h"
+#include "../ECS/Components/WidgetAnimationComponent.h"
