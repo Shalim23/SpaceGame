@@ -1,5 +1,6 @@
 //GENERATED FILE! DO NOT MODIFY DIRECTLY!
 #pragma once
+#include <cstdint>
 
 enum class TextureType : uint32_t
 {

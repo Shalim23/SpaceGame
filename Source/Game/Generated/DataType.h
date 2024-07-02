@@ -1,9 +1,9 @@
 //GENERATED FILE! DO NOT MODIFY DIRECTLY!
 #pragma once
+#include <cstdint>
 
 enum class DataType : uint32_t
 {
-	Text = 3044945995,
-	Texture = 419544200,
-	Font = 1851408563
+	Text = 460186943,
+	Font = 3707494940
 };

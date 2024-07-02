@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <vector>
 #include <array>
-#include "../Generated/TextureType.h"
+#include "../../Generated/TextureType.h"
 #include "../Types/Entity.h"
 #include "SDL.h"
 

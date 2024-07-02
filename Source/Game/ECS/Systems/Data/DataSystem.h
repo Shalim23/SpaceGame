@@ -2,8 +2,7 @@
 #include "DataDescriptor.h"
 #include "TextureInfo.h"
 #include "../../Types/Entity.h"
-#include "../../../Generated/TextType.h"
-#include "SDL_ttf.h"
+#include "Handlers/TextDataHandler.h"
 #include <vector>
 
 class World;
@@ -28,21 +27,16 @@ private:
     void addDynamicTexture(const Entity entity, SDL_Texture* texture);
 	void initTexturesDescriptors();
 	void initDataDescriptors();
-    void initStaticText();
-    std::vector<char> getFontRawData() const;
     std::vector<char> getTextureData(const TextureType type) const;
-    std::vector<TextDescriptor> getTextDescriptors() const;
-    TTF_Font* loadFontFromRawData(const std::vector<char>& rawData, const int fontSize) const;
-    TextureInfo createText(std::string_view text) const;
     TextureInfo createTexture(const TextureType type) const;
 
 private:
-    TTF_Font* font_{ nullptr };
     std::vector<DataDescriptor> dataDescriptors_;
     std::vector<DataDescriptor> textureDescriptors_;
     std::vector<std::pair<TextureType, TextureInfo>> textures_;
-    std::vector<std::pair<TextType, TextureInfo>> staticTexts_;
     std::vector<std::pair<Entity, SDL_Texture*>> dynamicTextures_;
 
     RenderSystem* renderSystem_{nullptr};
+
+    std::tuple<TextDataHandler> dataHandlers_;
 };

@@ -5,6 +5,11 @@
 
 namespace utils
 {
+    static std::string_view getDataFilePath()
+    {
+        return "Data/data.bin";
+    }
+    
     static void showMessageBox(const std::string_view title, const std::string_view message)
     {
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title.data(), message.data(), nullptr);

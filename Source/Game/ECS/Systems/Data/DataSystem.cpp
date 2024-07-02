@@ -32,11 +32,8 @@ void DataSystem::update(World& world, const double deltaTime)
 
 void DataSystem::shutdown()
 {
-    for (const auto& [type, info] : staticTexts_)
-    {
-        SDL_DestroyTexture(info.texture);
-    }
-
+    std::apply([](auto&&... handler) {((handler.shutdown()), ...); }, dataHandlers_);
+    
     for (const auto& [entity, texture] : dynamicTextures_)
     {
         SDL_DestroyTexture(texture);
@@ -47,11 +44,8 @@ void DataSystem::shutdown()
         SDL_DestroyTexture(info.texture);
     }
 
-    staticTexts_.clear();
     dynamicTextures_.clear();
     textures_.clear();
-    
-    TTF_CloseFont(font_);
 }
 
 void DataSystem::load(SystemsManager& systemsManager)
@@ -60,16 +54,12 @@ void DataSystem::load(SystemsManager& systemsManager)
     
     initDataDescriptors();
 
-    //#TODO
-    //data handlers for each data type
-    //tuple of data handlers
+    std::apply([this](auto&&... handler)
+        {((handler.init(renderSystem_, dataDescriptors_)), ...); }, dataHandlers_);
 
+    // #TODO
     //initTexturesDescriptors();
 
-    //const std::vector<char> fontRawData{ getFontRawData() };
-    //font_ = loadFontFromRawData(fontRawData, 40);
-
-    //initStaticText();
 }
 
 const TextureInfo& DataSystem::getTexture(const TextureType type)
@@ -86,14 +76,12 @@ const TextureInfo& DataSystem::getTexture(const TextureType type)
 
 const TextureInfo& DataSystem::getText(const TextType type) const
 {
-    auto iter{ std::ranges::find_if(staticTexts_,
-            [type](const auto& text) { return text.first == type; })};
-    return iter->second;
+    return std::get<TextDataHandler>(dataHandlers_).getText(type);
 }
 
 TextureInfo DataSystem::createDynamicText(const Entity entity, std::string_view text)
 {
-    TextureInfo data{ createText(text) };
+    TextureInfo data{ std::get<TextDataHandler>(dataHandlers_).createDynamicText(text) };
     addDynamicTexture(entity, data.texture);
     return data;
 }
@@ -137,16 +125,18 @@ void DataSystem::initTexturesDescriptors()
 
 void DataSystem::initDataDescriptors()
 {
-    FileHandler dataFile{ "Data/data.bin" };
+    FileHandler dataFile{ utils::getDataFilePath() };
 
     uint32_t dataTypesCount{};
     if (dataFile.read(reinterpret_cast<char*>(&dataTypesCount), sizeof(uint32_t)))
     {
+        const size_t dataFileOffset{ sizeof(uint32_t) + (sizeof(DataDescriptor) * dataTypesCount) };
         for (size_t i{ 0 }; i < dataTypesCount; ++i)
         {
             DataDescriptor desc{};
             if (dataFile.read(reinterpret_cast<char*>(&desc), sizeof(DataDescriptor)))
             {
+                desc.position += dataFileOffset;
                 dataDescriptors_.emplace_back(desc);
             }
             else
@@ -161,35 +151,6 @@ void DataSystem::initDataDescriptors()
         utils::showMessageBox(__FUNCTION__, "data.bin is corrupted!");
         throw std::exception{};
     }
-}
-
-void DataSystem::initStaticText()
-{
-    const std::vector<TextDescriptor> textDescriptors{ getTextDescriptors() };
-
-    staticTexts_.reserve(textDescriptors.size());
-
-    for (const auto& desc : textDescriptors)
-    {
-        staticTexts_.emplace_back(std::make_pair(
-            static_cast<TextType>(desc.id), createText(desc.text)));
-    }
-}
-
-std::vector<char> DataSystem::getFontRawData() const
-{
-    std::ifstream fontFile("Data/gameFont.bin", std::ios::binary);
-    if (!fontFile.is_open())
-    {
-        utils::showMessageBox(__FUNCTION__, "gameFont.bin is missing!");
-        throw SystemInitException{};
-    }
-
-    std::vector<char> fontRawData(std::istreambuf_iterator<char>(fontFile), {});
-
-    fontFile.close();
-
-    return fontRawData;
 }
 
 std::vector<char> DataSystem::getTextureData(const TextureType type) const
@@ -229,83 +190,6 @@ std::vector<char> DataSystem::getTextureData(const TextureType type) const
 
     texturesFile.close();
     return buffer;
-}
-
-std::vector<TextDescriptor> DataSystem::getTextDescriptors() const
-{
-    std::ifstream textDescriptorsFile("Data/textDescriptors.bin", std::ios::binary);
-    if (!textDescriptorsFile.is_open())
-    {
-        utils::showMessageBox(__FUNCTION__, "textDescriptors.bin is missing!");
-        throw SystemInitException{};
-    }
-
-    std::vector<TextDescriptor> textDescriptors;
-
-    while (!textDescriptorsFile.eof())
-    {
-        TextDescriptor desc{};
-        uint32_t len{};
-        if (textDescriptorsFile.read(reinterpret_cast<char*>(&desc.id), sizeof(desc.id)) &&
-            textDescriptorsFile.read(reinterpret_cast<char*>(&len), sizeof(len)))
-        {
-            std::vector<char> buffer(len);
-            if (textDescriptorsFile.read(buffer.data(), len))
-            {
-                desc.text.assign(buffer.begin(), buffer.end());
-                textDescriptors.push_back(desc);
-            }
-        }
-    }
-
-    textDescriptorsFile.close();
-
-    return textDescriptors;
-}
-
-TTF_Font* DataSystem::loadFontFromRawData(const std::vector<char>& rawData, const int fontSize) const
-{
-    SDL_RWops* rw{ SDL_RWFromConstMem(rawData.data(), rawData.size()) };
-    if (!rw)
-    {
-        utils::showMessageBox(__FUNCTION__, "Failed to create RWops!");
-        throw SystemInitException{};
-    }
-
-    TTF_Font* font{ TTF_OpenFontRW(rw, 1, fontSize) };
-    if (!font)
-    {
-        utils::showMessageBox(__FUNCTION__, "Failed to load font!");
-        throw SystemInitException{};
-        SDL_RWclose(rw);
-    }
-
-    return font;
-}
-
-TextureInfo DataSystem::createText(std::string_view text) const
-{
-    SDL_Surface* textSurface{ TTF_RenderText_Solid(font_, text.data(),
-            SDL_Color{.r = 255, .g = 255, .b = 255, .a = 255}) };
-    if (!textSurface)
-    {
-        auto a = SDL_GetError();
-        utils::showMessageBox(__FUNCTION__, "Failed to create text surface!");
-        throw std::exception{};
-    }
-
-    SDL_Texture* texture{ renderSystem_->createTextureFromSurface(textSurface) };
-    if (!texture)
-    {
-        utils::showMessageBox(__FUNCTION__, "Failed to create texture from text surface!");
-        throw std::exception{};
-    }
-
-    const SDL_Point textureSize{ .x = textSurface->w, .y = textSurface->h };
-    SDL_FreeSurface(textSurface);
-
-    return TextureInfo{.texture = texture,
-        .size = textureSize };
 }
 
 TextureInfo DataSystem::createTexture(const TextureType type) const

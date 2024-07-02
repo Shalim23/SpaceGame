@@ -18,7 +18,7 @@ class FontDataType(DataTypeBase):
     def binarize(self) -> bytes:
         with open(f"{DATA_PATH}/DinaRemaster.ttf", "rb") as file:
             return file.read()
-    
+
     def get_data_type_name(self) -> str:
         return "Font"
     
@@ -38,24 +38,22 @@ class TextDataType(DataTypeBase):
             return f.readlines()
 
     def binarize(self) -> bytes:
-        data = None
+        data = bytearray()
         lines = self._read_text()
         enum_entries = []
 
-        with tempfile.NamedTemporaryFile(mode="rb+") as temp_file:
-            for count, line in enumerate(lines):
-                line = line.rstrip()
-                desc = self._TextDescriptor(count, len(line), line.encode())
-                format_string = "ii" + str(len(desc.text)) + "s"
-                
-                temp_file.write(struct.pack(format_string, desc.text_id, desc.text_len, desc.text))
-                formatted_line = line.replace(" ", "_")
-                formatted_line = "".join(filter(str.isalpha, formatted_line))
-                enum_entries.append(f"{formatted_line} = {count}")
-
-            temp_file.flush()
-            temp_file.seek(0)
-            data = temp_file.read()
+        text_count = len(lines)
+        text_count = text_count & 0xFFFFFFFF
+        data.extend(struct.pack("i", text_count))
+        for count, line in enumerate(lines):
+            line = line.rstrip()
+            desc = self._TextDescriptor(count, len(line), line.encode())
+            format_string = "ii" + str(len(desc.text)) + "s"
+            
+            data.extend(struct.pack(format_string, desc.text_id, desc.text_len, desc.text))
+            formatted_line = line.replace(" ", "_")
+            formatted_line = "".join(filter(str.isalpha, formatted_line))
+            enum_entries.append(f"{formatted_line} = {count}")
 
         environment = Environment(loader=FileSystemLoader("Tools/templates/"))
         template = environment.get_template("EnumTemplate.h")
@@ -63,7 +61,6 @@ class TextDataType(DataTypeBase):
         with open(f"{GENERATED_PATH}/{self._ENUM_NAME}.h", "w") as f:
             f.write(content)
 
-        assert data
         return data
     
     def get_data_type_name(self) -> str:

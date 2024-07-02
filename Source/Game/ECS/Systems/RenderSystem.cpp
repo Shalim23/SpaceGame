@@ -2,8 +2,8 @@
 #include "../World.h"
 #include "../SystemsManager.h"
 #include "../Types/Exceptions.h"
-#include "../Utils.h"
-#include "../GameplayStatics.h"
+#include "../../Utils.h"
+#include "../../GameplayStatics.h"
 #include "SDL_image.h"
 #include <sstream>
 
