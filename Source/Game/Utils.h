@@ -56,6 +56,21 @@ namespace utils
         const auto duration{std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch())};
         return static_cast<unsigned int>(duration.count());
     }
+
+    constexpr uint32_t hashString(std::string_view str)
+    {
+        auto hashFunc{[](std::string_view str)
+        {
+            uint32_t hash = 0x811c9dc5; // FNV offset basis
+            for (char ch : str)
+            {
+                hash ^= static_cast<uint32_t>(ch);
+                hash *= 0x01000193; // FNV prime
+            }
+            return hash;
+        }};
+        return hashFunc(str);
+    }
 }
 
 static SDL_FPoint operator*(const SDL_FPoint& lhs, const SDL_Point& rhs)
