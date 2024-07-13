@@ -20,9 +20,12 @@ void RenderSystem::init(World& world, SystemsManager& systemsManager)
 
 void RenderSystem::shutdown()
 {
+#ifndef NDEBUG
+    debugUICallbacks_.clear();
     ImGui_ImplSDLRenderer2_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
+#endif
     
     SDL_DestroyRenderer(renderer_);
     SDL_DestroyWindow(window_);
@@ -33,16 +36,12 @@ void RenderSystem::shutdown()
 
 void RenderSystem::render()
 {
+#ifndef NDEBUG
+    drawDebugUI();  
+#endif
+
     SDL_SetRenderDrawColor(renderer_, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(renderer_);
-
-    /*ImGui_ImplSDLRenderer2_NewFrame();
-    ImGui_ImplSDL2_NewFrame();
-    ImGui::NewFrame();
-
-    ImGui::Render();
-
-    ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());*/
 
     const auto& renderData{viewportSystem_->getRenderData()};
     for (const auto& layer : renderData)
@@ -57,6 +56,10 @@ void RenderSystem::render()
                 nullptr, SDL_FLIP_NONE);
         }
     }
+
+#ifndef NDEBUG
+    ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
+#endif
 
     SDL_RenderPresent(renderer_);
 }
@@ -88,6 +91,10 @@ void RenderSystem::createWindow()
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io{ ImGui::GetIO() };
+
+    constexpr float imguiScale{2.0f};
+    io.FontGlobalScale = imguiScale;
+    io.DisplayFramebufferScale = ImVec2(imguiScale, imguiScale);
 
     ImGui_ImplSDL2_InitForSDLRenderer(window_, renderer_);
     ImGui_ImplSDLRenderer2_Init(renderer_);
@@ -135,3 +142,24 @@ SDL_FPoint RenderSystem::getScreenSizeF() const
     return SDL_FPoint{static_cast<float>(s.x),
         static_cast<float>(s.y)};
 }
+
+#ifndef NDEBUG
+void RenderSystem::registerDebugUICallback(std::function<void()> callback)
+{
+    debugUICallbacks_.push_back(callback);
+}
+
+void RenderSystem::drawDebugUI() const
+{
+    ImGui_ImplSDLRenderer2_NewFrame();
+    ImGui_ImplSDL2_NewFrame();
+    ImGui::NewFrame();
+
+    for (const auto& callback : debugUICallbacks_)
+    {
+        callback();
+    }
+
+    ImGui::Render();
+}
+#endif

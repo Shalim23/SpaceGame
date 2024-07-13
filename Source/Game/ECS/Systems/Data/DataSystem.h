@@ -26,7 +26,15 @@ public:
 private:
 	void initDataDescriptors();
 
+#ifndef NDEBUG
+    void debugUI();
+#endif
+
 private:
     std::vector<DataDescriptor> dataDescriptors_;
     std::tuple<TextDataHandler, TextureDataHandler> dataHandlers_;
+
+#ifndef NDEBUG
+    bool showDebugUI_{false};
+#endif
 };

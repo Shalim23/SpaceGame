@@ -1,16 +1,11 @@
 #pragma once
-#include <cstdint>
 #include <vector>
-#include <array>
-#include "../../Generated/TextureType.h"
-#include "../Types/Entity.h"
+#include <functional>
 #include "SDL.h"
 
 class World;
 class SystemsManager;
 class ViewportSystem;
-struct TransformComponent;
-struct SpriteComponent;
 
 class RenderSystem
 {
@@ -32,13 +27,22 @@ public:
     SDL_Point getScreenSize() const;
     SDL_FPoint getScreenSizeF() const;
 
+#ifndef NDEBUG
+    void registerDebugUICallback(std::function<void()> callback);
+#endif
+
 private:
 
-    
+#ifndef NDEBUG
+    void drawDebugUI() const;
+#endif
 
 private:
     SDL_Window* window_{ nullptr };
     SDL_Renderer* renderer_{ nullptr };
-
     ViewportSystem* viewportSystem_{nullptr};
+
+#ifndef NDEBUG
+    std::vector<std::function<void()>> debugUICallbacks_;
+#endif
 };

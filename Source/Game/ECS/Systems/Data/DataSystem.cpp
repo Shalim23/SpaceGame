@@ -3,6 +3,10 @@
 #include "../../SystemsManager.h"
 #include "FileHandler.h"
 
+#ifndef NDEBUG
+#include "imgui.h"
+#endif
+
 void DataSystem::update(World& world, const double deltaTime)
 {
     std::get<TextureDataHandler>(dataHandlers_).clearDynamicTextures(world);
@@ -24,6 +28,10 @@ void DataSystem::init(World& world, SystemsManager& systemsManager)
 
     std::apply([this, &systemsManager](auto&&... handler)
         {((handler.init(systemsManager, dataDescriptors_)), ...); }, dataHandlers_);
+
+#ifndef NDEBUG
+    systemsManager.getSystem<RenderSystem>().registerDebugUICallback([this]{debugUI();});
+#endif
 }
 
 const TextureInfo& DataSystem::getTexture(const TextureType type)
@@ -82,3 +90,26 @@ void DataSystem::initDataDescriptors()
         throw std::exception{};
     }
 }
+
+#ifndef NDEBUG
+void DataSystem::debugUI()
+{
+    if (ImGui::BeginMainMenuBar())
+    {
+        if (ImGui::BeginMenu("Gameplay parameters"))
+        {
+            showDebugUI_ = true;
+            ImGui::EndMenu();
+        }
+
+        ImGui::EndMainMenuBar();
+    }
+
+    if (showDebugUI_) 
+    {
+        ImGui::Begin("Gameplay parameters", &showDebugUI_);
+        ImGui::Text("Hello World");
+        ImGui::End();
+    }
+}
+#endif
