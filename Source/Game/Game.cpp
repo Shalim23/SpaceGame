@@ -19,7 +19,7 @@ void Game::init()
 {
     initSDL();
     renderSystem_.createWindow();
-    systemsManager_.getSystem<DataSystem>().load(systemsManager_);
+    systemsManager_.getSystem<DataSystem>().init(world_, systemsManager_);
 
     systemsManager_.init(world_);
 }

@@ -1,15 +1,15 @@
 #include "TextDataHandler.h"
 #include "../DataDescriptor.h"
-#include "../../../../Utils.h"
-#include "../../../Types/Exceptions.h"
-#include "../../RenderSystem.h"
-#include "../../../../Generated/DataType.h"
 #include "../FileHandler.h"
-#include <filesystem>
+#include "../../RenderSystem.h"
+#include "../../../SystemsManager.h"
+#include "../../../Types/Exceptions.h"
+#include "../../../../Utils.h"
+#include "../../../../Generated/DataType.h"
 
-void TextDataHandler::init(RenderSystem* renderSystem, const std::vector<DataDescriptor>& dataDescriptors)
+void TextDataHandler::init(SystemsManager& systemsManager, const std::vector<DataDescriptor>& dataDescriptors)
 {
-    renderSystem_ = renderSystem;
+    renderSystem_ = &systemsManager.getSystem<RenderSystem>();
 
     {
         const auto& fontDesc{*std::ranges::find_if(dataDescriptors, [](const DataDescriptor& desc)

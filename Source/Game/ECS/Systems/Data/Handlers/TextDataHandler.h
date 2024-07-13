@@ -7,11 +7,12 @@
 #include <string_view>
 
 class RenderSystem;
+class SystemsManager;
 
 class TextDataHandler
 {
 public:
-    void init(RenderSystem* renderSystem, const std::vector<DataDescriptor>& dataDescriptors);
+    void init(SystemsManager& systemsManager, const std::vector<DataDescriptor>& dataDescriptors);
     void shutdown();
 
     const TextureInfo& getText(const TextType type) const;

@@ -1,6 +1,5 @@
 import ctypes
 import struct
-import tempfile
 import zlib
 from pathlib import Path
 from dataclasses import dataclass, field
@@ -8,6 +7,7 @@ from jinja2 import Environment, FileSystemLoader
 from .._data import GENERATED_PATH
 
 from . import DataTypeBase
+from ._utils import ensure_32bit_int
 
 
 DATA_PATH = "Data"
@@ -47,8 +47,7 @@ class TextDataType(DataTypeBase):
         lines = self._read_text()
         enum_entries = []
 
-        text_count = len(lines)
-        text_count = text_count & 0xFFFFFFFF
+        text_count = ensure_32bit_int(len(lines))
         data.extend(struct.pack("i", text_count))
         for count, line in enumerate(lines):
             line = line.rstrip()
@@ -96,7 +95,7 @@ class TextureDataType(DataTypeBase):
                 crc32_hash = zlib.crc32(chunk, crc32_hash)
         
         # Ensure the result is an unsigned 32-bit integer
-        crc32_hash = crc32_hash & 0xFFFFFFFF
+        crc32_hash = ensure_32bit_int(crc32_hash)
         assert crc32_hash not in self._crcs
         self._crcs.add(crc32_hash)
         return crc32_hash
@@ -114,44 +113,34 @@ class TextureDataType(DataTypeBase):
     #rest of the data -> textures
     def binarize(self) -> bytes:
         self._gather_textures(Path(self._TEXTURES_PATH))
-        data = None
+        descriptors_data = bytearray()
+        textures_data = bytearray()
         enum_entries = []
 
         next_start: ctypes.c_uint32 = 0
-        with tempfile.NamedTemporaryFile(mode="rb+") as desc_file:
-            with tempfile.NamedTemporaryFile(mode="rb+") as textures_file:
 
-                for t in self._textures:
-                    with open(t.as_posix(), "rb") as t_file:
-                        data = t_file.read()
-                        write_size = textures_file.write(data)
+        for t in self._textures:
+            with open(t.as_posix(), "rb") as t_file:
+                data = t_file.read()
+                write_size = len(data)
+                textures_data.extend(data)
 
-                        assert write_size == t.lstat().st_size
+                crc32_hash = self._get_crc32(t.as_posix())
+                desc = self._TextureDescriptor(crc32_hash, next_start, write_size)
+                descriptors_data.extend(struct.pack("III", desc.texture_id, desc.start, desc.size))
 
-                        crc32_hash = self._get_crc32(t.as_posix())
-                        desc = self._TextureDescriptor(crc32_hash, next_start, write_size)
-                        desc_file.write(struct.pack("III", desc.texture_id, desc.start, desc.size))
+                next_start += write_size
 
-                        next_start += write_size
+                texture_name = t.as_posix().split(f"{self._TEXTURES_PATH}/")[-1].replace("/", "_").replace(".png", "")
+                enum_entries.append(f"{texture_name} = {crc32_hash}")
 
-                        texture_name = t.as_posix().split(f"{self._TEXTURES_PATH}/")[-1].replace("/", "_").replace(".png", "")
-                        enum_entries.append(f"{texture_name} = {crc32_hash}")
+                print(f"Processed {t.as_posix()}")
 
-                        print(f"Processed {t.as_posix()}")
-                
-                desc_file.flush()
-                textures_file.flush()
-                desc_file.seek(0)
-                textures_file.seek(0)
-
-                with tempfile.NamedTemporaryFile(mode="rb+") as all_data_file:
-                    all_data_file.write(struct.pack("I", len(enum_entries)))
-                    all_data_file.write(desc_file.read())
-                    all_data_file.write(textures_file.read())
-
-                    all_data_file.flush()
-                    all_data_file.seek(0)
-                    data = all_data_file.read()
+        all_data = bytearray()
+        textures_count = ensure_32bit_int(len(enum_entries))
+        all_data.extend(struct.pack("I", textures_count))
+        all_data.extend(descriptors_data)
+        all_data.extend(textures_data)
 
         environment = Environment(loader=FileSystemLoader("Tools/templates/"))
         template = environment.get_template("EnumTemplate.h")
@@ -159,8 +148,7 @@ class TextureDataType(DataTypeBase):
         with open(f"{GENERATED_PATH}/{self._ENUM_NAME}.h", "w") as f:
             f.write(content)
 
-        assert data
-        return data
+        return all_data
 
     def get_data_type_name(self) -> str:
         return "Texture"

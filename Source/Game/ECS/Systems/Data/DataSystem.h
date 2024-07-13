@@ -3,6 +3,7 @@
 #include "TextureInfo.h"
 #include "../../Types/Entity.h"
 #include "Handlers/TextDataHandler.h"
+#include "Handlers/TextureDataHandler.h"
 #include <vector>
 
 class World;
@@ -12,10 +13,9 @@ class RenderSystem;
 class DataSystem
 {
 public:
-	void init(World& world, SystemsManager& systemsManager){}
+	void init(World& world, SystemsManager& systemsManager);
 	void update(World& world, const double deltaTime);
 	void shutdown();
-	void load(SystemsManager& systemsManager);
 
     const TextureInfo& getTexture(const TextureType type);
     const TextureInfo& getText(const TextType type) const;
@@ -24,19 +24,9 @@ public:
     SDL_Surface* createSurface(const TextureType type) const;
 
 private:
-    void addDynamicTexture(const Entity entity, SDL_Texture* texture);
-	void initTexturesDescriptors();
 	void initDataDescriptors();
-    std::vector<char> getTextureData(const TextureType type) const;
-    TextureInfo createTexture(const TextureType type) const;
 
 private:
     std::vector<DataDescriptor> dataDescriptors_;
-    std::vector<DataDescriptor> textureDescriptors_;
-    std::vector<std::pair<TextureType, TextureInfo>> textures_;
-    std::vector<std::pair<Entity, SDL_Texture*>> dynamicTextures_;
-
-    RenderSystem* renderSystem_{nullptr};
-
-    std::tuple<TextDataHandler> dataHandlers_;
+    std::tuple<TextDataHandler, TextureDataHandler> dataHandlers_;
 };

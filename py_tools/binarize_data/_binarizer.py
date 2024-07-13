@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from jinja2 import Environment, FileSystemLoader
 from . import DataTypeBase
 from ._data_types import FontDataType, TextDataType, TextureDataType
+from ._utils import ensure_32bit_int
 from .._data import GENERATED_PATH, BIN_DATA_PATH
 
 class Binarizer():
@@ -32,14 +33,13 @@ class Binarizer():
 
         with open(f"{BIN_DATA_PATH}/data.bin", "wb") as data_file:
 
-            data_types_count = len(self._data_types) & 0xFFFFFFFF
+            data_types_count = ensure_32bit_int(len(self._data_types))
             data_file.write(struct.pack("I", data_types_count))
             next_start: ctypes.c_uint32 = 0
 
             for name, data in data_to_write:
                 hash_obj = hashlib.sha256(name.encode())
-                name_hash = int.from_bytes(hash_obj.digest())
-                name_hash = name_hash & 0xFFFFFFFF
+                name_hash = ensure_32bit_int(int.from_bytes(hash_obj.digest()))
                 data_size = len(data)
                 enum_entries.append(f"{name} = {name_hash}")
                 data_desc = self._DataDescriptor(name_hash, next_start, data_size)
