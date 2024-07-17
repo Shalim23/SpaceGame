@@ -4,6 +4,7 @@
 #include "../../Types/Entity.h"
 #include "Handlers/TextDataHandler.h"
 #include "Handlers/TextureDataHandler.h"
+#include "Handlers/ParametersHandler.h"
 #include <vector>
 
 class World;
@@ -26,15 +27,12 @@ public:
 private:
 	void initDataDescriptors();
 
-#ifndef NDEBUG
-    void debugUI();
-#endif
-
 private:
     std::vector<DataDescriptor> dataDescriptors_;
-    std::tuple<TextDataHandler, TextureDataHandler> dataHandlers_;
 
-#ifndef NDEBUG
-    bool showDebugUI_{false};
-#endif
+    std::tuple<
+        TextDataHandler,
+        TextureDataHandler,
+        ParametersHandler
+    > dataHandlers_;
 };
