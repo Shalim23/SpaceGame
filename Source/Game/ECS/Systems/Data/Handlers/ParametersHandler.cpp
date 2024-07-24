@@ -4,12 +4,16 @@
 
 #ifndef NDEBUG
 #include "imgui.h"
+#include <nlohmann/json.hpp>
+#include <fstream>
+#include <iostream>
 #endif
 
 namespace
 {
 #ifndef NDEBUG
     constexpr size_t newParamInputBufferSize{64};
+    const std::string paramsJsonPath{std::format("{}{}", SOURCES_PATH, "/Data/params.json")};
 #endif
 }
 
@@ -18,7 +22,20 @@ void ParametersHandler::init(SystemsManager& systemsManager, const std::vector<D
 #ifndef NDEBUG
     assert(IM_ARRAYSIZE(newParamTypes) == typeDefaultValues.size());
     newParamInputBuffer.reserve(newParamInputBufferSize);
-    //#TODO read from .json SOURCES_PATH
+    std::ifstream is(paramsJsonPath);
+    nlohmann::json paramsJson;
+    is >> paramsJson;
+    for (const auto& [key, value] : paramsJson.items())
+    {
+        if(value.is_number_float())
+        {
+            params_[key] = value.get<float>();
+        }
+        else if (value.is_number_integer())
+        {
+            params_[key] = value.get<int>();
+        }
+    }
 #else
     //#TODO read from data.bin file
 #endif
@@ -73,7 +90,22 @@ void ParametersHandler::showParametersUI()
         ImGui::NewLine();
         if (ImGui::Button("Save Params"))
         {
-            //#TODO dump to .json
+            nlohmann::json paramsJson;
+
+            for (auto& [paramName, paramValue] : params_)
+            {
+                std::visit(overloaded
+                    {
+                    [&paramName, &paramsJson](auto arg)
+                        {
+                            paramsJson[paramName] = arg;
+                        }
+                    },
+                    paramValue);
+            }
+
+            std::ofstream os(paramsJsonPath);
+            os << paramsJson.dump(4);
         }
         ImGui::End();
     }
@@ -88,9 +120,10 @@ void ParametersHandler::showParametersUI()
         ImGui::NewLine();
 
         std::string input{ newParamInputBuffer.data() };
-        const bool isButtonDisabled{ input.empty() || params_.contains(input)};
+        const bool isSaveDisabled{ input.empty() || params_.contains(input)};
+        const bool isRemoveDisabled{ input.empty() || !params_.contains(input)};
         
-        if (isButtonDisabled)
+        if (isSaveDisabled)
         {
             ImGui::BeginDisabled();
         }
@@ -101,7 +134,23 @@ void ParametersHandler::showParametersUI()
             newParamInputBuffer.clear();
         }
 
-        if (isButtonDisabled)
+        if (isSaveDisabled)
+        {
+            ImGui::EndDisabled();
+        }
+
+        if (isRemoveDisabled)
+        {
+            ImGui::BeginDisabled();
+        }
+
+        if (ImGui::Button("Remove parameter"))
+        {
+            params_.erase(input);
+            newParamInputBuffer.clear();
+        }
+
+        if (isRemoveDisabled)
         {
             ImGui::EndDisabled();
         }
